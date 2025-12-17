@@ -56,7 +56,7 @@ const Footer = () => {
       {/* Bottom Section */}
       <div className="mt-10 pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
         <div>
-          © 2024 RentFit. All rights reserved.
+          © 2025 RentFit. All rights reserved.
         </div>
         <div className="flex space-x-4 mt-4 md:mt-0">
           <a href="#" className="hover:text-white transition-colors">Privacy</a>
