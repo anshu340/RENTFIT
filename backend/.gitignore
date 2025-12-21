@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment - DO NOT COMMIT
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
+pip-selfcheck.json
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+
+# IDE
+.vscode/
+.idea/
