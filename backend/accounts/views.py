@@ -1,39 +1,74 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import RegisterSerializer, LoginSerializer, CustomerSerializer, StoreSerializer
+from .models import Customer, Store
 
-from .serializers import LoginUserSerializer
-from .models import User
+# Root API view to handle GET /api/
+class APIRootView(APIView):
+    permission_classes = [AllowAny]
 
-class LoginUserView(APIView):
+    def get(self, request):
+        return Response({
+            "message": "Welcome to Rentfit API",
+            "endpoints": {
+                "register": "/api/register/",
+                "login": "/api/login/",
+                "customer_dashboard": "/api/dashboard/customer/",
+                "store_dashboard": "/api/dashboard/store/"
+            }
+        })
+
+
+class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = LoginUserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "Registered successfully"})
 
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
 
-            return Response({
-                "success": True,
-                "message": "Login successful",
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "name": user.name,
-                    "role": user.role
-                },
-                "access_token": access_token,
-                "refresh_token": refresh_token
-            }, status=status.HTTP_200_OK)
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+
+        token = RefreshToken.for_user(user)
 
         return Response({
-            "success": False,
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+            "access": str(token.access_token),
+            "refresh": str(token),
+            "role": user.role
+        })
+
+
+class CustomerDashboard(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'customer':
+            return Response({"error": "Not allowed"})
+        try:
+            customer = Customer.objects.get(user=request.user)
+        except Customer.DoesNotExist:
+            return Response({"error": "Customer profile not found"})
+        return Response(CustomerSerializer(customer).data)
+
+
+class StoreDashboard(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'store':
+            return Response({"error": "Not allowed"})
+        try:
+            store = Store.objects.get(user=request.user)
+        except Store.DoesNotExist:
+            return Response({"error": "Store profile not found"})
+        return Response(StoreSerializer(store).data)

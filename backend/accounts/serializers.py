@@ -1,25 +1,33 @@
 from rest_framework import serializers
-from .models import User
+from django.contrib.auth import authenticate
+from .models import User, Customer, Store
 
-class LoginUserSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True, required=True)
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'role']
+        extra_kwargs = {'password': {'write_only': True}}
 
-    def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
+    def create(self, data):
+        return User.objects.create_user(**data)
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid email or password.")
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
-        if not user.check_password(password):
-            raise serializers.ValidationError("Invalid email or password.")
+    def validate(self, data):
+        user = authenticate(**data)
+        if not user:
+            raise serializers.ValidationError("Wrong username or password")
+        data['user'] = user
+        return data
 
-        # Check if user is verified (optional)
-        if not user.is_verified:
-            raise serializers.ValidationError("Email not verified. Please verify first.")
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
 
-        attrs['user'] = user
-        return attrs
+class StoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = '__all__'

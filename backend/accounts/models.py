@@ -1,18 +1,23 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from .managers import CustomUserManager  # <-- import the manager
 
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('customer', 'Customer'),
+        ('store', 'Store'),
+    )
 
-    objects = CustomUserManager()  
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='customer'   
+    )
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=15)
 
-    def __str__(self):
-        return self.email
+class Store(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    store_name = models.CharField(max_length=100)
+    location = models.CharField(max_length=200)
