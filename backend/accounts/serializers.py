@@ -1,33 +1,47 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, Customer, Store
+from .models import User
+from .otp import create_and_send_otp
 
-class RegisterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'password', 'role']
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, data):
-        return User.objects.create_user(**data)
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+# Base registration serializer
+class BaseRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        user = authenticate(**data)
-        if not user:
-            raise serializers.ValidationError("Wrong username or password")
-        data['user'] = user
-        return data
-
-class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Customer
-        fields = '__all__'
+        model = User
+        fields = ['email', 'password', 'name', 'phone']
 
-class StoreSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        is_store = getattr(self, 'is_store', False)
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            name=validated_data['name'],
+            phone=validated_data.get('phone'),
+            is_store=is_store
+        )
+        create_and_send_otp(user.email)
+        return user
+
+
+# Customer registration serializer
+class CustomerRegisterSerializer(BaseRegisterSerializer):
+    is_store = False
+
+
+# Store registration serializer
+class StoreRegisterSerializer(BaseRegisterSerializer):
+    is_store = True
+
+
+# Login serializer
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+
+# User serializer
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Store
-        fields = '__all__'
+        model = User
+        fields = ['id', 'email', 'name', 'phone', 'role']

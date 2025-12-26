@@ -1,10 +1,16 @@
 from django.urls import path
-from .views import APIRootView, RegisterView, LoginView, CustomerDashboard, StoreDashboard
+from .views import (
+    CustomerRegisterView,
+    StoreRegisterView,
+    LoginView,
+    VerifyOTPView,
+    ProfileView
+)
 
 urlpatterns = [
-    path('', APIRootView.as_view()),  
-    path('register/', RegisterView.as_view()),
-    path('login/', LoginView.as_view()),
-    path('dashboard/customer/', CustomerDashboard.as_view()),
-    path('dashboard/store/', StoreDashboard.as_view()),
+    path("register/customer/", CustomerRegisterView.as_view(), name="register-customer"),
+    path("register/store/", StoreRegisterView.as_view(), name="register-store"),
+    path("verify-otp/", VerifyOTPView.as_view(), name="verify-otp"),
+    path("login/", LoginView.as_view(), name="login"),
+    path("profile/", ProfileView.as_view(), name="profile"),
 ]
