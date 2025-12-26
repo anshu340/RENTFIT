@@ -1,160 +1,321 @@
-import React from 'react';
-import { FaEnvelope, FaLock, FaUser, FaPhone } from 'react-icons/fa';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axiosInstance from "../services/axiosInstance";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
+import { FaEnvelope, FaLock, FaUser, FaPhone } from "react-icons/fa";
 
 const UserRegister = () => {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1); // Step 1: Register, Step 2: OTP Verification
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [otp, setOtp] = useState("");
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setServerError("");
+    setErrors({});
+
+    // Client-side validation
+    const validationErrors = {};
+    if (!formData.name) validationErrors.name = "Name is required";
+    if (!formData.email) validationErrors.email = "Email is required";
+    if (!formData.phone) validationErrors.phone = "Phone is required";
+    if (!formData.password) validationErrors.password = "Password is required";
+    if (formData.password !== formData.confirmPassword)
+      validationErrors.confirmPassword = "Passwords do not match";
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await axiosInstance.post(
+        "register/customer/",
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        }
+      );
+
+      toast.success("Registration successful! Please verify your email with OTP.");
+      setStep(2); // Move to OTP verification step
+    } catch (err) {
+      console.error("Registration Error:", err);
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.response?.data?.email?.[0] ||
+        "Registration failed. Try again.";
+      setServerError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    setServerError("");
+
+    if (!otp || otp.length !== 6) {
+      setServerError("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await axiosInstance.post(
+        "verify-otp/",
+        {
+          email: formData.email,
+          otp: otp,
+        }
+      );
+
+      toast.success("Email verified successfully! You can now login.");
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (err) {
+      console.error("OTP Verification Error:", err);
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Invalid or expired OTP. Please try again.";
+      setServerError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setIsLoading(true);
+    try {
+      await axiosInstance.post("resend-otp/", {
+        email: formData.email,
+      });
+      toast.success("OTP resent successfully!");
+      setOtp("");
+    } catch (err) {
+      toast.error("Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      {/* Left Section */}
-      <div className="hidden lg:flex flex-col justify-center px-20 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 text-white">
-        <div className="mb-10 flex items-center gap-2">
-          <div className="w-8 h-8 bg-white rounded flex items-center justify-center text-purple-600 font-bold">
-            R
-          </div>
-          <span className="text-xl font-semibold">RentFit</span>
-        </div>
-
-        <h1 className="text-4xl font-bold mb-4">Join the Fashion Revolution</h1>
-        <p className="text-purple-100 mb-8 max-w-md">
-          Create your account and start renting premium outfits, donate unused clothes, and discover sustainable fashion near you.
-        </p>
-
-        <ul className="space-y-4 text-sm">
-          <li className="flex items-center gap-3">✔ Rent Premium Outfits</li>
-          <li className="flex items-center gap-3">✔ Find Nearby Shops with Maps</li>
-          <li className="flex items-center gap-3">✔ Donate & Earn Rewards</li>
-          <li className="flex items-center gap-3">✔ Track Your Rentals</li>
-          <li className="flex items-center gap-3">✔ Secure Payment Gateway</li>
-        </ul>
-      </div>
-
-      {/* Right Section */}
-      <div className="flex items-center justify-center bg-gray-50 px-6 py-8">
-        <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-8">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            CREATE ACCOUNT
-          </h1>
-          <p className="text-sm text-gray-500">
-            Choose your company type to get started
+    <>
+      <Navbar />
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        {/* Left Section */}
+        <div className="hidden lg:flex flex-col justify-center px-20 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 text-white">
+          <h1 className="text-4xl font-bold mb-4">Join RentFit Today</h1>
+          <p className="text-purple-100 mb-8 max-w-md">
+            {step === 1
+              ? "Register as a customer to explore online clothes rental, browse outfits, and rent your favorite fashion easily."
+              : "We've sent a verification code to your email. Please enter it below to complete your registration."}
           </p>
         </div>
 
-        {/* Form Fields */}
-        <div className="space-y-4">
-          
-          {/* Full Name */}
-          <div>
-            <label className="text-sm text-gray-700 mb-2 block font-medium">
-              Full Name
-            </label>
-            <div className="relative">
-              <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-              <input
-                type="text"
-                placeholder=""
-                className="w-full pl-10 pr-4 py-3 bg-purple-50 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-            </div>
+        {/* Right Section */}
+        <div className="flex items-center justify-center bg-gray-50 px-6 py-8">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-10">
+            {step === 1 ? (
+              <>
+                <h2 className="text-2xl font-bold mb-4 text-center">
+                  Register as Customer
+                </h2>
+
+                {serverError && (
+                  <p className="text-red-500 text-center mb-4">{serverError}</p>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="relative">
+                    <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Full Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10"
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10"
+                      autoComplete="email"
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Phone Number"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10"
+                      autoComplete="tel"
+                    />
+                    {errors.phone && (
+                      <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10"
+                      autoComplete="new-password"
+                    />
+                    {errors.password && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.password}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm Password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10"
+                      autoComplete="new-password"
+                    />
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+                  >
+                    {isLoading ? "Registering..." : "Register"}
+                  </button>
+                </form>
+
+                <p className="text-sm text-center text-gray-600 mt-4">
+                  Already have an account?{" "}
+                  <span
+                    onClick={() => navigate("/login")}
+                    className="text-purple-600 font-semibold cursor-pointer hover:underline"
+                  >
+                    Login here
+                  </span>
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-4 text-center">
+                  Verify Your Email
+                </h2>
+                <p className="text-sm text-gray-600 text-center mb-6">
+                  Enter the 6-digit code sent to{" "}
+                  <span className="font-semibold">{formData.email}</span>
+                </p>
+
+                {serverError && (
+                  <p className="text-red-500 text-center mb-4">{serverError}</p>
+                )}
+
+                <form onSubmit={handleOtpSubmit} className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="otp"
+                      placeholder="Enter 6-digit OTP"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="w-full p-3 border rounded-lg text-center text-2xl tracking-widest"
+                      maxLength={6}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+                  >
+                    {isLoading ? "Verifying..." : "Verify OTP"}
+                  </button>
+                </form>
+
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-600">
+                    Didn't receive the code?{" "}
+                    <button
+                      onClick={handleResendOtp}
+                      disabled={isLoading}
+                      className="text-purple-600 font-semibold hover:underline disabled:opacity-50"
+                    >
+                      Resend OTP
+                    </button>
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setStep(1)}
+                  className="w-full mt-4 text-gray-600 text-sm hover:underline"
+                >
+                  ← Back to Registration
+                </button>
+              </>
+            )}
           </div>
-
-          {/* Email Address */}
-          <div>
-            <label className="text-sm text-gray-700 mb-2 block font-medium">
-              Email Address
-            </label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-              <input
-                type="email"
-                placeholder=""
-                className="w-full pl-10 pr-4 py-3 bg-purple-50 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="text-sm text-gray-700 mb-2 block font-medium">
-              Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-              <input
-                type="password"
-                placeholder=""
-                className="w-full pl-10 pr-4 py-3 bg-purple-50 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="text-sm text-gray-700 mb-2 block font-medium">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-              <input
-                type="password"
-                placeholder=""
-                className="w-full pl-10 pr-4 py-3 bg-purple-50 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-            </div>
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label className="text-sm text-gray-700 mb-2 block font-medium">
-              Phone Number
-            </label>
-            <div className="relative">
-              <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-              <input
-                type="tel"
-                placeholder=""
-                className="w-full pl-10 pr-4 py-3 bg-purple-50 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Terms Checkbox */}
-        <div className="flex items-start gap-2 mt-6">
-          <input 
-            type="checkbox" 
-            id="terms" 
-            className="mt-1 accent-blue-600"
-          />
-          <label htmlFor="terms" className="text-xs text-gray-600">
-            I agree the{' '}
-            <span className="text-blue-600 cursor-pointer hover:underline">
-              Terms of Service
-            </span>
-            {' '}and{' '}
-            <span className="text-blue-600 cursor-pointer hover:underline">
-              Privacy Policy
-            </span>
-          </label>
-        </div>
-
-        {/* Create Account Button */}
-        <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mt-6">
-          Create Account
-        </button>
-
-        {/* Footer */}
-        <p className="text-sm text-center text-gray-600 mt-6">
-          Already have an account?
-          <span className="text-blue-600 font-semibold cursor-pointer hover:underline ml-1">
-            Sign in here
-          </span>
-        </p>
-
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
