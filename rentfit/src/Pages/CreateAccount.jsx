@@ -36,7 +36,10 @@ const CreateAccount = () => {
               Register to find your perfect rental
             </p>
 
-            <button className="bg-purple-500 text-white px-10 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition">
+            <button 
+              onClick={() => window.location.href = '/userRegister'}
+              className="bg-purple-500 text-white px-10 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-600 transition"
+            >
               Register
             </button>
           </div>
@@ -58,7 +61,10 @@ const CreateAccount = () => {
               Register to list your rental items
             </p>
 
-            <button className="bg-pink-500 text-white px-10 py-2.5 rounded-lg text-sm font-medium hover:bg-pink-600 transition">
+            <button 
+              onClick={() => window.location.href = '/storeRegister'}
+              className="bg-pink-500 text-white px-10 py-2.5 rounded-lg text-sm font-medium hover:bg-pink-600 transition"
+            >
               Register
             </button>
           </div>
@@ -69,7 +75,10 @@ const CreateAccount = () => {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <span className="text-purple-600 font-semibold cursor-pointer hover:underline">
+            <span 
+              onClick={() => window.location.href = '/login'}
+              className="text-purple-600 font-semibold cursor-pointer hover:underline"
+            >
               Login
             </span>
           </p>

@@ -7,8 +7,8 @@ const Lcreateaccount = () => {
       <div className="bg-white w-full max-w-4xl rounded-2xl shadow-lg px-16 py-14">
         {/* Header */}
         <div className="text-center mb-14">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
-          <p className="text-sm text-gray-600">Choose your account type to get started</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Login</h1>
+          <p className="text-sm text-gray-600">Choose your account type to login</p>
           <p className="text-sm text-gray-500 mt-1">or</p>
         </div>
 
@@ -23,7 +23,10 @@ const Lcreateaccount = () => {
             <p className="text-sm text-gray-600 mb-6">
               Login to find your perfect rental
             </p>
-            <button className="px-10 py-2.5 rounded-lg bg-purple-500 text-white text-sm font-medium hover:bg-purple-600 transition">
+            <button 
+              onClick={() => window.location.href = '/login'}
+              className="px-10 py-2.5 rounded-lg bg-purple-500 text-white text-sm font-medium hover:bg-purple-600 transition"
+            >
               Login
             </button>
           </div>
@@ -40,7 +43,10 @@ const Lcreateaccount = () => {
             <p className="text-sm text-gray-600 mb-6">
               Login to list your rental items
             </p>
-            <button className="px-10 py-2.5 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 transition">
+            <button
+              onClick={() => window.location.href = '/storeLogin'}
+              className="px-10 py-2.5 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 transition"
+            >
               Login
             </button>
           </div>
@@ -49,8 +55,11 @@ const Lcreateaccount = () => {
         {/* Footer */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Already have an account?{" "}
-            <span className="font-semibold text-purple-600 hover:underline cursor-pointer">
+            Don't have an account?{" "}
+            <span 
+              onClick={() => window.location.href = '/createAccount'}
+              className="font-semibold text-purple-600 hover:underline cursor-pointer"
+            >
               Register
             </span>
           </p>

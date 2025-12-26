@@ -43,12 +43,18 @@ const Navbar = () => {
               </button>
 
               {/* Log in Button */}
-              <button className="px-6 py-2 text-purple-600 border border-purple-600 text-sm font-medium rounded-md hover:bg-purple-50 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/lcreateaccount'}
+                className="px-6 py-2 text-purple-600 border border-purple-600 text-sm font-medium rounded-md hover:bg-purple-50 transition-colors"
+              >
                 Log in
               </button>
 
               {/* Sign up Button */}
-              <button className="px-6 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/createAccount'}
+                className="px-6 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
+              >
                 Sign up
               </button>
             </div>
