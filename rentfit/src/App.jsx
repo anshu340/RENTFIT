@@ -5,6 +5,7 @@ import Login from './Pages/Login.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
 import StoreRegister from './Pages/StoreRegister.jsx';
 import UserRegister from './Pages/UserRegister.jsx';
+import StoreDashboard from './Pages/StoreDashboard.jsx';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/storeRegister" element={<StoreRegister />} />
       <Route path="/userRegister" element={<UserRegister />} />
+      <Route path="/storeDashboard" element={<StoreDashboard />} />
     </Routes>
   );
 }

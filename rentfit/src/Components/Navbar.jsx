@@ -44,7 +44,7 @@ const Navbar = () => {
 
               {/* Log in Button */}
               <button 
-                onClick={() => window.location.href = '/lcreateaccount'}
+                onClick={() => window.location.href = '/login'}
                 className="px-6 py-2 text-purple-600 border border-purple-600 text-sm font-medium rounded-md hover:bg-purple-50 transition-colors"
               >
                 Log in

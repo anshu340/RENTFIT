@@ -9,7 +9,7 @@ import { FaEnvelope, FaLock, FaUser, FaPhone } from "react-icons/fa";
 
 const UserRegister = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // Step 1: Register, Step 2: OTP Verification
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -58,14 +58,35 @@ const UserRegister = () => {
       );
 
       toast.success("Registration successful! Please verify your email with OTP.");
-      setStep(2); // Move to OTP verification step
+      setStep(2);
     } catch (err) {
       console.error("Registration Error:", err);
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.response?.data?.email?.[0] ||
-        "Registration failed. Try again.";
+      console.error("Error Response:", err?.response?.data);
+      
+      // Extract error message from various possible response formats
+      let message = "Registration failed. Try again.";
+      
+      if (err?.response?.data) {
+        const errorData = err.response.data;
+        
+        // Check for different error formats
+        if (errorData.message) {
+          message = errorData.message;
+        } else if (errorData.error) {
+          message = errorData.error;
+        } else if (errorData.email) {
+          message = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
+        } else if (errorData.phone) {
+          message = Array.isArray(errorData.phone) ? errorData.phone[0] : errorData.phone;
+        } else if (errorData.name) {
+          message = Array.isArray(errorData.name) ? errorData.name[0] : errorData.name;
+        } else if (errorData.password) {
+          message = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password;
+        } else if (typeof errorData === 'string') {
+          message = errorData;
+        }
+      }
+      
       setServerError(message);
       toast.error(message);
     } finally {
@@ -97,6 +118,8 @@ const UserRegister = () => {
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       console.error("OTP Verification Error:", err);
+      console.error("Error Response:", err?.response?.data);
+      
       const message =
         err?.response?.data?.message ||
         err?.response?.data?.error ||
@@ -117,6 +140,7 @@ const UserRegister = () => {
       toast.success("OTP resent successfully!");
       setOtp("");
     } catch (err) {
+      console.error("Resend OTP Error:", err);
       toast.error("Failed to resend OTP. Please try again.");
     } finally {
       setIsLoading(false);
@@ -148,7 +172,7 @@ const UserRegister = () => {
                 </h2>
 
                 {serverError && (
-                  <p className="text-red-500 text-center mb-4">{serverError}</p>
+                  <p className="text-red-500 text-center mb-4 bg-red-50 p-3 rounded-lg">{serverError}</p>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -160,7 +184,7 @@ const UserRegister = () => {
                       placeholder="Full Name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10"
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                     {errors.name && (
                       <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -175,7 +199,7 @@ const UserRegister = () => {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10"
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       autoComplete="email"
                     />
                     {errors.email && (
@@ -191,7 +215,7 @@ const UserRegister = () => {
                       placeholder="Phone Number"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10"
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       autoComplete="tel"
                     />
                     {errors.phone && (
@@ -207,7 +231,7 @@ const UserRegister = () => {
                       placeholder="Password"
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10"
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       autoComplete="new-password"
                     />
                     {errors.password && (
@@ -225,7 +249,7 @@ const UserRegister = () => {
                       placeholder="Confirm Password"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10"
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       autoComplete="new-password"
                     />
                     {errors.confirmPassword && (
@@ -238,7 +262,7 @@ const UserRegister = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? "Registering..." : "Register"}
                   </button>
@@ -265,7 +289,7 @@ const UserRegister = () => {
                 </p>
 
                 {serverError && (
-                  <p className="text-red-500 text-center mb-4">{serverError}</p>
+                  <p className="text-red-500 text-center mb-4 bg-red-50 p-3 rounded-lg">{serverError}</p>
                 )}
 
                 <form onSubmit={handleOtpSubmit} className="space-y-4">
@@ -276,7 +300,7 @@ const UserRegister = () => {
                       placeholder="Enter 6-digit OTP"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="w-full p-3 border rounded-lg text-center text-2xl tracking-widest"
+                      className="w-full p-3 border rounded-lg text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
                       maxLength={6}
                     />
                   </div>
@@ -284,7 +308,7 @@ const UserRegister = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? "Verifying..." : "Verify OTP"}
                   </button>
