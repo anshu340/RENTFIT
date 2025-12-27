@@ -133,7 +133,7 @@ REST_FRAMEWORK = {
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Your React app
+    "http://localhost:5173",  #  React app
     "http://127.0.0.1:5173",
 ]
 
@@ -143,3 +143,8 @@ CORS_ALLOW_CREDENTIALS = True
 # For development: prints emails to console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@rentfit.com'
+
+import os
+# Media files (uploaded files like store logos)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

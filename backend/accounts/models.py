@@ -13,6 +13,7 @@ class User(AbstractUser):
     first_name = None
     last_name = None
 
+    # Common fields
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, blank=True, null=True)
@@ -24,6 +25,13 @@ class User(AbstractUser):
         choices=UserRoles.choices,
         default=UserRoles.CUSTOMER
     )
+
+    # Store-specific fields
+    store_name = models.CharField(max_length=255, blank=True, null=True)
+    store_address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    store_description = models.TextField(blank=True, null=True)
+    store_logo = models.ImageField(upload_to='store_logos/', blank=True, null=True)
 
     date_joined = models.DateTimeField(auto_now_add=True)
     objects = CustomUserManager()
@@ -42,6 +50,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.email} ({self.role})"
+
 
 class OTP(models.Model):
     email = models.EmailField()

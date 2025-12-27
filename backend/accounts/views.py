@@ -4,24 +4,33 @@ from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .models import User
-from .serializers import CustomerRegisterSerializer, StoreRegisterSerializer, LoginSerializer, UserSerializer
+from .serializers import (
+    CustomerRegisterSerializer, 
+    StoreRegisterSerializer, 
+    LoginSerializer, 
+    UserSerializer,
+    StoreDashboardSerializer
+)
 from .otp import verify_otp
 
-#  Customer Register 
+
+# Customer Register 
 class CustomerRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = CustomerRegisterSerializer
 
 
-#  Store Register 
+# Store Register 
 class StoreRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = StoreRegisterSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
 
-#  VERIFY OTP
+# VERIFY OTP
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 
@@ -55,7 +64,7 @@ class LoginView(APIView):
         refresh = RefreshToken.for_user(user)
 
         return Response({
-            "user": UserSerializer(user).data,
+            "user": UserSerializer(user, context={'request': request}).data,
             "access_token": str(refresh.access_token),
             "refresh_token": str(refresh)
         })
@@ -66,4 +75,45 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user).data)
+        return Response(UserSerializer(request.user, context={'request': request}).data)
+
+
+# STORE DASHBOARD - Get and Update Store Details
+class StoreDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get(self, request):
+        """Get all store details"""
+        if not request.user.is_store:
+            return Response(
+                {"error": "Only store owners can access this endpoint"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = StoreDashboardSerializer(request.user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        """Update store details (partial update)"""
+        if not request.user.is_store:
+            return Response(
+                {"error": "Only store owners can update store details"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = StoreDashboardSerializer(
+            request.user, 
+            data=request.data, 
+            partial=True,
+            context={'request': request}
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Store details updated successfully",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
