@@ -15,8 +15,8 @@ class User(AbstractUser):
 
     # Common fields
     email = models.EmailField(unique=True)
-    name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=20, blank=True, null=True)
+    name = models.CharField(max_length=255)  # full_name for Customer, owner_name for Store
+    phone = models.CharField(max_length=20, blank=True, null=True)  # phone_number
     is_verified = models.BooleanField(default=False)
     is_store = models.BooleanField(default=False)
 
@@ -25,6 +25,23 @@ class User(AbstractUser):
         choices=UserRoles.choices,
         default=UserRoles.CUSTOMER
     )
+
+    # Customer-specific fields
+    address = models.TextField(blank=True, null=True)
+    gender = models.CharField(max_length=20, blank=True, null=True, choices=[
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+        ('Prefer not to say', 'Prefer not to say'),
+    ])
+    preferred_clothing_size = models.CharField(max_length=10, blank=True, null=True, choices=[
+        ('XS', 'XS'),
+        ('S', 'S'),
+        ('M', 'M'),
+        ('L', 'L'),
+        ('XL', 'XL'),
+        ('XXL', 'XXL'),
+    ])
 
     # Store-specific fields
     store_name = models.CharField(max_length=255, blank=True, null=True)
