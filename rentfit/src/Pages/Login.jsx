@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
@@ -36,25 +35,24 @@ const Login = () => {
     }
 
     setIsLoading(true);
+    setServerError("");
 
     try {
-      console.log("Attempting login with:", { email }); // Debug log
-      
-      const response = await axiosInstance.post("login/", { 
-        email, 
-        password 
+      const response = await axiosInstance.post("login/", {
+        email,
+        password,
       });
-      
-      console.log("Login response:", response.data); // Debug log
-      const { user, access_token, refresh_token } = response.data;
 
-      // Store tokens and user info
-      localStorage.setItem("access_token", access_token);
-      localStorage.setItem("refresh_token", refresh_token);
-      localStorage.setItem("role", user.role);
-      localStorage.setItem("isLoggedIn", "true");
+      // Store tokens securely in localStorage
+      if (response.data.access_token) {
+        localStorage.setItem("access_token", response.data.access_token);
+        localStorage.setItem("refresh_token", response.data.refresh_token || "");
+        localStorage.setItem("user", JSON.stringify(response.data.user || {}));
+        localStorage.setItem("role", response.data.user?.role || "");
+        localStorage.setItem("isLoggedIn", "true");
+      }
 
-      toast.success("Login successful!");
+      const { user } = response.data;
 
       // Navigate based on role
       if (user.role === "Customer") {
@@ -64,19 +62,16 @@ const Login = () => {
       } else {
         navigate("/");
       }
-    } catch (err) {
-      console.error("Login Error:", err);
-      console.error("Error response:", err?.response?.data);
-      
-      // Django returns "error" field, not "message"
+    } catch (error) {
+      console.error("Login Error:", error);
+      const errorData = error.response?.data;
       const message = 
-        err?.response?.data?.error || 
-        err?.response?.data?.detail || 
-        err?.response?.data?.message ||
+        errorData?.error || 
+        errorData?.detail || 
+        errorData?.message ||
         "Login failed. Please check your credentials.";
       
       setServerError(message);
-      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +88,7 @@ const Login = () => {
             <p className="text-gray-600 mb-6 text-center">Login to your account</p>
             
             {serverError && (
-              <div className="text-red-600 text-sm text-center mb-4 bg-red-50 p-3 rounded-lg">
+              <div className="text-red-600 text-sm text-center mb-4 bg-red-50 p-3 rounded-lg border border-red-200">
                 {serverError}
               </div>
             )}

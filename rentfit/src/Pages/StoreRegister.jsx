@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { FaEnvelope, FaLock, FaUser, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 import axiosInstance from "../services/axiosInstance";
+import { FaEnvelope, FaLock, FaUser, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
@@ -11,18 +9,19 @@ const StoreRegister = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: "",
+    owner_name: "",
     email: "",
-    phone: "",
+    phone_number: "",
     store_name: "",
     store_address: "",
     city: "",
     store_description: "",
     store_logo: null,
+    business_registration_number: "",
     password: "",
     confirmPassword: "",
-    otp: "",
   });
+  const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -39,49 +38,83 @@ const StoreRegister = () => {
 
   // Step 2: Submit registration and get OTP
   const handleRegister = async () => {
+    // Client-side validation
+    if (!formData.store_name) {
+      setError("Store name is required");
+      return;
+    }
+    if (!formData.owner_name) {
+      setError("Owner name is required");
+      return;
+    }
+    if (!formData.email) {
+      setError("Email is required");
+      return;
+    }
+    if (!formData.password) {
+      setError("Password is required");
+      return;
+    }
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
-      toast.error("Passwords do not match");
       return;
     }
 
     setIsLoading(true);
-    const data = new FormData();
-    data.append("email", formData.email);
-    data.append("password", formData.password);
-    data.append("name", formData.name);
-    data.append("phone", formData.phone);
-    data.append("store_name", formData.store_name);
-    data.append("store_address", formData.store_address);
-    data.append("city", formData.city);
-    data.append("store_description", formData.store_description);
-    if (formData.store_logo) {
-      data.append("store_logo", formData.store_logo);
-    }
+    setError("");
+    setMessage("");
 
     try {
-      const res = await fetch("/api/accounts/register/store/", {
-        method: "POST",
-        body: data,
-      });
-
-      const result = await res.json();
-      
-      if (res.ok) {
-        const successMsg = result.message || "Store registered! Please verify OTP.";
-        setMessage(successMsg);
-        toast.success(successMsg);
-        setStep(3); // Move to OTP verification step
-      } else {
-        console.error("Registration Error:", result);
-        const errorMsg = result.message || result.error || "Registration failed. Please try again.";
-        setError(errorMsg);
-        toast.error(errorMsg);
+      const formDataToSend = new FormData();
+      formDataToSend.append("store_name", formData.store_name);
+      formDataToSend.append("owner_name", formData.owner_name);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("password", formData.password);
+      formDataToSend.append("phone_number", formData.phone_number || "");
+      formDataToSend.append("store_address", formData.store_address);
+      formDataToSend.append("city", formData.city);
+      formDataToSend.append("store_description", formData.store_description || "");
+      if (formData.store_logo) {
+        formDataToSend.append("store_logo", formData.store_logo);
       }
-    } catch (err) {
-      console.error("Network Error:", err);
-      setError("Network error. Please try again.");
-      toast.error("Network error. Please try again.");
+
+      const response = await axiosInstance.post("register/store/", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      
+      const successMsg = "Store registered! Please verify OTP.";
+      setMessage(successMsg);
+      setStep(3); // Move to OTP verification step
+    } catch (error) {
+      console.error("Network Error:", error);
+      let errorMsg = "Registration failed. Please try again.";
+      const errorData = error.response?.data;
+      
+      if (errorData) {
+        if (errorData.email) {
+          errorMsg = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
+        } else if (errorData.phone_number) {
+          errorMsg = Array.isArray(errorData.phone_number) ? errorData.phone_number[0] : errorData.phone_number;
+        } else if (errorData.store_name) {
+          errorMsg = Array.isArray(errorData.store_name) ? errorData.store_name[0] : errorData.store_name;
+        } else if (errorData.password) {
+          errorMsg = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password;
+        } else if (errorData.message) {
+          errorMsg = errorData.message;
+        } else if (errorData.error) {
+          errorMsg = errorData.error;
+        } else if (typeof errorData === 'string') {
+          errorMsg = errorData;
+        }
+      }
+      
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -89,81 +122,44 @@ const StoreRegister = () => {
 
   // Step 3: Verify OTP
   const handleVerifyOTP = async () => {
-    if (!formData.otp || formData.otp.length !== 6) {
+    if (!otp || otp.length !== 6) {
       setError("Please enter a valid 6-digit OTP");
-      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
     setIsLoading(true);
+    setError("");
+    setMessage("");
 
     try {
-      const res = await fetch("/api/accounts/verify-otp/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          otp: formData.otp,
-        }),
+      const response = await axiosInstance.post("verify-otp/", {
+        email: formData.email,
+        otp: otp,
       });
-
-      const result = await res.json();
       
-      if (res.ok) {
-        setMessage("Account verified successfully! Redirecting to login...");
-        toast.success("Account verified successfully! Redirecting to login...");
-        // Redirect to login page
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } else {
-        console.error("OTP Verification Error:", result);
-        const errorMsg = result.message || result.error || "Invalid OTP. Please try again.";
-        setError(errorMsg);
-        toast.error(errorMsg);
-      }
-    } catch (err) {
-      console.error("Network Error:", err);
-      setError("Network error. Please try again.");
-      toast.error("Network error. Please try again.");
+      setMessage("Account verified successfully! Redirecting to login...");
+      // Redirect to login page
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error) {
+      console.error("OTP Verification Error:", error);
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || "Invalid OTP. Please try again.";
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleResendOtp = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/accounts/resend-otp/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-        }),
-      });
-
-      if (res.ok) {
-        toast.success("OTP resent successfully!");
-        setFormData({ ...formData, otp: "" });
-      } else {
-        toast.error("Failed to resend OTP. Please try again.");
-      }
-    } catch (err) {
-      console.error("Resend OTP Error:", err);
-      toast.error("Failed to resend OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    // Note: Resend OTP endpoint may need to be implemented in backend
+    setError("Please use the OTP sent to your email. If you didn't receive it, try registering again.");
+    setOtp("");
   };
 
   return (
     <>
       <Navbar />
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
         {/* Left Section */}
         <div className="hidden lg:flex flex-col justify-center px-20 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 text-white">
@@ -199,9 +195,9 @@ const StoreRegister = () => {
                   <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    name="name"
+                    name="owner_name"
                     placeholder="Owner Name"
-                    value={formData.name}
+                    value={formData.owner_name}
                     onChange={handleChange}
                     className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
@@ -225,12 +221,11 @@ const StoreRegister = () => {
                   <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="tel"
-                    name="phone"
+                    name="phone_number"
                     placeholder="Phone Number"
-                    value={formData.phone}
+                    value={formData.phone_number}
                     onChange={handleChange}
                     className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
                   />
                 </div>
 
@@ -272,6 +267,16 @@ const StoreRegister = () => {
                   className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   rows="3"
                 />
+
+                <input
+                  type="text"
+                  name="business_registration_number"
+                  placeholder="Business Registration Number (Optional)"
+                  value={formData.business_registration_number}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <p className="text-xs text-gray-500">Note: This field is for reference only and is not stored in the backend yet.</p>
 
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 transition">
                   <input
@@ -338,7 +343,7 @@ const StoreRegister = () => {
                 <button
                   onClick={handleRegister}
                   disabled={isLoading}
-                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 "
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
                 </button>
@@ -369,10 +374,10 @@ const StoreRegister = () => {
                     type="text"
                     name="otp"
                     placeholder="Enter 6-digit OTP"
-                    value={formData.otp}
+                    value={otp}
                     onChange={(e) => {
                       const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-                      setFormData({ ...formData, otp: value });
+                      setOtp(value);
                       setError("");
                     }}
                     maxLength="6"

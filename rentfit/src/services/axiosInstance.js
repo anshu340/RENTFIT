@@ -10,10 +10,19 @@ const axiosInstance = axios.create({
 // Add this interceptor to automatically include JWT token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Don't add token to login, register, or verify-otp endpoints
+    const publicEndpoints = ['login/', 'register/', 'verify-otp/'];  // ✅ ADDED verify-otp/
+    const isPublicEndpoint = publicEndpoints.some(endpoint => 
+      config.url?.includes(endpoint)
+    );
+    
+    if (!isPublicEndpoint) {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+    
     return config;
   },
   (error) => {

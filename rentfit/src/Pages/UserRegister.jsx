@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { FaEnvelope, FaLock, FaUser, FaPhone } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaUser, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 
 const UserRegister = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
-    phone: "",
+    phone_number: "",
     password: "",
     confirmPassword: "",
+    address: "",
+    city: "",
+    gender: "",
+    preferred_clothing_size: "",
   });
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState({});
@@ -32,10 +34,11 @@ const UserRegister = () => {
 
     // Client-side validation
     const validationErrors = {};
-    if (!formData.name) validationErrors.name = "Name is required";
+    if (!formData.full_name) validationErrors.full_name = "Full name is required";
     if (!formData.email) validationErrors.email = "Email is required";
-    if (!formData.phone) validationErrors.phone = "Phone is required";
+    if (!formData.phone_number) validationErrors.phone_number = "Phone number is required";
     if (!formData.password) validationErrors.password = "Password is required";
+    if (formData.password.length < 8) validationErrors.password = "Password must be at least 8 characters";
     if (formData.password !== formData.confirmPassword)
       validationErrors.confirmPassword = "Passwords do not match";
 
@@ -47,48 +50,43 @@ const UserRegister = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post(
-        "register/customer/",
-        {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-        }
-      );
-
-      toast.success("Registration successful! Please verify your email with OTP.");
+      const response = await axiosInstance.post("register/customer/", {
+        full_name: formData.full_name,
+        email: formData.email,
+        password: formData.password,
+        phone_number: formData.phone_number,
+        address: formData.address,
+        city: formData.city,
+        gender: formData.gender,
+        preferred_clothing_size: formData.preferred_clothing_size,
+      });
+      
+      setServerError("");
       setStep(2);
-    } catch (err) {
-      console.error("Registration Error:", err);
-      console.error("Error Response:", err?.response?.data);
+    } catch (error) {
+      console.error("Registration Error:", error);
+      let message = "Registration failed. Please try again.";
+      const errorData = error.response?.data;
       
-      // Extract error message from various possible response formats
-      let message = "Registration failed. Try again.";
-      
-      if (err?.response?.data) {
-        const errorData = err.response.data;
-        
-        // Check for different error formats
-        if (errorData.message) {
+      if (errorData) {
+        if (errorData.email) {
+          message = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
+        } else if (errorData.phone_number) {
+          message = Array.isArray(errorData.phone_number) ? errorData.phone_number[0] : errorData.phone_number;
+        } else if (errorData.full_name) {
+          message = Array.isArray(errorData.full_name) ? errorData.full_name[0] : errorData.full_name;
+        } else if (errorData.password) {
+          message = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password;
+        } else if (errorData.message) {
           message = errorData.message;
         } else if (errorData.error) {
           message = errorData.error;
-        } else if (errorData.email) {
-          message = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
-        } else if (errorData.phone) {
-          message = Array.isArray(errorData.phone) ? errorData.phone[0] : errorData.phone;
-        } else if (errorData.name) {
-          message = Array.isArray(errorData.name) ? errorData.name[0] : errorData.name;
-        } else if (errorData.password) {
-          message = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password;
         } else if (typeof errorData === 'string') {
           message = errorData;
         }
       }
       
       setServerError(message);
-      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -106,51 +104,31 @@ const UserRegister = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post(
-        "verify-otp/",
-        {
-          email: formData.email,
-          otp: otp,
-        }
-      );
-
-      toast.success("Email verified successfully! You can now login.");
-      setTimeout(() => navigate("/login"), 2000);
-    } catch (err) {
-      console.error("OTP Verification Error:", err);
-      console.error("Error Response:", err?.response?.data);
+      const response = await axiosInstance.post("verify-otp/", {
+        email: formData.email,
+        otp: otp,
+      });
       
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Invalid or expired OTP. Please try again.";
+      setServerError("");
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      console.error("OTP Verification Error:", error);
+      const message = error.response?.data?.message || error.response?.data?.error || "Invalid or expired OTP. Please try again.";
       setServerError(message);
-      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleResendOtp = async () => {
-    setIsLoading(true);
-    try {
-      await axiosInstance.post("resend-otp/", {
-        email: formData.email,
-      });
-      toast.success("OTP resent successfully!");
-      setOtp("");
-    } catch (err) {
-      console.error("Resend OTP Error:", err);
-      toast.error("Failed to resend OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    // Note: Resend OTP endpoint may need to be implemented in backend
+    setServerError("Please use the OTP sent to your email. If you didn't receive it, try registering again.");
+    setOtp("");
   };
 
   return (
     <>
       <Navbar />
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
         {/* Left Section */}
         <div className="hidden lg:flex flex-col justify-center px-20 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 text-white">
@@ -180,14 +158,14 @@ const UserRegister = () => {
                     <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
-                      name="name"
+                      name="full_name"
                       placeholder="Full Name"
-                      value={formData.name}
+                      value={formData.full_name}
                       onChange={handleChange}
                       className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
-                    {errors.name && (
-                      <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    {errors.full_name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.full_name}</p>
                     )}
                   </div>
 
@@ -211,15 +189,83 @@ const UserRegister = () => {
                     <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                       type="tel"
-                      name="phone"
+                      name="phone_number"
                       placeholder="Phone Number"
-                      value={formData.phone}
+                      value={formData.phone_number}
                       onChange={handleChange}
                       className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       autoComplete="tel"
                     />
-                    {errors.phone && (
-                      <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                    {errors.phone_number && (
+                      <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    {errors.address && (
+                      <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="city"
+                      placeholder="City"
+                      value={formData.city}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    {errors.city && (
+                      <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                    {errors.gender && (
+                      <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <select
+                      name="preferred_clothing_size"
+                      value={formData.preferred_clothing_size}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="">Select Preferred Clothing Size</option>
+                      <option value="XS">XS</option>
+                      <option value="S">S</option>
+                      <option value="M">M</option>
+                      <option value="L">L</option>
+                      <option value="XL">XL</option>
+                      <option value="XXL">XXL</option>
+                    </select>
+                    {errors.preferred_clothing_size && (
+                      <p className="text-red-500 text-xs mt-1">{errors.preferred_clothing_size}</p>
                     )}
                   </div>
 
@@ -228,7 +274,7 @@ const UserRegister = () => {
                     <input
                       type="password"
                       name="password"
-                      placeholder="Password"
+                      placeholder="Password (min. 8 characters)"
                       value={formData.password}
                       onChange={handleChange}
                       className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"

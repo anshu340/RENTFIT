@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../services/axiosInstance";
 import { 
   FaBell, FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle, 
@@ -74,14 +72,14 @@ const StoreDashboard = () => {
   const [recentActivities, setRecentActivities] = useState([]);
 
   const menuItems = [
-    { name: 'Dashboard', icon: FaHome },
-    { name: 'Verify Listings', icon: FaCheckCircle },
-    { name: 'List Clothes', icon: FaTshirt },
-    { name: 'Rental Management', icon: FaBox },
-    { name: 'Donations', icon: FaHeart },
-    { name: 'Shop Locations', icon: FaMapMarkerAlt },
-    { name: 'User Support', icon: FaQuestionCircle },
-    { name: 'Reports', icon: FaFileAlt },
+    { name: 'Dashboard', icon: FaHome, path: null },
+    { name: 'Verify Listings', icon: FaCheckCircle, path: null },
+    { name: 'List Clothes', icon: FaTshirt, path: null },
+    { name: 'Rental Management', icon: FaBox, path: null },
+    { name: 'Donations', icon: FaHeart, path: '/store/donations' },
+    { name: 'Shop Locations', icon: FaMapMarkerAlt, path: null },
+    { name: 'User Support', icon: FaQuestionCircle, path: null },
+    { name: 'Reports', icon: FaFileAlt, path: null },
   ];
 
   useEffect(() => {
@@ -92,57 +90,30 @@ const StoreDashboard = () => {
     try {
       setIsLoading(true);
       
-      // Get token from localStorage
+      // Check if user is authenticated
       const token = localStorage.getItem("access_token");
-      
       if (!token) {
-        toast.error("Please login first");
         navigate('/login');
         return;
       }
       
-      // Fetch profile data with authorization header
-      const profileResponse = await axiosInstance.get('profile/', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const profileData = profileResponse.data;
-      
-      console.log("Profile data received:", profileData); // Debug log
+      // Fetch store profile data
+      const response = await axiosInstance.get("stores/profile/");
+      const profileData = response.data?.data || response.data;
       
       if (profileData) {
-        // Extract store information from various possible field names
-        const storeName = profileData.store_name || 
-                         profileData.business_name || 
-                         profileData.storeName || 
-                         "My Store";
-        
-        const ownerName = profileData.owner_name ||
-                         `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || 
-                         profileData.ownerName ||
-                         "Store Owner";
-        
-        const location = profileData.location || 
-                        profileData.address || 
-                        profileData.store_location ||
-                        "";
-        
-        const description = profileData.description || 
-                           profileData.bio || 
-                           profileData.store_description ||
-                           "No description available";
-        
-        const storeImage = profileData.store_image || 
-                          profileData.profile_image || 
-                          profileData.storeImage ||
-                          "";
+        // Extract store information from API response
+        const storeName = profileData.store_name || "My Store";
+        const ownerName = profileData.owner_name || profileData.name || "Store Owner";
+        const location = profileData.store_address || "";
+        const description = profileData.store_description || "No description available";
+        const storeImage = profileData.store_logo_url || profileData.store_logo || "";
         
         setStoreInfo({
           storeName,
           ownerName,
           email: profileData.email || "",
-          phone: profileData.phone || profileData.phone_number || "",
+          phone: profileData.phone_number || profileData.phone || "",
           location,
           description,
           storeImage,
@@ -153,52 +124,11 @@ const StoreDashboard = () => {
         }
       }
       
-      // Fetch dashboard data (optional - if endpoint exists)
-      try {
-        const dashboardResponse = await axiosInstance.get('dashboard/store/', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const dashData = dashboardResponse.data;
-        
-        if (dashData) {
-          setDashboardData({
-            pendingVerifications: dashData.pending_verifications || 0,
-            activeRentals: dashData.active_rentals || 0,
-            pendingReturns: dashData.pending_returns || 0,
-            donationsReceived: dashData.donations_received || 0,
-            supportTickets: dashData.support_tickets || 0,
-            totalRevenue: dashData.total_revenue || 0,
-            totalListings: dashData.total_listings || 0,
-          });
-          
-          if (dashData.recent_activities && Array.isArray(dashData.recent_activities)) {
-            const activities = dashData.recent_activities.map(activity => ({
-              icon: getActivityIcon(activity.type),
-              color: getActivityColor(activity.type),
-              title: activity.title || activity.action,
-              desc: activity.description || activity.details,
-              time: formatTime(activity.created_at || activity.timestamp),
-            }));
-            setRecentActivities(activities);
-          }
-        }
-      } catch (dashError) {
-        console.log("Dashboard endpoint not available, using defaults");
-      }
-      
     } catch (error) {
       console.error("Error fetching data:", error);
-      console.error("Error details:", error?.response?.data);
-      
-      const message = error?.response?.data?.message || 
-                     error?.response?.data?.detail ||
-                     "Failed to fetch dashboard data";
-      toast.error(message);
       
       // If unauthorized, redirect to login
-      if (error?.response?.status === 401) {
+      if (error.response?.status === 401) {
         localStorage.clear();
         navigate('/login');
       }
@@ -245,8 +175,7 @@ const StoreDashboard = () => {
 
   const handleLogout = () => {
     localStorage.clear();
-    toast.success("Logged out successfully!");
-    setTimeout(() => navigate('/login'), 1000);
+    navigate('/login');
   };
 
   if (isLoading) {
@@ -262,8 +191,6 @@ const StoreDashboard = () => {
 
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} theme="light" />
-      
       <div className="min-h-screen flex bg-gray-50">
         {/* Sidebar */}
         <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -289,7 +216,12 @@ const StoreDashboard = () => {
               return (
                 <button
                   key={item.name}
-                  onClick={() => setActiveMenu(item.name)}
+                  onClick={() => {
+                    setActiveMenu(item.name);
+                    if (item.path) {
+                      navigate(item.path);
+                    }
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
                     isActive
                       ? 'bg-purple-50 text-purple-600 font-medium'
