@@ -76,7 +76,7 @@ const StoreDashboard = () => {
     { name: 'Verify Listings', icon: FaCheckCircle, path: null },
     { name: 'List Clothes', icon: FaTshirt, path: null },
     { name: 'Rental Management', icon: FaBox, path: null },
-    { name: 'Donations', icon: FaHeart, path: '/store/donations' },
+    { name: 'Donations', icon: FaHeart, path: '/storedonations' },
     { name: 'Shop Locations', icon: FaMapMarkerAlt, path: null },
     { name: 'User Support', icon: FaQuestionCircle, path: null },
     { name: 'Reports', icon: FaFileAlt, path: null },

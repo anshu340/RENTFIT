@@ -151,7 +151,7 @@ const Dashboard = () => {
             <FaHandHoldingHeart className="text-lg" />
             <span>Donate Clothes</span>
           </a>
-          <a href="/my-donations" onClick={(e) => { e.preventDefault(); navigate('/my-donations'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+          <a href="/mydonations" onClick={(e) => { e.preventDefault(); navigate('/mydonations'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
             <FaBox className="text-lg" />
             <span>My Donations</span>
           </a>
