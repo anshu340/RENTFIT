@@ -32,7 +32,6 @@ class User(AbstractUser):
         ('Male', 'Male'),
         ('Female', 'Female'),
         ('Other', 'Other'),
-        ('Prefer not to say', 'Prefer not to say'),
     ])
     preferred_clothing_size = models.CharField(max_length=10, blank=True, null=True, choices=[
         ('XS', 'XS'),
@@ -77,3 +76,100 @@ class OTP(models.Model):
 
     def __str__(self):
         return f"{self.email} - {self.otp}"
+
+class Clothing(models.Model):
+    """
+    Clothing model for store inventory management
+    Stores can add clothing items for rent with pricing and availability tracking
+    """
+    
+    class Category(models.TextChoices):
+        SHIRT = "Shirt", "Shirt"
+        PANTS = "Pants", "Pants"
+        DRESS = "Dress", "Dress"
+        JACKET = "Jacket", "Jacket"
+        SKIRT = "Skirt", "Skirt"
+        SHOES = "Shoes", "Shoes"
+        ACCESSORIES = "Accessories", "Accessories"
+        OTHER = "Other", "Other"
+
+    class Condition(models.TextChoices):
+        NEW = "New", "New"
+        LIKE_NEW = "Like New", "Like New"
+        GOOD = "Good", "Good"
+        USED = "Used", "Used"
+
+    class Status(models.TextChoices):
+        AVAILABLE = "Available", "Available"
+        RENTED = "Rented", "Rented"
+        UNAVAILABLE = "Unavailable", "Unavailable"
+
+    # Relationships
+    store = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='clothing_items',
+        limit_choices_to={'role': 'Store'}
+    )
+
+    # Clothing details
+    item_name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=Category.choices)
+    gender = models.CharField(
+        max_length=20, 
+        choices=[
+            ('Male', 'Male'),
+            ('Female', 'Female'),
+            ('Other', 'Other'),
+        ]
+    )
+    size = models.CharField(max_length=10)
+    condition = models.CharField(max_length=20, choices=Condition.choices)
+    description = models.TextField(blank=True, null=True)
+    rental_price = models.DecimalField(max_digits=10, decimal_places=2)
+    images = models.ImageField(upload_to='clothing_images/', blank=True, null=True)
+    
+    # Status tracking
+    clothing_status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.AVAILABLE
+    )
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Clothing Item'
+        verbose_name_plural = 'Clothing Items'
+
+    def __str__(self):
+        return f"{self.item_name} - {self.store.store_name} ({self.clothing_status})"
+
+class Wishlist(models.Model):
+    """
+    Wishlist model for customers to save favorite clothing items
+    """
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='wishlist_items',
+        limit_choices_to={'role': 'Customer'}
+    )
+    clothing = models.ForeignKey(
+        Clothing,
+        on_delete=models.CASCADE,
+        related_name='wishlisted_by'
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('customer', 'clothing')
+        ordering = ['-added_at']
+        verbose_name = 'Wishlist Item'
+        verbose_name_plural = 'Wishlist Items'
+
+    def __str__(self):
+        return f"{self.customer.email} - {self.clothing.item_name}"

@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
-from .models import User
+from .models import User, Clothing, Wishlist
 from .serializers import (
     CustomerRegisterSerializer, 
     CustomerReadSerializer,
@@ -16,7 +16,14 @@ from .serializers import (
     StoreUpdateSerializer,
     LoginSerializer, 
     UserSerializer,
-    StoreDashboardSerializer
+    StoreDashboardSerializer,
+    ClothingCreateSerializer,
+    ClothingListSerializer,
+    ClothingDetailSerializer,
+    ClothingUpdateSerializer,
+    ClothingStatusUpdateSerializer,
+    WishlistSerializer,
+    WishlistDetailSerializer,
 )
 from .permissions import IsCustomer, IsStore
 from .otp import verify_otp
@@ -358,4 +365,329 @@ class StoreProfileView(APIView):
         
         return Response({
             "message": "Store account deactivated successfully"
+        }, status=status.HTTP_200_OK)
+
+# STORE CLOTHING VIEWS
+
+
+class ClothingCreateView(generics.CreateAPIView):
+    """
+    Create Clothing Item
+    POST /api/accounts/clothing/create/
+    Auth: Store (JWT)
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+    serializer_class = ClothingCreateSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def perform_create(self, serializer):
+        """Create clothing item with store from request user"""
+        serializer.save()
+
+
+class StoreClothingListView(generics.ListAPIView):
+    """
+    My Clothing Items (Store)
+    GET /api/accounts/clothing/my/
+    Auth: Store
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+    serializer_class = ClothingListSerializer
+
+    def get_queryset(self):
+        """Return only clothing items belonging to the authenticated store"""
+        return Clothing.objects.filter(store=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        """Return list of clothing items"""
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ClothingDetailView(generics.RetrieveAPIView):
+    """
+    View Clothing Item
+    GET /api/accounts/clothing/<id>/
+    Auth: Any authenticated user
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ClothingDetailSerializer
+    queryset = Clothing.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        """Return clothing item details"""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ClothingUpdateView(generics.UpdateAPIView):
+    """
+    Update Clothing Item
+    PUT/PATCH /api/accounts/clothing/<id>/update/
+    Auth: Store (owner only)
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+    serializer_class = ClothingUpdateSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        """Return only clothing items belonging to the authenticated store"""
+        return Clothing.objects.filter(store=self.request.user)
+
+
+class ClothingDeleteView(generics.DestroyAPIView):
+    """
+    Delete Clothing Item
+    DELETE /api/accounts/clothing/<id>/delete/
+    Auth: Store (owner only)
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+
+    def get_queryset(self):
+        """Return only clothing items belonging to the authenticated store"""
+        return Clothing.objects.filter(store=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete clothing item and return success message"""
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Clothing item deleted successfully"},
+            status=status.HTTP_200_OK
+        )
+
+
+class ClothingStatusUpdateView(generics.UpdateAPIView):
+    """
+    Update Clothing Status
+    PATCH /api/accounts/clothing/<id>/status/
+    Auth: Store (owner only)
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+    serializer_class = ClothingStatusUpdateSerializer
+
+    def get_queryset(self):
+        """Return only clothing items belonging to the authenticated store"""
+        return Clothing.objects.filter(store=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        """Update clothing status"""
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # Return updated clothing details
+        detail_serializer = ClothingDetailSerializer(instance, context={'request': request})
+        return Response({
+            "message": f"Clothing status updated to {instance.clothing_status}",
+            "data": detail_serializer.data
+        }, status=status.HTTP_200_OK)
+
+# CUSTOMER CLOTHING VIEWS
+
+class AllClothingListView(generics.ListAPIView):
+    """
+    Browse All Available Clothing
+    GET /api/accounts/clothing/all/
+    Auth: Customer
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+    serializer_class = ClothingListSerializer
+
+    def get_queryset(self):
+        """Return all available clothing items"""
+        queryset = Clothing.objects.filter(clothing_status=Clothing.Status.AVAILABLE)
+        
+        # Optional filters
+        category = self.request.query_params.get('category', None)
+        gender = self.request.query_params.get('gender', None)
+        min_price = self.request.query_params.get('min_price', None)
+        max_price = self.request.query_params.get('max_price', None)
+        city = self.request.query_params.get('city', None)
+        
+        if category:
+            queryset = queryset.filter(category=category)
+        if gender:
+            queryset = queryset.filter(gender=gender)
+        if min_price:
+            queryset = queryset.filter(rental_price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(rental_price__lte=max_price)
+        if city:
+            queryset = queryset.filter(store__city=city)
+        
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """Return list of available clothing items"""
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)   
+
+
+class WishlistListView(generics.ListAPIView):
+    """
+    Get Customer's Wishlist
+    GET /api/accounts/wishlist/
+    Auth: Customer
+    Returns: List of all wishlist items for the authenticated customer
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+    serializer_class = WishlistDetailSerializer
+
+    def get_queryset(self):
+        """Return wishlist items for authenticated customer"""
+        return Wishlist.objects.filter(customer=self.request.user).select_related('clothing', 'clothing__store')
+
+    def list(self, request, *args, **kwargs):
+        """Return list of wishlist items"""
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response({
+            "message": "Wishlist retrieved successfully",
+            "count": queryset.count(),
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+class WishlistAddView(generics.CreateAPIView):
+    """
+    Add Item to Wishlist
+    POST /api/accounts/wishlist/add/
+    Auth: Customer
+    Body: { "clothing_id": 1 }
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+    serializer_class = WishlistSerializer
+
+    def create(self, request, *args, **kwargs):
+        """Add item to wishlist"""
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            
+            # Return detailed response
+            wishlist_item = Wishlist.objects.get(id=serializer.data['id'])
+            detail_serializer = WishlistDetailSerializer(wishlist_item, context={'request': request})
+            
+            return Response({
+                "message": "Item added to wishlist successfully",
+                "data": detail_serializer.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except serializers.ValidationError as e:
+            return Response({
+                "error": "Failed to add item to wishlist",
+                "details": e.detail
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WishlistRemoveView(generics.DestroyAPIView):
+    """
+    Remove Item from Wishlist
+    DELETE /api/accounts/wishlist/<id>/remove/
+    Auth: Customer (owner only)
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def get_queryset(self):
+        """Return wishlist items for authenticated customer"""
+        return Wishlist.objects.filter(customer=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        """Remove item from wishlist"""
+        try:
+            instance = self.get_object()
+            clothing_name = instance.clothing.item_name
+            self.perform_destroy(instance)
+            
+            return Response({
+                "message": f"{clothing_name} removed from wishlist successfully"
+            }, status=status.HTTP_200_OK)
+            
+        except Wishlist.DoesNotExist:
+            return Response({
+                "error": "Wishlist item not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+class WishlistRemoveByClothingView(APIView):
+    """
+    Remove Item from Wishlist by Clothing ID
+    DELETE /api/accounts/wishlist/remove-by-clothing/<clothing_id>/
+    Auth: Customer
+    Alternative endpoint to remove by clothing ID instead of wishlist ID
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def delete(self, request, clothing_id):
+        """Remove item from wishlist by clothing ID"""
+        try:
+            wishlist_item = Wishlist.objects.get(
+                customer=request.user,
+                clothing_id=clothing_id
+            )
+            clothing_name = wishlist_item.clothing.item_name
+            wishlist_item.delete()
+            
+            return Response({
+                "message": f"{clothing_name} removed from wishlist successfully"
+            }, status=status.HTTP_200_OK)
+            
+        except Wishlist.DoesNotExist:
+            return Response({
+                "error": "Item not found in wishlist"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+class WishlistCheckView(APIView):
+    """
+    Check if Item is in Wishlist
+    GET /api/accounts/wishlist/check/<clothing_id>/
+    Auth: Customer
+    Returns: { "in_wishlist": true/false, "wishlist_id": 1 or null }
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def get(self, request, clothing_id):
+        """Check if clothing item is in wishlist"""
+        try:
+            wishlist_item = Wishlist.objects.get(
+                customer=request.user,
+                clothing_id=clothing_id
+            )
+            return Response({
+                "in_wishlist": True,
+                "wishlist_id": wishlist_item.id
+            }, status=status.HTTP_200_OK)
+            
+        except Wishlist.DoesNotExist:
+            return Response({
+                "in_wishlist": False,
+                "wishlist_id": None
+            }, status=status.HTTP_200_OK)
+
+
+class WishlistClearView(APIView):
+    """
+    Clear All Wishlist Items
+    DELETE /api/accounts/wishlist/clear/
+    Auth: Customer
+    Removes all items from customer's wishlist
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def delete(self, request):
+        """Clear all wishlist items"""
+        count = Wishlist.objects.filter(customer=request.user).count()
+        Wishlist.objects.filter(customer=request.user).delete()
+        
+        return Response({
+            "message": f"Wishlist cleared successfully. {count} items removed."
         }, status=status.HTTP_200_OK)
