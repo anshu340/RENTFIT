@@ -9,6 +9,10 @@ import StoreDashboard from './Pages/StoreDashboard.jsx';
 import DonateClothing from './Pages/DonateClothing.jsx';
 import MyDonations from './Pages/MyDonations.jsx';
 import StoreDonations from './Pages/StoreDonations.jsx';
+import AddClothingItem from './Pages/AddClothingItem.jsx';
+import MyClothingItems from './Pages/MyClothingItems.jsx';
+import BrowseClothes from './Pages/BrowseClothes.jsx';
+import Wishlist from './Pages/Wishlist.jsx';
 
 function App() {
   return (
@@ -23,6 +27,10 @@ function App() {
       <Route path="/donate" element={<DonateClothing />} />
       <Route path="/mydonations" element={<MyDonations />} />
       <Route path="/storedonations" element={<StoreDonations />} />
+      <Route path="/addClothingItem" element={<AddClothingItem />} />
+      <Route path="/myClothingItems" element={<MyClothingItems />} />
+      <Route path="/browseClothes" element={<BrowseClothes />} />
+      <Route path="/wishlist" element={<Wishlist />} />
     </Routes>
   );
 }

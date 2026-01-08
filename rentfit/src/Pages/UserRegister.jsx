@@ -109,6 +109,13 @@ const UserRegister = () => {
         otp: otp,
       });
       
+      // Add authentication for navbar
+      if (response.data.access_token) {
+        localStorage.setItem("authToken", response.data.access_token);
+        localStorage.setItem("userType", "user");
+        window.dispatchEvent(new Event('authChange'));
+      }
+      
       setServerError("");
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {

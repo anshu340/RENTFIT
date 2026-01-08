@@ -137,6 +137,13 @@ const StoreRegister = () => {
         otp: otp,
       });
       
+      // Add authentication for navbar
+      if (response.data.access_token) {
+        localStorage.setItem("authToken", response.data.access_token);
+        localStorage.setItem("userType", "store");
+        window.dispatchEvent(new Event('authChange'));
+      }
+      
       setMessage("Account verified successfully! Redirecting to login...");
       // Redirect to login page
       setTimeout(() => {
@@ -343,7 +350,7 @@ const StoreRegister = () => {
                 <button
                   onClick={handleRegister}
                   disabled={isLoading}
-                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 "
+                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
                 </button>

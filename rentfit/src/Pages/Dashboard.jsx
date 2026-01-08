@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
+import donationAxios from '../services/donationAxios';
 import { 
   FaTachometerAlt, 
   FaTshirt, 
@@ -52,17 +53,58 @@ const Dashboard = () => {
         }
       }
 
+      // Fetch donations count
+      try {
+        const donationsResponse = await donationAxios.get("donations/my/");
+        console.log("My donations response:", donationsResponse.data);
+        const donations = donationsResponse.data || [];
+        const donationCount = Array.isArray(donations) ? donations.length : 0;
+        
+        setDashboardData(prev => ({
+          ...prev,
+          itemsDonated: donationCount
+        }));
+
+        // Add recent donation activities
+        if (donations.length > 0) {
+          const recentDonations = donations
+            .slice(0, 3)
+            .map(d => ({
+              type: 'donation',
+              title: 'Donation Submitted',
+              description: `${d.item_name} to ${d.store_name} - Status: ${d.donation_status}`,
+              time: formatTime(d.created_at)
+            }));
+          
+          setDashboardData(prev => ({
+            ...prev,
+            recentActivity: [...recentDonations, ...prev.recentActivity]
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching donations:", error);
+      }
+
+      // Fetch wishlist count
+      try {
+        const wishlistResponse = await axiosInstance.get("wishlist/");
+        const wishlistCount = wishlistResponse.data?.data?.length || 0;
+        setDashboardData(prev => ({
+          ...prev,
+          wishlistItems: wishlistCount
+        }));
+      } catch (error) {
+        console.log("Error fetching wishlist:", error);
+      }
+
       // Fetch dashboard statistics
-      // You'll need to create these endpoints in your backend
       try {
         const statsResponse = await axiosInstance.get("dashboard/stats/");
         if (statsResponse.data) {
           setDashboardData(prev => ({
             ...prev,
             activeRentals: statsResponse.data.active_rentals || 0,
-            wishlistItems: statsResponse.data.wishlist_items || 0,
-            totalSpent: statsResponse.data.total_spent || 0,
-            itemsDonated: statsResponse.data.items_donated || 0
+            totalSpent: statsResponse.data.total_spent || 0
           }));
         }
       } catch (error) {
@@ -82,19 +124,6 @@ const Dashboard = () => {
         console.log("Rentals endpoint not available yet");
       }
 
-      // Fetch recent activity
-      try {
-        const activityResponse = await axiosInstance.get("activity/recent/");
-        if (activityResponse.data) {
-          setDashboardData(prev => ({
-            ...prev,
-            recentActivity: activityResponse.data.results || activityResponse.data || []
-          }));
-        }
-      } catch (error) {
-        console.log("Activity endpoint not available yet");
-      }
-
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       if (error.response?.status === 401) {
@@ -104,6 +133,22 @@ const Dashboard = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return 'Recently';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 60) return `${diffMins} mins ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   };
 
   if (isLoading) {
@@ -135,7 +180,7 @@ const Dashboard = () => {
             <FaTachometerAlt className="text-lg" />
             <span>Dashboard</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+          <a href="/browseClothes" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
             <FaTshirt className="text-lg" />
             <span>Browse Clothes</span>
           </a>
@@ -143,7 +188,7 @@ const Dashboard = () => {
             <FaShoppingBag className="text-lg" />
             <span>My Rentals</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+          <a href="/wishlist" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
             <FaHeart className="text-lg" />
             <span>Wishlist</span>
           </a>
@@ -253,7 +298,7 @@ const Dashboard = () => {
                 <FaShoppingBag className="text-4xl mx-auto mb-2 opacity-50" />
                 <p>No active rentals yet</p>
                 <button 
-                  onClick={() => navigate('/browse')}
+                  onClick={() => navigate('/browseClothes')}
                   className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                 >
                   Browse Clothes
@@ -297,8 +342,12 @@ const Dashboard = () => {
               <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <button onClick={() => navigate('/donate')} className="w-full flex items-center gap-3 px-4 py-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition">
-                  <FaBox />
+                  <FaHandHoldingHeart />
                   <span className="text-sm font-medium">Donate Items</span>
+                </button>
+                <button onClick={() => navigate('/mydonations')} className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
+                  <FaBox />
+                  <span className="text-sm font-medium">View My Donations</span>
                 </button>
                 <button className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition">
                   <FaMapMarkerAlt />
@@ -314,12 +363,13 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
               ) : (
                 <div className="space-y-4">
-                  {dashboardData.recentActivity.map((activity, index) => (
+                  {dashboardData.recentActivity.slice(0, 5).map((activity, index) => (
                     <div key={index} className="flex gap-3">
                       <div className={`w-2 h-2 rounded-full mt-2 ${
                         activity.type === 'payment' ? 'bg-green-500' :
                         activity.type === 'wishlist' ? 'bg-blue-500' :
-                        'bg-purple-500'
+                        activity.type === 'donation' ? 'bg-purple-500' :
+                        'bg-gray-500'
                       }`}></div>
                       <div>
                         <p className="text-sm font-medium text-gray-800">{activity.title}</p>

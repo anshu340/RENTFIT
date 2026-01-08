@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
+import donationAxios from "../services/donationAxios";
 import { 
   FaBell, FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle, 
   FaFileAlt, FaChevronRight, FaCheckCircle, FaClock, FaExclamationCircle, 
-  FaStore, FaTimes, FaTshirt, FaSignOutAlt, FaCog, FaCamera
+  FaStore, FaTshirt, FaSignOutAlt, FaCog
 } from 'react-icons/fa';
 
 const InfoCard = ({ icon: Icon, label, value, color = "gray", trend }) => (
@@ -58,23 +59,23 @@ const StoreDashboard = () => {
     description: "",
     storeImage: "",
   });
-  
-  const [dashboardData, setDashboardData] = useState({
-    pendingVerifications: 0,
-    activeRentals: 0,
-    pendingReturns: 0,
-    donationsReceived: 0,
-    supportTickets: 0,
-    totalRevenue: 0,
-    totalListings: 0,
-  });
 
   const [recentActivities, setRecentActivities] = useState([]);
+  
+  const [stats, setStats] = useState({
+    approvedDonations: 0,
+    pendingDonations: 0,
+    rejectedDonations: 0,
+    collectedDonations: 0,
+    availableClothes: 0,
+    unavailableClothes: 0,
+    totalClothes: 0,
+  });
 
   const menuItems = [
     { name: 'Dashboard', icon: FaHome, path: null },
-    { name: 'Verify Listings', icon: FaCheckCircle, path: null },
-    { name: 'List Clothes', icon: FaTshirt, path: null },
+    { name: 'Verify Listings', icon: FaCheckCircle, path: '/myClothingItems' },
+    { name: 'List Clothes', icon: FaTshirt, path: '/addClothingItem'},
     { name: 'Rental Management', icon: FaBox, path: null },
     { name: 'Donations', icon: FaHeart, path: '/storedonations' },
     { name: 'Shop Locations', icon: FaMapMarkerAlt, path: null },
@@ -84,25 +85,24 @@ const StoreDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchDonationsData();
+    fetchClothingItemsData();
   }, []);
 
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
       
-      // Check if user is authenticated
       const token = localStorage.getItem("access_token");
       if (!token) {
         navigate('/login');
         return;
       }
       
-      // Fetch store profile data
       const response = await axiosInstance.get("stores/profile/");
       const profileData = response.data?.data || response.data;
       
       if (profileData) {
-        // Extract store information from API response
         const storeName = profileData.store_name || "My Store";
         const ownerName = profileData.owner_name || profileData.name || "Store Owner";
         const location = profileData.store_address || "";
@@ -127,7 +127,6 @@ const StoreDashboard = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
       
-      // If unauthorized, redirect to login
       if (error.response?.status === 401) {
         localStorage.clear();
         navigate('/login');
@@ -137,23 +136,94 @@ const StoreDashboard = () => {
     }
   };
 
-  const getActivityIcon = (type) => {
-    switch(type) {
-      case 'verification': return FaCheckCircle;
-      case 'rental': return FaBox;
-      case 'donation': return FaHeart;
-      case 'support': return FaQuestionCircle;
-      default: return FaExclamationCircle;
+  const fetchDonationsData = async () => {
+    try {
+      const response = await donationAxios.get("donations/store/");
+      console.log("Donations response:", response.data);
+      
+      const donations = response.data || [];
+      
+      const approved = donations.filter(d => d.donation_status === 'Approved').length;
+      const pending = donations.filter(d => d.donation_status === 'Pending').length;
+      const rejected = donations.filter(d => d.donation_status === 'Rejected').length;
+      const collected = donations.filter(d => d.donation_status === 'Collected').length;
+      
+      console.log("Donations - Approved:", approved, "Pending:", pending, "Rejected:", rejected, "Collected:", collected);
+      
+      setStats(prev => ({
+        ...prev,
+        approvedDonations: approved,
+        pendingDonations: pending,
+        rejectedDonations: rejected,
+        collectedDonations: collected,
+      }));
+      
+      const recentDonations = donations
+        .filter(d => d.donation_status === 'Approved' || d.donation_status === 'Collected')
+        .slice(0, 3)
+        .map(d => ({
+          icon: FaHeart,
+          color: 'bg-blue-100 text-blue-600',
+          title: `Donation ${d.donation_status}`,
+          desc: `${d.item_name || 'Item'} from ${d.customer_name || 'Donor'}`,
+          time: formatTime(d.created_at),
+          type: 'donation'
+        }));
+      
+      setRecentActivities(prev => [...prev, ...recentDonations]);
+    } catch (error) {
+      console.error("Error fetching donations:", error);
+      console.error("Error response:", error.response?.data);
     }
   };
 
-  const getActivityColor = (type) => {
-    switch(type) {
-      case 'verification': return 'bg-green-100 text-green-600';
-      case 'rental': return 'bg-purple-100 text-purple-600';
-      case 'donation': return 'bg-blue-100 text-blue-600';
-      case 'support': return 'bg-cyan-100 text-cyan-600';
-      default: return 'bg-yellow-100 text-yellow-600';
+  const fetchClothingItemsData = async () => {
+    try {
+      const response = await axiosInstance.get("clothing/my/");
+      console.log("Clothing items response:", response.data);
+      
+      let items = [];
+      if (Array.isArray(response.data)) {
+        items = response.data;
+      } else if (response.data?.results) {
+        items = response.data.results;
+      } else if (response.data?.data) {
+        items = response.data.data;
+      }
+      
+      console.log("Total items found:", items.length);
+      
+      const available = items.filter(item => 
+        item.clothing_status?.toLowerCase() === 'available'
+      ).length;
+      const unavailable = items.filter(item => 
+        item.clothing_status?.toLowerCase() === 'unavailable'
+      ).length;
+      
+      console.log("Available:", available, "Unavailable:", unavailable);
+      
+      setStats(prev => ({
+        ...prev,
+        availableClothes: available,
+        unavailableClothes: unavailable,
+        totalClothes: items.length,
+      }));
+      
+      const recentItems = items
+        .slice(0, 3)
+        .map(item => ({
+          icon: FaTshirt,
+          color: 'bg-purple-100 text-purple-600',
+          title: `${item.item_name || 'Item'} - ${item.clothing_status || 'Listed'}`,
+          desc: `${item.category || 'Category'} - Size ${item.size || 'N/A'}`,
+          time: formatTime(item.created_at),
+          type: 'rental'
+        }));
+      
+      setRecentActivities(prev => [...prev, ...recentItems]);
+    } catch (error) {
+      console.error("Error fetching clothing items:", error);
+      console.error("Error response:", error.response?.data);
     }
   };
 
@@ -290,96 +360,196 @@ const StoreDashboard = () => {
             {/* Metrics Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
               <InfoCard
-                icon={FaClock}
-                label="Pending Verifications"
-                value={dashboardData.pendingVerifications}
-                color="orange"
-                trend="Needs Review"
+                icon={FaTshirt}
+                label="Total Listings"
+                value={stats.totalClothes}
+                color="purple"
+                trend={`${stats.availableClothes} available`}
               />
               <InfoCard
                 icon={FaBox}
-                label="Active Rentals"
-                value={dashboardData.activeRentals}
-                color="green"
-                trend="+12% this week"
+                label="Currently Rented"
+                value={stats.unavailableClothes}
+                color="orange"
+                trend={`${stats.totalClothes - stats.unavailableClothes} ready to rent`}
               />
               <InfoCard
                 icon={FaHeart}
-                label="Donations Received"
-                value={dashboardData.donationsReceived}
+                label="Total Donations"
+                value={stats.approvedDonations + stats.collectedDonations}
                 color="blue"
-                trend="+5 today"
+                trend={`${stats.collectedDonations} collected`}
               />
               <InfoCard
-                icon={FaQuestionCircle}
-                label="Support Tickets"
-                value={dashboardData.supportTickets}
-                color="cyan"
-                trend="3 urgent"
+                icon={FaClock}
+                label="Pending Reviews"
+                value={stats.pendingDonations}
+                color="green"
+                trend="Needs attention"
               />
+            </div>
+
+            {/* Detailed Stats Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <FaTshirt className="text-purple-500" />
+                  Clothing Items Breakdown
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Available for Rent</span>
+                    <span className="text-lg font-bold text-green-600">{stats.availableClothes}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div 
+                      className="bg-green-500 h-2 rounded-full transition-all duration-500" 
+                      style={{ width: `${stats.totalClothes > 0 ? (stats.availableClothes / stats.totalClothes) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Currently Rented</span>
+                    <span className="text-lg font-bold text-orange-600">{stats.unavailableClothes}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-500" 
+                      style={{ width: `${stats.totalClothes > 0 ? (stats.unavailableClothes / stats.totalClothes) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <FaHeart className="text-blue-500" />
+                  Donations Status
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Approved</span>
+                    <span className="text-lg font-bold text-green-600">{stats.approvedDonations}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Collected</span>
+                    <span className="text-lg font-bold text-blue-600">{stats.collectedDonations}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Pending</span>
+                    <span className="text-lg font-bold text-orange-600">{stats.pendingDonations}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Rejected</span>
+                    <span className="text-lg font-bold text-red-600">{stats.rejectedDonations}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <FaCheckCircle className="text-green-500" />
+                  Quick Summary
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Items</span>
+                    <span className="text-lg font-bold text-gray-800">{stats.totalClothes}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Donations</span>
+                    <span className="text-lg font-bold text-gray-800">
+                      {stats.approvedDonations + stats.collectedDonations + stats.pendingDonations + stats.rejectedDonations}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Utilization Rate</span>
+                    <span className="text-lg font-bold text-purple-600">
+                      {stats.totalClothes > 0 ? Math.round((stats.unavailableClothes / stats.totalClothes) * 100) : 0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Verification Status Chart */}
+              {/* Donation Status Chart */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-800 mb-6">Verification Status</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-6">Donation Status</h3>
                 <div className="relative w-48 h-48 mx-auto mb-6">
                   <svg viewBox="0 0 100 100" className="transform -rotate-90">
                     <circle cx="50" cy="50" r="35" fill="none" stroke="#e5e7eb" strokeWidth="10" />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="10"
-                      strokeDasharray="220"
-                      strokeDashoffset="55"
-                      strokeLinecap="round"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="10"
-                      strokeDasharray="220"
-                      strokeDashoffset="165"
-                      strokeLinecap="round"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#ef4444"
-                      strokeWidth="10"
-                      strokeDasharray="220"
-                      strokeDashoffset="198"
-                      strokeLinecap="round"
-                    />
+                    {(() => {
+                      const total = Math.max(stats.approvedDonations + stats.pendingDonations + stats.rejectedDonations + stats.collectedDonations, 1);
+                      const circumference = 220;
+                      const approvedPercent = stats.approvedDonations / total;
+                      const collectedPercent = stats.collectedDonations / total;
+                      const pendingPercent = stats.pendingDonations / total;
+                      
+                      return (
+                        <>
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="35"
+                            fill="none"
+                            stroke="#10b981"
+                            strokeWidth="10"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (circumference * approvedPercent)}
+                            strokeLinecap="round"
+                          />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="35"
+                            fill="none"
+                            stroke="#3b82f6"
+                            strokeWidth="10"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent))}
+                            strokeLinecap="round"
+                          />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="35"
+                            fill="none"
+                            stroke="#f59e0b"
+                            strokeWidth="10"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent + pendingPercent))}
+                            strokeLinecap="round"
+                          />
+                        </>
+                      );
+                    })()}
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-gray-800">{dashboardData.totalListings}</div>
-                      <div className="text-xs text-gray-500 mt-1">Total Items</div>
+                      <div className="text-3xl font-bold text-gray-800">
+                        {stats.approvedDonations + stats.collectedDonations + stats.pendingDonations + stats.rejectedDonations}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Total Donations</div>
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-center gap-4 text-xs">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-gray-600">Approved</span>
+                    <span className="text-gray-600">Approved ({stats.approvedDonations})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="text-gray-600">Collected ({stats.collectedDonations})</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <span className="text-gray-600">Pending</span>
+                    <span className="text-gray-600">Pending ({stats.pendingDonations})</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="text-gray-600">Rejected</span>
+                    <span className="text-gray-600">Rejected ({stats.rejectedDonations})</span>
                   </div>
                 </div>
               </div>
@@ -394,7 +564,7 @@ const StoreDashboard = () => {
                 </div>
                 <div className="space-y-1 max-h-80 overflow-y-auto">
                   {recentActivities.length > 0 ? (
-                    recentActivities.slice(0, 5).map((activity, index) => (
+                    recentActivities.slice(0, 6).map((activity, index) => (
                       <ActivityItem key={index} {...activity} />
                     ))
                   ) : (
@@ -412,39 +582,43 @@ const StoreDashboard = () => {
                   <QuickActionButton 
                     label="Verify Listings" 
                     color="purple" 
-                    onClick={() => setActiveMenu('Verify Listings')} 
+                    onClick={() => navigate('/myClothingItems')} 
                   />
                   <QuickActionButton 
-                    label="Process Returns" 
+                    label="List New Items" 
                     color="green" 
-                    onClick={() => setActiveMenu('Rental Management')} 
+                    onClick={() => navigate('/addClothingItem')} 
                   />
                   <QuickActionButton 
                     label="Handle Donations" 
                     color="blue" 
-                    onClick={() => setActiveMenu('Donations')} 
+                    onClick={() => navigate('/storedonations')} 
                   />
                   <QuickActionButton 
-                    label="Support Center" 
+                    label="View Reports" 
                     color="cyan" 
-                    onClick={() => setActiveMenu('User Support')} 
+                    onClick={() => setActiveMenu('Reports')} 
                   />
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-100">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Performance This Month</h4>
-                  <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Current Statistics</h4>
+                  <div className="space-y-3">
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-600">Verifications</span>
-                      <span className="font-semibold text-gray-800">234</span>
+                      <span className="text-gray-600">Items Available</span>
+                      <span className="font-semibold text-green-600">{stats.availableClothes}</span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-600">Returns Processed</span>
-                      <span className="font-semibold text-gray-800">456</span>
+                      <span className="text-gray-600">Items Rented</span>
+                      <span className="font-semibold text-orange-600">{stats.unavailableClothes}</span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-600">Tickets Resolved</span>
-                      <span className="font-semibold text-gray-800">89</span>
+                      <span className="text-gray-600">Approved Donations</span>
+                      <span className="font-semibold text-blue-600">{stats.approvedDonations}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600">Pending Reviews</span>
+                      <span className="font-semibold text-yellow-600">{stats.pendingDonations}</span>
                     </div>
                   </div>
                 </div>
