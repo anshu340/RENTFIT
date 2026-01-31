@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',  # IMPORTANT: Add this for CORS support
     'accounts',
     'donations',
+    'rent',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
