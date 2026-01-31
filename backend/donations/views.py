@@ -17,9 +17,7 @@ from accounts.permissions import IsCustomer, IsStore
 from accounts.models import User
 
 
-# ============================================================================
 # CUSTOMER DONATION VIEWS
-# ============================================================================
 
 class DonationCreateView(generics.CreateAPIView):
     """
@@ -129,10 +127,7 @@ class DonationDeleteView(generics.DestroyAPIView):
             status=status.HTTP_200_OK
         )
 
-
-# ============================================================================
 # STORE DONATION VIEWS
-# ============================================================================
 
 class StoreDonationListView(generics.ListAPIView):
     """
@@ -215,9 +210,7 @@ class DonationCollectView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-# ============================================================================
 # UTILITY VIEWS
-# ============================================================================
 
 class StoreListForDonationView(APIView):
     """

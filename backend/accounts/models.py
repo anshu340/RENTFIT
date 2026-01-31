@@ -127,6 +127,7 @@ class Clothing(models.Model):
     condition = models.CharField(max_length=20, choices=Condition.choices)
     description = models.TextField(blank=True, null=True)
     rental_price = models.DecimalField(max_digits=10, decimal_places=2)
+    available_quantity = models.IntegerField(default=1)  # Added for rental system
     images = models.ImageField(upload_to='clothing_images/', blank=True, null=True)
     
     # Status tracking
