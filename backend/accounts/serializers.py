@@ -137,7 +137,7 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'full_name', 'email', 'password', 'phone_number',
-            'address', 'city', 'gender', 'preferred_clothing_size'
+            'address', 'city', 'gender', 'preferred_clothing_size', 'profile_image'
         ]
 
     def validate_email(self, value):
@@ -165,6 +165,7 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
             city=validated_data.get('city'),
             gender=validated_data.get('gender'),
             preferred_clothing_size=validated_data.get('preferred_clothing_size'),
+            profile_image=validated_data.get('profile_image'),
             is_store=False
         )
         create_and_send_otp(user.email)
@@ -179,15 +180,25 @@ class CustomerReadSerializer(serializers.ModelSerializer):
     """
     full_name = serializers.CharField(source='name', read_only=True)
     phone_number = serializers.CharField(source='phone', read_only=True)
+    profile_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             'id', 'full_name', 'email', 'phone_number',
             'address', 'city', 'gender', 'preferred_clothing_size',
+            'profile_image', 'profile_image_url',
             'is_verified', 'date_joined', 'role'
         ]
         read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role']
+
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
 
 # Customer Update Serializer
@@ -203,7 +214,7 @@ class CustomerUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'full_name', 'phone_number', 'address', 'city',
-            'gender', 'preferred_clothing_size'
+            'gender', 'preferred_clothing_size', 'profile_image'
         ]
 
     def validate_phone_number(self, value):
@@ -247,6 +258,7 @@ class LoginSerializer(serializers.Serializer):
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
     store_logo_url = serializers.SerializerMethodField()
+    profile_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -254,8 +266,17 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'email', 'name', 'phone', 'role', 
             'store_name', 'store_address', 'city', 'store_description', 
             'store_logo', 'store_logo_url',
+            'profile_image', 'profile_image_url',
             'is_verified', 'date_joined'
         ]
+
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
     def get_store_logo_url(self, obj):
         if obj.store_logo:
