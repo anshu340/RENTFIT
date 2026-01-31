@@ -171,162 +171,164 @@ const Dashboard = () => {
   return (
     <>
       <Navbar />
-      <div className="flex min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500">
+      <div className="flex min-h-screen bg-gray-50 text-gray-800">
         <DashboardSidebar />
 
         {/* Main Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        <div className="flex-1 flex flex-col min-h-screen">
           <DashboardHeader
             userInfo={userInfo}
             notificationCount={dashboardData.recentActivity.length}
           />
+          <main className="flex-1 p-8 pt-0 overflow-y-auto">
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Active Rentals</p>
-                  <p className="text-3xl font-bold text-gray-800">{dashboardData.activeRentals}</p>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Active Rentals</p>
+                    <p className="text-3xl font-bold text-gray-800">{dashboardData.activeRentals}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <FaShoppingBag className="text-blue-600" />
+                  </div>
                 </div>
-                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <FaShoppingBag className="text-blue-600" />
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Wishlist Items</p>
+                    <p className="text-3xl font-bold text-gray-800">{dashboardData.wishlistItems}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center">
+                    <FaHeart className="text-pink-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Total Spent</p>
+                    <p className="text-3xl font-bold text-gray-800">${dashboardData.totalSpent}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                    <FaDollarSign className="text-green-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Items Donated</p>
+                    <p className="text-3xl font-bold text-gray-800">{dashboardData.itemsDonated}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                    <FaHandHoldingHeart className="text-purple-600" />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Wishlist Items</p>
-                  <p className="text-3xl font-bold text-gray-800">{dashboardData.wishlistItems}</p>
-                </div>
-                <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center">
-                  <FaHeart className="text-pink-600" />
-                </div>
-              </div>
-            </div>
+            {/* Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Current Rentals */}
+              <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">Current Rentals</h2>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Spent</p>
-                  <p className="text-3xl font-bold text-gray-800">${dashboardData.totalSpent}</p>
-                </div>
-                <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                  <FaDollarSign className="text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Items Donated</p>
-                  <p className="text-3xl font-bold text-gray-800">{dashboardData.itemsDonated}</p>
-                </div>
-                <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                  <FaHandHoldingHeart className="text-purple-600" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Current Rentals */}
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">Current Rentals</h2>
-
-              {dashboardData.currentRentals.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <FaShoppingBag className="text-4xl mx-auto mb-2 opacity-50" />
-                  <p>No active rentals yet</p>
-                  <button
-                    onClick={() => navigate('/browseClothes')}
-                    className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                  >
-                    Browse Clothes
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {dashboardData.currentRentals.map((rental, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg overflow-hidden">
-                          {rental.image && (
-                            <img src={rental.image} alt={rental.name} className="w-full h-full object-cover" />
-                          )}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{rental.name || 'Item'}</h3>
-                          <p className="text-sm text-gray-600">
-                            Size: {rental.size || 'N/A'} | Rented: {rental.rental_period || 'N/A'}
-                          </p>
-                          <p className="text-sm text-gray-600">Return due: {rental.return_date || 'N/A'}</p>
-                        </div>
-                      </div>
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${rental.status === 'active' ? 'bg-orange-100 text-orange-600' :
-                        rental.status === 'upcoming' ? 'bg-green-100 text-green-600' :
-                          'bg-blue-100 text-blue-600'
-                        }`}>
-                        {rental.status || 'Active'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Quick Actions & Recent Activity */}
-            <div className="space-y-6">
-              {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
-                <div className="space-y-3">
-                  <button onClick={() => navigate('/donate')} className="w-full flex items-center gap-3 px-4 py-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition">
-                    <FaHandHoldingHeart />
-                    <span className="text-sm font-medium">Donate Items</span>
-                  </button>
-                  <button onClick={() => navigate('/mydonations')} className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
-                    <FaBox />
-                    <span className="text-sm font-medium">View My Donations</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition">
-                    <FaMapMarkerAlt />
-                    <span className="text-sm font-medium">Find Nearby Shops</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
-                {dashboardData.recentActivity.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
+                {dashboardData.currentRentals.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <FaShoppingBag className="text-4xl mx-auto mb-2 opacity-50" />
+                    <p>No active rentals yet</p>
+                    <button
+                      onClick={() => navigate('/browseClothes')}
+                      className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    >
+                      Browse Clothes
+                    </button>
+                  </div>
                 ) : (
                   <div className="space-y-4">
-                    {dashboardData.recentActivity.slice(0, 5).map((activity, index) => (
-                      <div key={index} className="flex gap-3">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'payment' ? 'bg-green-500' :
-                          activity.type === 'wishlist' ? 'bg-blue-500' :
-                            activity.type === 'donation' ? 'bg-purple-500' :
-                              'bg-gray-500'
-                          }`}></div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">{activity.title}</p>
-                          <p className="text-xs text-gray-600">{activity.description}</p>
-                          <p className="text-xs text-gray-500">{activity.time}</p>
+                    {dashboardData.currentRentals.map((rental, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg overflow-hidden">
+                            {rental.image && (
+                              <img src={rental.image} alt={rental.name} className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-800">{rental.name || 'Item'}</h3>
+                            <p className="text-sm text-gray-600">
+                              Size: {rental.size || 'N/A'} | Rented: {rental.rental_period || 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600">Return due: {rental.return_date || 'N/A'}</p>
+                          </div>
                         </div>
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${rental.status === 'active' ? 'bg-orange-100 text-orange-600' :
+                          rental.status === 'upcoming' ? 'bg-green-100 text-green-600' :
+                            'bg-blue-100 text-blue-600'
+                          }`}>
+                          {rental.status || 'Active'}
+                        </span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* Quick Actions & Recent Activity */}
+              <div className="space-y-6">
+                {/* Quick Actions */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
+                  <div className="space-y-3">
+                    <button onClick={() => navigate('/donate')} className="w-full flex items-center gap-3 px-4 py-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition">
+                      <FaHandHoldingHeart />
+                      <span className="text-sm font-medium">Donate Items</span>
+                    </button>
+                    <button onClick={() => navigate('/mydonations')} className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
+                      <FaBox />
+                      <span className="text-sm font-medium">View My Donations</span>
+                    </button>
+                    <button className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition">
+                      <FaMapMarkerAlt />
+                      <span className="text-sm font-medium">Find Nearby Shops</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
+                  {dashboardData.recentActivity.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {dashboardData.recentActivity.slice(0, 5).map((activity, index) => (
+                        <div key={index} className="flex gap-3">
+                          <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'payment' ? 'bg-green-500' :
+                            activity.type === 'wishlist' ? 'bg-blue-500' :
+                              activity.type === 'donation' ? 'bg-purple-500' :
+                                'bg-gray-500'
+                            }`}></div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">{activity.title}</p>
+                            <p className="text-xs text-gray-600">{activity.description}</p>
+                            <p className="text-xs text-gray-500">{activity.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </>
   );

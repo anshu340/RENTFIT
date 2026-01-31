@@ -18,14 +18,20 @@ const UserRegister = () => {
     city: "",
     gender: "",
     preferred_clothing_size: "",
+    profile_image: null,
   });
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    if (e.target.name === "profile_image") {
+      setFormData({ ...formData, profile_image: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,24 +56,26 @@ const UserRegister = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post("register/customer/", {
-        full_name: formData.full_name,
-        email: formData.email,
-        password: formData.password,
-        phone_number: formData.phone_number,
-        address: formData.address,
-        city: formData.city,
-        gender: formData.gender,
-        preferred_clothing_size: formData.preferred_clothing_size,
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== null && key !== "confirmPassword") {
+          data.append(key, formData[key]);
+        }
       });
-      
+
+      const response = await axiosInstance.post("register/customer/", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       setServerError("");
       setStep(2);
     } catch (error) {
       console.error("Registration Error:", error);
       let message = "Registration failed. Please try again.";
       const errorData = error.response?.data;
-      
+
       if (errorData) {
         if (errorData.email) {
           message = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
@@ -85,7 +93,7 @@ const UserRegister = () => {
           message = errorData;
         }
       }
-      
+
       setServerError(message);
     } finally {
       setIsLoading(false);
@@ -108,14 +116,14 @@ const UserRegister = () => {
         email: formData.email,
         otp: otp,
       });
-      
+
       // Add authentication for navbar
       if (response.data.access_token) {
         localStorage.setItem("authToken", response.data.access_token);
         localStorage.setItem("userType", "user");
         window.dispatchEvent(new Event('authChange'));
       }
-      
+
       setServerError("");
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
@@ -274,6 +282,19 @@ const UserRegister = () => {
                     {errors.preferred_clothing_size && (
                       <p className="text-red-500 text-xs mt-1">{errors.preferred_clothing_size}</p>
                     )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700 ml-1">Profile Image</label>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        name="profile_image"
+                        accept="image/*"
+                        onChange={handleChange}
+                        className="w-full p-2.5 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 transition"
+                      />
+                    </div>
                   </div>
 
                   <div className="relative">

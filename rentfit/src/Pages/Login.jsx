@@ -50,11 +50,11 @@ const Login = () => {
         localStorage.setItem("user", JSON.stringify(response.data.user || {}));
         localStorage.setItem("role", response.data.user?.role || "");
         localStorage.setItem("isLoggedIn", "true");
-        
+
         // Add these lines for navbar authentication
         localStorage.setItem("authToken", response.data.access_token);
         localStorage.setItem("userType", response.data.user?.role === "Store" ? "store" : "user");
-        
+
         // Dispatch event to update navbar immediately
         window.dispatchEvent(new Event('authChange'));
       }
@@ -72,12 +72,12 @@ const Login = () => {
     } catch (error) {
       console.error("Login Error:", error);
       const errorData = error.response?.data;
-      const message = 
-        errorData?.error || 
-        errorData?.detail || 
+      const message =
+        errorData?.error ||
+        errorData?.detail ||
         errorData?.message ||
         "Login failed. Please check your credentials.";
-      
+
       setServerError(message);
     } finally {
       setIsLoading(false);
@@ -93,7 +93,7 @@ const Login = () => {
           <div className="md:w-1/2 w-full px-8 py-10 flex flex-col justify-center">
             <h2 className="text-3xl font-bold text-blue-800 mb-2 text-center">Welcome Back</h2>
             <p className="text-gray-600 mb-6 text-center">Login to your account</p>
-            
+
             {serverError && (
               <div className="text-red-600 text-sm text-center mb-4 bg-red-50 p-3 rounded-lg border border-red-200">
                 {serverError}
@@ -135,8 +135,8 @@ const Login = () => {
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isLoading}
                 className="w-full bg-blue-800 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >

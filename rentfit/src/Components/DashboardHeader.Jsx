@@ -18,36 +18,38 @@ const DashboardHeader = ({ userInfo, notificationCount }) => {
             );
         }
         return (
-            <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+            <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm font-bold">
                 {name.charAt(0).toUpperCase()}
             </div>
         );
     };
 
     return (
-        <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-white/20 border-2 border-white shadow-lg group cursor-pointer">
-                    {renderAvatar()}
+        <div className="bg-white border-b border-gray-200 mb-8 -mx-8 -mt-8">
+            <div className="px-8 py-5 flex items-center justify-between">
+                <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-800">User Dashboard</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Welcome back, {name}. Manage your rentals and explore new outfits.
+                    </p>
                 </div>
-                <div className="text-white">
-                    <h1 className="text-2xl font-bold">Welcome back, {name}</h1>
-                    <div className="flex flex-col text-sm text-white/90">
-                        <span>{email}</span>
-                        <span>{phone}</span>
-                        <span className="mt-1 font-semibold bg-white/20 w-fit px-2 py-0.5 rounded text-xs">
-                            Role: User
-                        </span>
+                <div className="flex items-center gap-4">
+                    <button className="relative p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <FaBell className="text-lg" />
+                        {notificationCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                        )}
+                    </button>
+                    <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+                        <div className="flex flex-col items-end">
+                            <p className="text-sm font-medium text-gray-800">{name}</p>
+                            <p className="text-xs text-gray-500">User</p>
+                        </div>
+                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer border border-gray-100 shadow-sm">
+                            {renderAvatar()}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="flex items-center gap-4">
-                <button className="p-2 text-white hover:bg-white/20 rounded-lg relative">
-                    <FaBell className="text-xl" />
-                    {notificationCount > 0 && (
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    )}
-                </button>
             </div>
         </div>
     );
