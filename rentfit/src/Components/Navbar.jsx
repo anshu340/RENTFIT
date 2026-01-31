@@ -1,8 +1,34 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/Rentfit Logo.png";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState("");
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("access_token") || localStorage.getItem("authToken");
+      const role = localStorage.getItem("role") || localStorage.getItem("userType");
+      setIsLoggedIn(!!token);
+      // Normalize role names
+      if (role === 'Store' || role === 'store') setUserRole('Store');
+      else if (role === 'Customer' || role === 'user') setUserRole('Customer');
+      else setUserRole('');
+    };
+
+    checkAuth();
+    window.addEventListener("authChange", checkAuth);
+    return () => window.removeEventListener("authChange", checkAuth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+    setUserRole("");
+    navigate("/login");
+  };
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,11 +47,27 @@ const Navbar = () => {
           {/* NAV LINKS */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              to="/browse"
+              to="/browseClothes"
               className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
             >
               Browse
             </Link>
+            {isLoggedIn && userRole === 'Customer' && (
+              <Link
+                to="/myrentals"
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                My Rentals
+              </Link>
+            )}
+            {isLoggedIn && userRole === 'Store' && (
+              <Link
+                to="/storerentals"
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                Rental Requests
+              </Link>
+            )}
             <Link
               to="/donate"
               className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
@@ -33,16 +75,10 @@ const Navbar = () => {
               Donate
             </Link>
             <Link
-              to="/locations"
+              to={userRole === 'Store' ? "/storeDashboard" : "/dashboard"}
               className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
             >
-              Locations
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-            >
-              About
+              Dashboard
             </Link>
           </div>
 
@@ -65,21 +101,29 @@ const Navbar = () => {
               </svg>
             </button>
 
-            {/* LOGIN */}
-            <Link
-              to="/login"
-              className="px-6 py-2 text-purple-600 border border-purple-600 text-sm font-medium rounded-md hover:bg-purple-50 transition-colors"
-            >
-              Log in
-            </Link>
-
-            {/* SIGN UP */}
-            <Link
-              to="/createAccount"
-              className="px-6 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
-            >
-              Sign up
-            </Link>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
+              >
+                Log out
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-6 py-2 text-purple-600 border border-purple-600 text-sm font-medium rounded-md hover:bg-purple-50 transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/createAccount"
+                  className="px-6 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

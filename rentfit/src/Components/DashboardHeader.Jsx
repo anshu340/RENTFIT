@@ -2,24 +2,42 @@ import React from 'react';
 import { FaBell } from 'react-icons/fa';
 
 const DashboardHeader = ({ userInfo, notificationCount }) => {
+    const name = userInfo?.fullName || 'User';
+    const email = userInfo?.email || '';
+    const phone = userInfo?.phone || '';
+    const image = userInfo?.profileImage;
+
+    const renderAvatar = () => {
+        if (image) {
+            return (
+                <img
+                    src={image}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                />
+            );
+        }
+        return (
+            <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+                {name.charAt(0).toUpperCase()}
+            </div>
+        );
+    };
+
     return (
         <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
                 <div className="relative w-16 h-16 rounded-full overflow-hidden bg-white/20 border-2 border-white shadow-lg group cursor-pointer">
-                    {userInfo.profileImage ? (
-                        <img src={userInfo.profileImage} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
-                            {userInfo.fullName?.charAt(0)?.toUpperCase()}
-                        </div>
-                    )}
+                    {renderAvatar()}
                 </div>
                 <div className="text-white">
-                    <h1 className="text-2xl font-bold">Welcome back, {userInfo.fullName}</h1>
+                    <h1 className="text-2xl font-bold">Welcome back, {name}</h1>
                     <div className="flex flex-col text-sm text-white/90">
-                        <span>{userInfo.email}</span>
-                        <span>{userInfo.phone}</span>
-                        <span className="mt-1 font-semibold bg-white/20 w-fit px-2 py-0.5 rounded text-xs">Role: User</span>
+                        <span>{email}</span>
+                        <span>{phone}</span>
+                        <span className="mt-1 font-semibold bg-white/20 w-fit px-2 py-0.5 rounded text-xs">
+                            Role: User
+                        </span>
                     </div>
                 </div>
             </div>
