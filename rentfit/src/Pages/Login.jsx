@@ -20,6 +20,9 @@ const Login = () => {
     if (location.state?.email) {
       setEmail(location.state.email);
     }
+    if (location.state?.message) {
+      setServerError(location.state.message);
+    }
   }, [location]);
 
   const handleSubmit = async (e) => {

@@ -190,7 +190,7 @@ const BrowseClothes = () => {
   const toggleFavorite = async (id) => {
     const token = localStorage.getItem("access_token");
     if (!token) {
-      showAlert("Please login to use wishlist", "error");
+      navigate("/login", { state: { message: "Please login to use wishlist" } });
       return;
     }
 
@@ -219,6 +219,12 @@ const BrowseClothes = () => {
   };
 
   const handleRentNow = (item) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/login", { state: { message: "Please login to continue renting" } });
+      return;
+    }
+
     // If not a customer, you might want to redirect or show alert
     const userRole = localStorage.getItem('role');
     if (userRole !== 'Customer') {

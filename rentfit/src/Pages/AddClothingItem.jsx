@@ -184,7 +184,7 @@ const AddClothingItem = () => {
           {/* Header */}
           <div className="mb-6">
             <button 
-              onClick={() => navigate('/my-clothing-items')}
+              onClick={() => navigate('/myclothingitems')}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
             >
               <FaArrowLeft className="mr-2" />
