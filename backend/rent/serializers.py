@@ -30,8 +30,8 @@ class RentalCreateSerializer(serializers.ModelSerializer):
         # 1. Validate dates
         if start_date < date.today():
             raise serializers.ValidationError("Start date cannot be in the past.")
-        if end_date <= start_date:
-            raise serializers.ValidationError("End date must be after start date.")
+        if end_date < start_date:
+            raise serializers.ValidationError("End date cannot be before start date.")
 
         # 2. Check available quantity
         if clothing.available_quantity <= 0:
@@ -45,8 +45,7 @@ class RentalCreateSerializer(serializers.ModelSerializer):
         end_date = validated_data['rent_end_date']
         
         # 3. Calculate total price
-        num_days = (end_date - start_date).days
-        if num_days <= 0: num_days = 1 # Minimum 1 day charge
+        num_days = (end_date - start_date).days + 1  # Standard rental logic: inclusive of both days
         total_price = clothing.rental_price * num_days
         
         customer = self.context['request'].user
