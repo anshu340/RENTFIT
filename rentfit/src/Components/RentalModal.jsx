@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axiosInstance from '../services/axiosInstance';
+import rentalAxiosInstance from '../services/rentalAxiosInstance';
 
 const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
     const [startDate, setStartDate] = useState('');
@@ -15,7 +15,7 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
         setError('');
 
         try {
-            const response = await axiosInstance.post('rent/create/', {
+            const response = await rentalAxiosInstance.post('create/', {
                 clothing: clothing.id,
                 rent_start_date: startDate,
                 rent_end_date: endDate,
@@ -24,8 +24,27 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
             onRentalCreated('Rental request submitted successfully!', 'success');
             onClose();
         } catch (err) {
-            console.error(err);
-            const errorMsg = err.response?.data?.error || err.response?.data?.non_field_errors?.[0] || 'Failed to create rental request.';
+            console.error('Rental Creation Error:', err.response?.data);
+
+            let errorMsg = 'Failed to create rental request.';
+
+            if (err.response?.data) {
+                const data = err.response.data;
+                if (data.error) {
+                    errorMsg = data.error;
+                } else if (data.non_field_errors && data.non_field_errors.length > 0) {
+                    errorMsg = data.non_field_errors[0];
+                } else if (typeof data === 'object') {
+                    // Extract first error from any field (e.g., clothing, rent_start_date)
+                    const fieldErrors = Object.values(data);
+                    if (fieldErrors.length > 0 && Array.isArray(fieldErrors[0])) {
+                        errorMsg = fieldErrors[0][0];
+                    } else if (fieldErrors.length > 0 && typeof fieldErrors[0] === 'string') {
+                        errorMsg = fieldErrors[0];
+                    }
+                }
+            }
+
             setError(errorMsg);
             onRentalCreated(errorMsg, 'error');
         } finally {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../services/axiosInstance';
+import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Alert from '../Components/Alert';
@@ -17,7 +17,7 @@ const MyRentals = () => {
     const fetchRentals = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get('rent/my/');
+            const response = await rentalAxiosInstance.get('my/');
             setRentals(response.data);
         } catch (error) {
             console.error('Error fetching rentals:', error);
@@ -29,7 +29,7 @@ const MyRentals = () => {
 
     const handleMarkReturned = async (id) => {
         try {
-            await axiosInstance.patch(`rent/${id}/mark-return/`);
+            await rentalAxiosInstance.patch(`${id}/mark-return/`);
             showAlert('Item marked as returned. Waiting for store confirmation.', 'success');
             fetchRentals();
         } catch (error) {
