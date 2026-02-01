@@ -4,25 +4,33 @@ import axiosInstance from '../services/axiosInstance';
 import donationAxios from '../services/donationAxios';
 import Navbar from '../Components/Navbar';
 import DashboardSidebar from '../Components/DashboardSidebar';
-import DashboardHeader from '../Components/DashboardHeader';
 import {
   FaHeart,
   FaHandHoldingHeart,
   FaMapMarkerAlt,
   FaDollarSign,
   FaShoppingBag,
-  FaBox
+  FaBox,
+  FaBell
 } from 'react-icons/fa';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState('User');
-  const [userInfo, setUserInfo] = useState({
-    fullName: "User",
-    email: "",
-    phone: "",
-    profileImage: ""
+  const [userInfo, setUserInfo] = useState(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      return {
+        fullName: savedUser.name || "User",
+        email: savedUser.email || "",
+        phone: savedUser.phone || "",
+        profileImage: savedUser.profile_image_url || savedUser.profile_image || "",
+        role: localStorage.getItem('role') || "Customer"
+      };
+    } catch (e) {
+      return { fullName: "User", email: "", phone: "", profileImage: "", role: "Customer" };
+    }
   });
+  const [userName, setUserName] = useState(userInfo.fullName);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     activeRentals: 0,
@@ -55,7 +63,8 @@ const Dashboard = () => {
           fullName: name,
           email: profileData.email || "",
           phone: profileData.phone_number || profileData.phone || "",
-          profileImage: profileData.profile_image_url || profileData.profile_image || ""
+          profileImage: profileData.profile_image_url || profileData.profile_image || "",
+          role: profileData.role || "Customer"
         });
       }
 
@@ -176,10 +185,44 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-h-screen">
-          <DashboardHeader
-            userInfo={userInfo}
-            notificationCount={dashboardData.recentActivity.length}
-          />
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div className="px-8 py-5 flex items-center justify-between">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-800">User Dashboard</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Welcome back, {userInfo.fullName || 'User'}. Manage your rentals and explore new outfits.
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="relative p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                  <FaBell className="text-lg" />
+                  {dashboardData.recentActivity.length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </button>
+                <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer border border-gray-100 shadow-sm">
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-lg font-bold z-0">
+                      {(userInfo.fullName || 'User').charAt(0).toUpperCase()}
+                    </div>
+                    {userInfo.profileImage && (
+                      <img
+                        src={userInfo.profileImage}
+                        alt="Profile"
+                        className="absolute inset-0 w-full h-full object-cover z-10"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <p className="text-sm font-medium text-gray-800">{userInfo.fullName || 'User'}</p>
+                    <p className="text-xs text-gray-500">{userInfo.role || 'Customer'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <main className="flex-1 p-8 pt-0 overflow-y-auto">
 
             {/* Stats Cards */}
