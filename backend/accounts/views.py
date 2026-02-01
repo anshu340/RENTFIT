@@ -411,7 +411,8 @@ class ClothingDetailView(generics.RetrieveAPIView):
     GET /api/accounts/clothing/<id>/
     Auth: Any authenticated user
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    authentication_classes = []
     serializer_class = ClothingDetailSerializer
     queryset = Clothing.objects.all()
 
@@ -495,12 +496,14 @@ class AllClothingListView(generics.ListAPIView):
     GET /api/accounts/clothing/all/
     Auth: Customer
     """
-    permission_classes = [IsAuthenticated, IsCustomer]
+    permission_classes = [AllowAny]
+    authentication_classes = []
     serializer_class = ClothingListSerializer
 
     def get_queryset(self):
         """Return all available clothing items"""
-        queryset = Clothing.objects.filter(clothing_status=Clothing.Status.AVAILABLE)
+        # queryset = Clothing.objects.filter(clothing_status=Clothing.Status.AVAILABLE)
+        queryset = Clothing.objects.all() # Temporarily broaden to see all
         
         # Optional filters
         category = self.request.query_params.get('category', None)
