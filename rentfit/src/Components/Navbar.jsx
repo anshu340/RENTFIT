@@ -52,6 +52,32 @@ const Navbar = () => {
             >
               Browse
             </Link>
+
+            {/* Logged Out Links - Locations & About */}
+            {!isLoggedIn && (
+              <>
+                <Link
+                  to="/locations"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                >
+                  Locations
+                </Link>
+                <Link
+                  to="/about"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/donate"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                >
+                  Donation
+                </Link>
+              </>
+            )}
+
+            {/* Logged In Links */}
             {isLoggedIn && userRole === 'Customer' && (
               <Link
                 to="/myrentals"
@@ -68,18 +94,24 @@ const Navbar = () => {
                 Rental Requests
               </Link>
             )}
-            <Link
-              to="/donate"
-              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-            >
-              Donate
-            </Link>
-            <Link
-              to={userRole === 'Store' ? "/storeDashboard" : "/dashboard"}
-              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-            >
-              Dashboard
-            </Link>
+            {isLoggedIn && userRole === 'Customer' && (
+              <Link
+                to="/donate"
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                Donate
+              </Link>
+            )}
+
+            {/* Dashboard - Logged In Only */}
+            {isLoggedIn && (
+              <Link
+                to={userRole === 'Store' ? "/storeDashboard" : "/dashboard"}
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                Dashboard
+              </Link>
+            )}
           </div>
 
           {/* RIGHT ACTIONS */}

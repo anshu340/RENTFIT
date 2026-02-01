@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import Alert from "../Components/Alert";
+import RentalModal from "../Components/RentalModal";
 import { FaHeart, FaRegHeart, FaTh, FaList, FaStar, FaFilter } from "react-icons/fa";
 
 const BrowseClothes = () => {
@@ -10,9 +12,14 @@ const BrowseClothes = () => {
   const [clothes, setClothes] = useState([]);
   const [filteredClothes, setFilteredClothes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('grid'); 
+  const [viewMode, setViewMode] = useState('grid');
   const [sortBy, setSortBy] = useState('popular');
   const [favorites, setFavorites] = useState([]);
+
+  // Rental states
+  const [selectedClothing, setSelectedClothing] = useState(null);
+  const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
+  const [alert, setAlert] = useState({ message: '', type: '' });
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -34,80 +41,138 @@ const BrowseClothes = () => {
 
   useEffect(() => {
     fetchClothes();
+    fetchWishlist();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [clothes, filters, sortBy]);
+  const fetchWishlist = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      const response = await axiosInstance.get("wishlist/");
+
+      let wishlistData = [];
+      if (Array.isArray(response.data)) {
+        wishlistData = response.data;
+      } else if (response.data && Array.isArray(response.data.results)) {
+        wishlistData = response.data.results;
+      }
+
+      if (wishlistData) {
+        // Map wishlist items to just clothing IDs
+        const wishlistedIds = wishlistData.map(item => item.clothing?.id || item.clothing_id);
+        setFavorites(wishlistedIds);
+      }
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+    }
+  };
 
   const fetchClothes = async () => {
     try {
       setIsLoading(true);
       const response = await axiosInstance.get("clothing/all/");
-      if (response.data) {
-        setClothes(response.data);
-        setFilteredClothes(response.data);
+
+      let clothingData = [];
+      if (Array.isArray(response.data)) {
+        clothingData = response.data;
+      } else if (response.data && Array.isArray(response.data.results)) {
+        clothingData = response.data.results;
       }
+
+      setClothes(clothingData);
+      setFilteredClothes(clothingData);
     } catch (error) {
       console.error("Error fetching clothes:", error);
+      // Initialize with empty array on error to prevent crashes in render
+      setClothes([]);
+      setFilteredClothes([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...clothes];
+  useEffect(() => {
+    applyFilters();
+  }, [clothes, filters, sortBy]);
 
-    // Search filter
+  const applyFilters = () => {
+    let result = [...clothes];
+
+    // Search Query
     if (filters.searchQuery) {
-      filtered = filtered.filter(item =>
-        item.item_name.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(filters.searchQuery.toLowerCase())
+      const query = filters.searchQuery.toLowerCase();
+      result = result.filter(item =>
+        item.item_name.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query)
       );
     }
 
-    // Category filter
+    // Category
     if (filters.category.length > 0) {
-      filtered = filtered.filter(item => filters.category.includes(item.category));
+      result = result.filter(item =>
+        filters.category.includes(item.category)
+      );
     }
 
-    // Size filter
+    // Size
     if (filters.size.length > 0) {
-      filtered = filtered.filter(item => filters.size.includes(item.size));
+      result = result.filter(item =>
+        filters.size.includes(item.size)
+      );
     }
 
-    // Price range filter
+    // Price Range
     if (filters.priceRange) {
       const [min, max] = filters.priceRange.split('-').map(Number);
-      filtered = filtered.filter(item => {
+      result = result.filter(item => {
         const price = parseFloat(item.rental_price);
         return price >= min && price <= max;
       });
     }
 
-    // Sort
-    if (sortBy === 'price-low') {
-      filtered.sort((a, b) => parseFloat(a.rental_price) - parseFloat(b.rental_price));
-    } else if (sortBy === 'price-high') {
-      filtered.sort((a, b) => parseFloat(b.rental_price) - parseFloat(a.rental_price));
-    } else if (sortBy === 'newest') {
-      filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    // Event Type (loose match as requested)
+    if (filters.eventType && filters.eventType !== 'All Events') {
+      // Assuming eventType might map to category or just text match
+      result = result.filter(item =>
+        item.category.includes(filters.eventType) ||
+        item.description?.includes(filters.eventType)
+      );
     }
 
-    setFilteredClothes(filtered);
+    // Sorting
+    switch (sortBy) {
+      case 'price-low':
+        result.sort((a, b) => parseFloat(a.rental_price) - parseFloat(b.rental_price));
+        break;
+      case 'price-high':
+        result.sort((a, b) => parseFloat(b.rental_price) - parseFloat(a.rental_price));
+        break;
+      case 'newest':
+        // Assuming there's a date or ID to sort by, fallback to ID if no date
+        result.sort((a, b) => b.id - a.id);
+        break;
+      case 'popular':
+      default:
+        // Keep default order (or implement popularity logic)
+        break;
+    }
+
+    setFilteredClothes(result);
   };
 
-  const handleFilterChange = (filterType, value) => {
+  const handleFilterChange = (key, value) => {
     setFilters(prev => {
-      if (filterType === 'category' || filterType === 'size') {
-        const currentValues = prev[filterType];
-        const newValues = currentValues.includes(value)
-          ? currentValues.filter(v => v !== value)
-          : [...currentValues, value];
-        return { ...prev, [filterType]: newValues };
-      } else {
-        return { ...prev, [filterType]: value };
+      // For arrays (Category, Size)
+      if (Array.isArray(prev[key])) {
+        if (prev[key].includes(value)) {
+          return { ...prev, [key]: prev[key].filter(item => item !== value) };
+        } else {
+          return { ...prev, [key]: [...prev[key], value] };
+        }
       }
+      // For single values (Search, Price, Event)
+      return { ...prev, [key]: value };
     });
   };
 
@@ -119,16 +184,53 @@ const BrowseClothes = () => {
       eventType: 'All Events',
       searchQuery: ''
     });
+    setSortBy('popular');
   };
 
-  const toggleFavorite = (id) => {
+  const toggleFavorite = async (id) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      showAlert("Please login to use wishlist", "error");
+      return;
+    }
+
+    // Optimistic Update
+    const isAdding = !favorites.includes(id);
     setFavorites(prev =>
-      prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]
+      isAdding ? [...prev, id] : prev.filter(fav => fav !== id)
     );
+
+    try {
+      if (isAdding) {
+        await axiosInstance.post("wishlist/add/", { clothing_id: id });
+        showAlert("Added to wishlist", "success");
+      } else {
+        await axiosInstance.delete(`wishlist/remove-by-clothing/${id}/`);
+        showAlert("Removed from wishlist", "success");
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      // Revert if error
+      setFavorites(prev =>
+        isAdding ? prev.filter(fav => fav !== id) : [...prev, id]
+      );
+      showAlert("Failed to update wishlist", "error");
+    }
   };
 
-  const handleRentNow = (id) => {
-    navigate(`/clothing/${id}`);
+  const handleRentNow = (item) => {
+    // If not a customer, you might want to redirect or show alert
+    const userRole = localStorage.getItem('role');
+    if (userRole !== 'Customer') {
+      showAlert('Only customers can rent items.', 'error');
+      return;
+    }
+    setSelectedClothing(item);
+    setIsRentalModalOpen(true);
+  };
+
+  const showAlert = (message, type) => {
+    setAlert({ message, type });
   };
 
   const getStatusBadge = (status) => {
@@ -214,11 +316,10 @@ const BrowseClothes = () => {
                       <button
                         key={size}
                         onClick={() => handleFilterChange('size', size)}
-                        className={`py-2 px-3 border rounded-lg text-sm font-medium transition-colors ${
-                          filters.size.includes(size)
-                            ? 'bg-purple-600 text-white border-purple-600'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-purple-300'
-                        }`}
+                        className={`py-2 px-3 border rounded-lg text-sm font-medium transition-colors ${filters.size.includes(size)
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-purple-300'
+                          }`}
                       >
                         {size}
                       </button>
@@ -330,7 +431,7 @@ const BrowseClothes = () => {
                             src={item.images}
                             alt={item.item_name}
                             className="w-full h-64 object-cover cursor-pointer"
-                            onClick={() => handleRentNow(item.id)}
+                            onClick={() => handleRentNow(item)}
                           />
                         )}
                         <div className="absolute top-3 left-3">
@@ -373,7 +474,7 @@ const BrowseClothes = () => {
                             <span className="text-sm text-gray-600">/day</span>
                           </div>
                           <button
-                            onClick={() => handleRentNow(item.id)}
+                            onClick={() => handleRentNow(item)}
                             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                             disabled={item.clothing_status !== 'Available'}
                           >
@@ -409,6 +510,19 @@ const BrowseClothes = () => {
         </div>
       </div>
       <Footer />
+
+      <RentalModal
+        isOpen={isRentalModalOpen}
+        onClose={() => setIsRentalModalOpen(false)}
+        clothing={selectedClothing || {}}
+        onRentalCreated={showAlert}
+      />
+
+      <Alert
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ message: '', type: '' })}
+      />
     </>
   );
 };

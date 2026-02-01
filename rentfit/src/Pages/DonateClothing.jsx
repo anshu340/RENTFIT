@@ -24,8 +24,22 @@ const DonateClothing = () => {
   const [isLoadingStores, setIsLoadingStores] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (role === "Store") {
+      alert("Store accounts cannot make donations.");
+      navigate("/storeDashboard");
+      return;
+    }
+
     fetchStores();
-  }, []);
+  }, [navigate]);
 
   const fetchStores = async () => {
     try {
@@ -36,7 +50,11 @@ const DonateClothing = () => {
       }
     } catch (error) {
       console.error("Error fetching stores:", error);
-      setMessage({ type: "error", text: "Failed to load stores. Please try again." });
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        setMessage({ type: "error", text: "You must be logged in as a customer to donate." });
+      } else {
+        setMessage({ type: "error", text: "Failed to load stores. Please try again." });
+      }
     } finally {
       setIsLoadingStores(false);
     }
@@ -139,11 +157,10 @@ const DonateClothing = () => {
             {/* Message Display */}
             {message.text && (
               <div
-                className={`mb-6 p-4 rounded-lg ${
-                  message.type === "success"
+                className={`mb-6 p-4 rounded-lg ${message.type === "success"
                     ? "bg-green-50 text-green-800 border border-green-200"
                     : "bg-red-50 text-red-800 border border-red-200"
-                }`}
+                  }`}
               >
                 {message.text}
               </div>
@@ -165,9 +182,8 @@ const DonateClothing = () => {
                     name="store_id"
                     value={formData.store_id}
                     onChange={handleChange}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      errors.store_id ? "border-red-500" : ""
-                    }`}
+                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.store_id ? "border-red-500" : ""
+                      }`}
                   >
                     <option value="">-- Select a store --</option>
                     {stores.map((store) => (
@@ -193,9 +209,8 @@ const DonateClothing = () => {
                   placeholder="e.g., Blue Denim Jacket"
                   value={formData.item_name}
                   onChange={handleChange}
-                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                    errors.item_name ? "border-red-500" : ""
-                  }`}
+                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.item_name ? "border-red-500" : ""
+                    }`}
                 />
                 {errors.item_name && (
                   <p className="text-red-500 text-xs mt-1">{errors.item_name}</p>
@@ -212,9 +227,8 @@ const DonateClothing = () => {
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      errors.category ? "border-red-500" : ""
-                    }`}
+                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.category ? "border-red-500" : ""
+                      }`}
                   >
                     <option value="">-- Select category --</option>
                     <option value="Shirt">Shirt</option>
@@ -239,9 +253,8 @@ const DonateClothing = () => {
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      errors.gender ? "border-red-500" : ""
-                    }`}
+                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.gender ? "border-red-500" : ""
+                      }`}
                   >
                     <option value="">-- Select gender --</option>
                     <option value="Male">Male</option>
@@ -266,9 +279,8 @@ const DonateClothing = () => {
                     placeholder="e.g., M, L, 42, etc."
                     value={formData.size}
                     onChange={handleChange}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      errors.size ? "border-red-500" : ""
-                    }`}
+                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.size ? "border-red-500" : ""
+                      }`}
                   />
                   {errors.size && (
                     <p className="text-red-500 text-xs mt-1">{errors.size}</p>
@@ -283,9 +295,8 @@ const DonateClothing = () => {
                     name="condition"
                     value={formData.condition}
                     onChange={handleChange}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      errors.condition ? "border-red-500" : ""
-                    }`}
+                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.condition ? "border-red-500" : ""
+                      }`}
                   >
                     <option value="">-- Select condition --</option>
                     <option value="New">New</option>

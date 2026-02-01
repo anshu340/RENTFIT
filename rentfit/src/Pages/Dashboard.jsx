@@ -93,7 +93,7 @@ const Dashboard = () => {
 
       // Fetch wishlist count
       try {
-        const wishlistResponse = await axiosInstance.get("accounts/wishlist/");
+        const wishlistResponse = await axiosInstance.get("wishlist/");
         const wishlistCount = wishlistResponse.data?.data?.length || 0;
         setDashboardData(prev => ({
           ...prev,
@@ -105,7 +105,7 @@ const Dashboard = () => {
 
       // Fetch dashboard statistics
       try {
-        const statsResponse = await axiosInstance.get("accounts/dashboard/stats/");
+        const statsResponse = await axiosInstance.get("dashboard/stats/");
         if (statsResponse.data) {
           setDashboardData(prev => ({
             ...prev,
@@ -119,7 +119,7 @@ const Dashboard = () => {
 
       // Fetch current rentals
       try {
-        const rentalsResponse = await axiosInstance.get("accounts/rentals/current/");
+        const rentalsResponse = await axiosInstance.get("rentals/current/");
         if (rentalsResponse.data) {
           setDashboardData(prev => ({
             ...prev,
@@ -183,51 +183,51 @@ const Dashboard = () => {
           <main className="flex-1 p-8 pt-0 overflow-y-auto">
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-xl shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-between h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Active Rentals</p>
                     <p className="text-3xl font-bold text-gray-800">{dashboardData.activeRentals}</p>
                   </div>
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <FaShoppingBag className="text-blue-600" />
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FaShoppingBag className="text-blue-600 text-lg" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-between h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Wishlist Items</p>
                     <p className="text-3xl font-bold text-gray-800">{dashboardData.wishlistItems}</p>
                   </div>
-                  <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center">
-                    <FaHeart className="text-pink-600" />
+                  <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FaHeart className="text-pink-600 text-lg" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-between h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Total Spent</p>
                     <p className="text-3xl font-bold text-gray-800">${dashboardData.totalSpent}</p>
                   </div>
-                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                    <FaDollarSign className="text-green-600" />
+                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FaDollarSign className="text-green-600 text-lg" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-between h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Items Donated</p>
                     <p className="text-3xl font-bold text-gray-800">{dashboardData.itemsDonated}</p>
                   </div>
-                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                    <FaHandHoldingHeart className="text-purple-600" />
+                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FaHandHoldingHeart className="text-purple-600 text-lg" />
                   </div>
                 </div>
               </div>
