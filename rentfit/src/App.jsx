@@ -13,6 +13,8 @@ import AddClothingItem from './Pages/AddClothingItem.jsx';
 import MyClothingItems from './Pages/MyClothingItems.jsx';
 import BrowseClothes from './Pages/BrowseClothes.jsx';
 import Wishlist from './Pages/Wishlist.jsx';
+import MyRentals from './Pages/MyRentals.jsx';
+import StoreRentals from './Pages/StoreRentals.jsx';
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
       <Route path="/myClothingItems" element={<MyClothingItems />} />
       <Route path="/browseClothes" element={<BrowseClothes />} />
       <Route path="/wishlist" element={<Wishlist />} />
+      <Route path="/myrentals" element={<MyRentals />} />
+      <Route path="/storerentals" element={<StoreRentals />} />
     </Routes>
   );
 }
