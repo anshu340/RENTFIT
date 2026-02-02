@@ -20,7 +20,7 @@ class RentalSerializer(serializers.ModelSerializer):
 class RentalCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rental
-        fields = ['clothing', 'rent_start_date', 'rent_end_date']
+        fields = ['id', 'clothing', 'rent_start_date', 'rent_end_date']
 
     def validate(self, data):
         clothing = data['clothing']

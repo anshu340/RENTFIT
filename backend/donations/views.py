@@ -4,6 +4,7 @@ from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.shortcuts import get_object_or_404
+from notifications.models import Notification
 
 from .models import Donation
 from .serializers import (
@@ -31,7 +32,12 @@ class DonationCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         """Create donation with customer from request user"""
-        serializer.save()
+        donation = serializer.save()
+        Notification.objects.create(
+            user=donation.store,
+            message=f"New donation pledge from {self.request.user.email}: {donation.item_name}.",
+            notification_type='donation'
+        )
 
 
 class CustomerDonationListView(generics.ListAPIView):
@@ -170,6 +176,12 @@ class DonationStatusUpdateView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
+        Notification.objects.create(
+            user=instance.customer,
+            message=f"The status of your donation {instance.item_name} has been updated to {instance.donation_status}.",
+            notification_type='donation'
+        )
+
         # Return updated donation details
         detail_serializer = DonationDetailSerializer(instance, context={'request': request})
         return Response({
@@ -202,6 +214,12 @@ class DonationCollectView(APIView):
 
         donation.donation_status = Donation.DonationStatus.COLLECTED
         donation.save()
+
+        Notification.objects.create(
+            user=donation.customer,
+            message=f"Store {request.user.store_name} has marked your donation {donation.item_name} as collected. Thank you!",
+            notification_type='donation'
+        )
 
         serializer = DonationDetailSerializer(donation, context={'request': request})
         return Response({

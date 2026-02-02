@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Rental
 from .serializers import RentalSerializer, RentalCreateSerializer
 from django.shortcuts import get_object_or_404
+from notifications.models import Notification
 
 class RentalCreateView(generics.CreateAPIView):
     """
@@ -14,10 +15,13 @@ class RentalCreateView(generics.CreateAPIView):
     serializer_class = RentalCreateSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        if request.user.role != 'Customer':
-            return Response({"error": "Only customers can create rentals."}, status=status.HTTP_403_FORBIDDEN)
-        return super().create(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        rental = serializer.save(customer=self.request.user)
+        Notification.objects.create(
+            user=rental.store,
+            message=f"{self.request.user.email} requested to rent {rental.clothing.item_name}.",
+            notification_type='rental'
+        )
 
 class CustomerRentalListView(generics.ListAPIView):
     """
@@ -62,6 +66,12 @@ class RentalApproveView(generics.UpdateAPIView):
             rental.save()
             clothing.available_quantity -= 1
             clothing.save()
+
+            Notification.objects.create(
+                user=rental.customer,
+                message=f"Your rental request for {clothing.item_name} has been approved by {request.user.store_name}.",
+                notification_type='rental'
+            )
             return Response({"message": "Rental approved and stock updated."}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No stock available to approve this rental."}, status=status.HTTP_400_BAD_REQUEST)
@@ -81,6 +91,12 @@ class RentalRejectView(generics.UpdateAPIView):
         rental = get_object_or_404(Rental, pk=pk, store=request.user, status='pending')
         rental.status = 'rejected'
         rental.save()
+
+        Notification.objects.create(
+            user=rental.customer,
+            message=f"Your rental request for {rental.clothing.item_name} has been rejected by {request.user.store_name}.",
+            notification_type='rental'
+        )
         return Response({"message": "Rental rejected."}, status=status.HTTP_200_OK)
 
 class RentalMarkReturnedView(generics.UpdateAPIView):
@@ -103,6 +119,12 @@ class RentalMarkReturnedView(generics.UpdateAPIView):
             
         rental.status = 'returned_pending'
         rental.save()
+
+        Notification.objects.create(
+            user=rental.store,
+            message=f"Customer {request.user.email} has marked {rental.clothing.item_name} as returned. Please confirm.",
+            notification_type='rental'
+        )
         return Response({"message": "Item marked as returned. Waiting for store confirmation."}, status=status.HTTP_200_OK)
 
 class RentalConfirmReturnView(generics.UpdateAPIView):
@@ -125,5 +147,11 @@ class RentalConfirmReturnView(generics.UpdateAPIView):
         clothing = rental.clothing
         clothing.available_quantity += 1
         clothing.save()
+        
+        Notification.objects.create(
+            user=rental.customer,
+            message=f"Store {request.user.store_name} has confirmed the return of {rental.clothing.item_name}.",
+            notification_type='rental'
+        )
         
         return Response({"message": "Return confirmed and stock updated."}, status=status.HTTP_200_OK)

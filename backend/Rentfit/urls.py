@@ -26,6 +26,8 @@ urlpatterns = [
     path('api/donations/', include('donations.urls')),
     # Rental app
     path('api/rent/', include('rent.urls')),
+    # Notifications app
+    path('api/notifications/', include('notifications.urls')),
 ]
 
 # Serve media files in development

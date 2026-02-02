@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'donations',
     'rent',
+    'notifications',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
