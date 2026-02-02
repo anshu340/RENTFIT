@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { FaTshirt, FaStore, FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaDollarSign, FaBox } from "react-icons/fa";
+import { FaTshirt,  FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaDollarSign, FaBox } from "react-icons/fa";
 
 const MyClothingItems = () => {
   const navigate = useNavigate();
