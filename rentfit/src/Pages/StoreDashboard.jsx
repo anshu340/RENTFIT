@@ -303,16 +303,104 @@ const StoreDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Bottom Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Donation Status Chart */}
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
-              <div className="space-y-2">
-                {recentActivities.length > 0 ? recentActivities.map((activity, index) => (
-                  <ActivityItem key={index} {...activity} />
-                )) : <p className="text-gray-400 text-sm">No recent activities</p>}
+              <h3 className="text-lg font-semibold text-gray-800 mb-6">Donation Status</h3>
+              <div className="relative w-48 h-48 mx-auto mb-6">
+                <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                  <circle cx="50" cy="50" r="35" fill="none" stroke="#e5e7eb" strokeWidth="10" />
+                  {(() => {
+                    const total = Math.max(stats.approvedDonations + stats.pendingDonations + stats.rejectedDonations + stats.collectedDonations, 1);
+                    const circumference = 2 * Math.PI * 35;
+                    const approvedPercent = stats.approvedDonations / total;
+                    const collectedPercent = stats.collectedDonations / total;
+                    const pendingPercent = stats.pendingDonations / total;
+
+                    return (
+                      <>
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="35"
+                          fill="none"
+                          stroke="#10b981"
+                          strokeWidth="10"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={circumference - (circumference * approvedPercent)}
+                          strokeLinecap="round"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="35"
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="10"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent))}
+                          strokeLinecap="round"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="35"
+                          fill="none"
+                          stroke="#f59e0b"
+                          strokeWidth="10"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent + pendingPercent))}
+                          strokeLinecap="round"
+                        />
+                      </>
+                    );
+                  })()}
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-center">
+                  <div>
+                    <div className="text-3xl font-bold text-gray-800">
+                      {stats.approvedDonations + stats.collectedDonations + stats.pendingDonations + stats.rejectedDonations}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Total Donations</div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-gray-600">Approved ({stats.approvedDonations})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-gray-600">Collected ({stats.collectedDonations})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span className="text-gray-600">Pending ({stats.pendingDonations})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span className="text-gray-600">Rejected ({stats.rejectedDonations})</span>
+                </div>
               </div>
             </div>
 
+            {/* Recent Activities */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {recentActivities.length > 0 ? (
+                  recentActivities.map((activity, index) => (
+                    <ActivityItem key={index} {...activity} />
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm">No recent activities</p>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
               <div className="space-y-3 text-sm">
