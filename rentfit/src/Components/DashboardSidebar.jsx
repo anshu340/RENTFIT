@@ -17,13 +17,13 @@ const DashboardSidebar = () => {
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6">
-            {/* Logo */}
+            {/* Logo
             <div className="flex items-center gap-2 mb-8">
                 <div className="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
                     <span className="text-white font-bold text-lg">R</span>
                 </div>
                 <span className="text-xl font-bold text-gray-800">RentFit</span>
-            </div>
+            </div> */}
 
             {/* Menu Items */}
             <nav className="space-y-2">

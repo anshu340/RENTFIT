@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/Rentfit Logo.png";
+import { IoMdNotifications } from "react-icons/io";
+import notificationAxiosInstance from "../services/notificationAxiosInstance";
+import NotificationDropdown from "./NotificationDropdown.jsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -22,6 +27,27 @@ const Navbar = () => {
     window.addEventListener("authChange", checkAuth);
     return () => window.removeEventListener("authChange", checkAuth);
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await notificationAxiosInstance.get('unread-count/');
+        setUnreadCount(response.data.unread_count);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 15000); // Poll every 15s
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -116,6 +142,27 @@ const Navbar = () => {
 
           {/* RIGHT ACTIONS */}
           <div className="flex items-center space-x-4">
+            {/* NOTIFICATION BELL */}
+            {isLoggedIn && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
+                >
+                  <IoMdNotifications className="w-6 h-6" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-2 ring-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <NotificationDropdown onClose={() => setShowNotifications(false)} />
+                )}
+              </div>
+            )}
+
             {/* HEART ICON */}
             <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
               <svg
