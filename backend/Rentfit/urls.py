@@ -25,7 +25,7 @@ urlpatterns = [
     # Donations app 
     path('api/donations/', include('donations.urls')),
     # Rental app
-    path('api/rent/', include('rent.urls')),
+    path('api/rentals/', include('rent.urls')),
     # Notifications app
     path('api/notifications/', include('notifications.urls')),
 ]

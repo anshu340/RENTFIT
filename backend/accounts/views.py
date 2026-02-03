@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from django.db.models import Sum
+from django.apps import apps
 
 from .models import User, Clothing, Wishlist
 from .serializers import (
@@ -131,6 +133,56 @@ class StoreDashboardView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CustomerDashboardStatsView(APIView):
+    """
+    Get summary statistics for the authenticated customer dashboard
+    - Active Rentals count
+    - Wishlist Items count
+    - Total Spent
+    - Items Donated count
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'Customer':
+            return Response(
+                {"error": "Only customers can access these statistics"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        user = request.user
+        
+        # We'll use apps.get_model to avoid potential circular imports
+        Rental = apps.get_model('rent', 'Rental')
+        Donation = apps.get_model('donations', 'Donation')
+        
+        # Statistics logic
+        active_status = ['pending', 'approved', 'rented', 'Pending', 'Approved', 'Rented']
+        spent_status = ['approved', 'rented', 'returned_confirmed', 'Approved', 'Rented', 'Returned Confirmed']
+        
+        active_rentals = Rental.objects.filter(
+            customer=user,
+            status__in=active_status
+        ).count()
+        
+        total_spent = Rental.objects.filter(
+            customer=user,
+            status__in=spent_status
+        ).aggregate(total=Sum('total_price'))['total'] or 0
+        
+        wishlist_items = Wishlist.objects.filter(customer=user).count()
+        
+        items_donated = Donation.objects.filter(customer=user).count()
+        
+        return Response({
+            "message": "Success",
+            "data": {
+                "active_rentals": active_rentals,
+                "total_spent": float(total_spent),
+                "wishlist_items": wishlist_items,
+                "items_donated": items_donated
+            }
+        }, status=status.HTTP_200_OK)
 
 # CUSTOMER CRUD VIEWS
 
@@ -246,12 +298,8 @@ class CustomerProfileView(APIView):
         return Response({
             "message": "Customer account deactivated successfully"
         }, status=status.HTTP_200_OK)
-
-
-
+        
 # STORE CRUD VIEWS
-
-
 class StoreProfileView(APIView):
     """
     Store Profile CRUD View

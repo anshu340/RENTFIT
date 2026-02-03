@@ -21,6 +21,7 @@ from .views import (
     WishlistRemoveByClothingView,
     WishlistCheckView,
     WishlistClearView,
+    CustomerDashboardStatsView,
 )
 
 urlpatterns = [
@@ -33,6 +34,7 @@ urlpatterns = [
     # Legacy Endpoints
     path("profile/", ProfileView.as_view(), name="profile"),
     path("dashboard/store/", StoreDashboardView.as_view(), name="store-dashboard"),
+    path("dashboard/stats/", CustomerDashboardStatsView.as_view(), name="customer-stats"),
     
     # Customer CRUD Endpoints
     path("customers/profile/", CustomerProfileView.as_view(), name="customer-profile"),
