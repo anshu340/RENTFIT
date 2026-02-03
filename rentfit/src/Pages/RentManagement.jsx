@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
+import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import StoreSidebar from '../Components/StoreSidebar';
 import { FaCheck, FaTimes, FaUser, FaTshirt, FaCalendarAlt, FaHistory } from 'react-icons/fa';
 
@@ -25,7 +26,8 @@ const RentManagement = () => {
     const fetchRentals = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get('rent/store/');
+            const response = await rentalAxiosInstance.get('store/');
+            console.log('Rental Requests Response:', response.data);
             setRentals(response.data);
         } catch (error) {
             console.error('Error fetching rentals:', error);
@@ -37,7 +39,7 @@ const RentManagement = () => {
 
     const handleAction = async (id, action) => {
         try {
-            await axiosInstance.patch(`rent/${id}/${action}/`);
+            await rentalAxiosInstance.patch(`${id}/${action}/`);
             showAlert(`Rental request ${action}ed successfully!`, 'success');
             fetchRentals();
         } catch (error) {
