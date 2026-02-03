@@ -54,6 +54,9 @@ const BrowseClothes = () => {
       let wishlistData = [];
       if (Array.isArray(response.data)) {
         wishlistData = response.data;
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        // Fix: Backend returns { data: [...] } structure
+        wishlistData = response.data.data;
       } else if (response.data && Array.isArray(response.data.results)) {
         wishlistData = response.data.results;
       }
