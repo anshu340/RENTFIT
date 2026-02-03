@@ -347,7 +347,7 @@ class ClothingListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'rental_price', 'clothing_status', 'store_name', 'store_city',
-            'images', 'image_url', 'created_at', 'updated_at'
+            'images', 'image_url', 'average_rating', 'review_count', 'created_at', 'updated_at'
         ]
 
     def get_image_url(self, obj):
@@ -376,7 +376,7 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'description', 'rental_price', 'images', 'image_url',
             'clothing_status', 'store_name', 'store_email', 'store_phone',
-            'store_address', 'store_city',
+            'store_address', 'store_city', 'average_rating', 'review_count',
             'created_at', 'updated_at'
         ]
 

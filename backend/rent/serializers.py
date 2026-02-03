@@ -8,15 +8,19 @@ class RentalSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='customer.name', read_only=True)
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     clothing_name = serializers.CharField(source='clothing.item_name', read_only=True)
+    has_review = serializers.SerializerMethodField()
     
     class Meta:
         model = Rental
         fields = [
             'id', 'customer', 'customer_email', 'customer_name', 'store', 'store_name',
             'clothing', 'clothing_name', 'rent_start_date', 'rent_end_date',
-            'total_price', 'status', 'created_at'
+            'total_price', 'status', 'has_review', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
+
+    def get_has_review(self, obj):
+        return hasattr(obj, 'review')
 
 class RentalCreateSerializer(serializers.ModelSerializer):
     class Meta:

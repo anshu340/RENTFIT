@@ -28,6 +28,8 @@ urlpatterns = [
     path('api/rentals/', include('rent.urls')),
     # Notifications app
     path('api/notifications/', include('notifications.urls')),
+    # Reviews app
+    path('api/reviews/', include('reviews.urls')),
 ]
 
 # Serve media files in development

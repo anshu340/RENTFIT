@@ -150,6 +150,19 @@ class Clothing(models.Model):
     def __str__(self):
         return f"{self.item_name} - {self.store.store_name} ({self.clothing_status})"
 
+    @property
+    def average_rating(self):
+        from reviews.models import Review
+        reviews = Review.objects.filter(clothing=self)
+        if reviews.exists():
+            return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+        return 0.0
+
+    @property
+    def review_count(self):
+        from reviews.models import Review
+        return Review.objects.filter(clothing=self).count()
+
 class Wishlist(models.Model):
     """
     Wishlist model for customers to save favorite clothing items
