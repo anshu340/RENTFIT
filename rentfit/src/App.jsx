@@ -16,6 +16,8 @@ import Wishlist from './Pages/Wishlist.jsx';
 import MyRentals from './Pages/MyRentals.jsx';
 import StoreRentals from './Pages/StoreRentals.jsx';
 import RentManagement from './Pages/RentManagement.jsx';
+import AboutUs from './Pages/AboutUs.jsx';
+
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
       <Route path="/myrentals" element={<MyRentals />} />
       <Route path="/storerentals" element={<StoreRentals />} />
       <Route path="/rentmanagement" element={<RentManagement />} />
+      <Route path="/about" element={<AboutUs />} />
+
     </Routes>
   );
 }

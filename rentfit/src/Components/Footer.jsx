@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 
 const Footer = () => {
@@ -32,11 +33,11 @@ const Footer = () => {
         <div>
           <h3 className="text-white font-semibold text-lg mb-4">Quick Links</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-white transition-colors">Browse Clothes</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Donate Items</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Find Locations</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">How It Works</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+            <li><Link to="/browseClothes" className="hover:text-white transition-colors">Browse Clothes</Link></li>
+            <li><Link to="/donate" className="hover:text-white transition-colors">Donate Items</Link></li>
+            <li><Link to="/locations" className="hover:text-white transition-colors">Find Locations</Link></li>
+            <li><Link to="/about#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
+            <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
           </ul>
         </div>
 
