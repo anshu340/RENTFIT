@@ -3,7 +3,7 @@ import { FaStar } from 'react-icons/fa';
 import reviewAxiosInstance from '../services/reviewAxiosInstance';
 
 const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
-    const [rating, setRating] = useState(5);
+    const [rating, setRating] = useState(0); // Start at 0, not 5
     const [hover, setHover] = useState(null);
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -11,6 +11,12 @@ const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (rating === 0) {
+            setError('Please select a rating before submitting.');
+            return;
+        }
+
         setIsSubmitting(true);
         setError('');
 
@@ -43,27 +49,22 @@ const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
                 )}
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Rating</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Rating {rating > 0 && <span className="text-purple-600">— {rating} star{rating > 1 ? 's' : ''}</span>}
+                    </label>
                     <div className="flex gap-2">
                         {[...Array(5)].map((_, index) => {
                             const ratingValue = index + 1;
                             return (
-                                <label key={index}>
-                                    <input
-                                        type="radio"
-                                        name="rating"
-                                        className="hidden"
-                                        value={ratingValue}
-                                        onClick={() => setRating(ratingValue)}
-                                    />
-                                    <FaStar
-                                        className="cursor-pointer transition-colors duration-200"
-                                        color={ratingValue <= (hover || rating) ? "#ffc107" : "#e4e5e9"}
-                                        size={30}
-                                        onMouseEnter={() => setHover(ratingValue)}
-                                        onMouseLeave={() => setHover(null)}
-                                    />
-                                </label>
+                                <FaStar
+                                    key={index}
+                                    className="cursor-pointer transition-colors duration-200"
+                                    color={ratingValue <= (hover || rating) ? "#ffc107" : "#e4e5e9"}
+                                    size={30}
+                                    onClick={() => setRating(ratingValue)}
+                                    onMouseEnter={() => setHover(ratingValue)}
+                                    onMouseLeave={() => setHover(null)}
+                                />
                             );
                         })}
                     </div>
@@ -83,7 +84,7 @@ const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
                 <div className="flex gap-4">
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || rating === 0}
                         className="flex-1 bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 shadow-lg shadow-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? 'Submitting...' : 'Submit Review'}

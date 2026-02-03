@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import rentalAxiosInstance from '../services/rentalAxiosInstance';
+import reviewAxiosInstance from '../services/reviewAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import ReviewSection from '../Components/ReviewSection';
 import ReviewForm from '../Components/ReviewForm';
 import RentalModal from '../Components/RentalModal';
 import Alert from '../Components/Alert';
-import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart } from 'react-icons/fa';
+import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart, FaStar } from 'react-icons/fa';
 
 const ClothingDetail = () => {
     const { id } = useParams();
@@ -38,7 +39,7 @@ const ClothingDetail = () => {
             setClothing(item);
 
             // Fetch reviews
-            const reviewsRes = await axiosInstance.get(`reviews/clothing/${id}/`);
+            const reviewsRes = await reviewAxiosInstance.get(`clothing/${id}/`);
             setReviews(reviewsRes.data.results);
             setStats({
                 average_rating: reviewsRes.data.average_rating,

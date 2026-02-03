@@ -436,8 +436,8 @@ const BrowseClothes = () => {
                           <img
                             src={item.images}
                             alt={item.item_name}
-                            className="w-full h-64 object-cover cursor-pointer"
-                            onClick={() => handleRentNow(item)}
+                            className="w-full h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => navigate(`/clothing/${item.id}`)}
                           />
                         )}
                         <div className="absolute top-3 left-3">
@@ -458,7 +458,10 @@ const BrowseClothes = () => {
                       </div>
 
                       <div className="p-4">
-                        <h3 className="text-lg font-bold text-gray-800 mb-1 truncate">
+                        <h3
+                          className="text-lg font-bold text-gray-800 mb-1 truncate cursor-pointer hover:text-purple-600 transition-colors"
+                          onClick={() => navigate(`/clothing/${item.id}`)}
+                        >
                           {item.item_name}
                         </h3>
                         <p className="text-sm text-gray-600 mb-2">
@@ -467,9 +470,9 @@ const BrowseClothes = () => {
 
                         <div className="flex items-center gap-1 mb-3">
                           {[...Array(5)].map((_, i) => (
-                            <FaStar key={i} className="text-yellow-400 text-xs" />
+                            <FaStar key={i} className={`text-xs ${i < Math.round(item.average_rating || 0) ? 'text-yellow-400' : 'text-gray-200'}`} />
                           ))}
-                          <span className="text-xs text-gray-600 ml-1">(32 reviews)</span>
+                          <span className="text-xs text-gray-600 ml-1">({item.review_count || 0} reviews)</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -480,11 +483,10 @@ const BrowseClothes = () => {
                             <span className="text-sm text-gray-600">/day</span>
                           </div>
                           <button
-                            onClick={() => handleRentNow(item)}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                            disabled={item.clothing_status !== 'Available'}
+                            onClick={() => navigate(`/clothing/${item.id}`)}
+                            className="px-6 py-2 bg-purple-600 text-white text-sm font-bold rounded-lg hover:bg-purple-700 transition"
                           >
-                            {item.clothing_status === 'Available' ? 'Rent Now' : 'Unavailable'}
+                            Rent Now
                           </button>
                         </div>
                       </div>
