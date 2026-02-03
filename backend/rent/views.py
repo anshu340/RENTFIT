@@ -43,7 +43,9 @@ class StoreRentalListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Rental.objects.filter(store=self.request.user)
+        qs = Rental.objects.filter(store=self.request.user)
+        print(f"DEBUG: Rental list for store {self.request.user}: {qs}")
+        return qs
 
 class RentalApproveView(generics.UpdateAPIView):
     """

@@ -5,13 +5,14 @@ from datetime import date
 
 class RentalSerializer(serializers.ModelSerializer):
     customer_email = serializers.EmailField(source='customer.email', read_only=True)
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     clothing_name = serializers.CharField(source='clothing.item_name', read_only=True)
     
     class Meta:
         model = Rental
         fields = [
-            'id', 'customer', 'customer_email', 'store', 'store_name',
+            'id', 'customer', 'customer_email', 'customer_name', 'store', 'store_name',
             'clothing', 'clothing_name', 'rent_start_date', 'rent_end_date',
             'total_price', 'status', 'created_at'
         ]
