@@ -17,6 +17,7 @@ import MyRentals from './Pages/MyRentals.jsx';
 import StoreRentals from './Pages/StoreRentals.jsx';
 import RentManagement from './Pages/RentManagement.jsx';
 import AboutUs from './Pages/AboutUs.jsx';
+import ClothingDetail from './Pages/ClothingDetail.jsx';
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
       <Route path="/addClothingItem" element={<AddClothingItem />} />
       <Route path="/myClothingItems" element={<MyClothingItems />} />
       <Route path="/browseClothes" element={<BrowseClothes />} />
+      <Route path="/clothing/:id" element={<ClothingDetail />} />
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/myrentals" element={<MyRentals />} />
       <Route path="/storerentals" element={<StoreRentals />} />
