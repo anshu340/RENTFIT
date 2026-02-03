@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   AiFillHeart, 
   AiOutlineHeart, 
-  AiOutlineFilter, 
-  AiOutlineBell, 
-  AiOutlineUser,
   AiOutlineLoading3Quarters,
   AiOutlineWarning
 } from 'react-icons/ai';
-import { BsChevronLeft, BsChevronRight, BsGrid3X3Gap, BsList } from 'react-icons/bs';
+import { BsGrid3X3Gap, BsList } from 'react-icons/bs';
 import axiosInstance from "../services/axiosInstance";
 
 const Wishlist = () => {

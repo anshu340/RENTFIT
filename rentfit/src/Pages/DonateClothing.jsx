@@ -115,7 +115,7 @@ const DonateClothing = () => {
 
       setMessage({ type: "success", text: "Donation submitted successfully! The store will review it." });
       setTimeout(() => {
-        navigate("/my-donations");
+        navigate("/mydonations");
       }, 2000);
     } catch (error) {
       console.error("Donation submission error:", error);

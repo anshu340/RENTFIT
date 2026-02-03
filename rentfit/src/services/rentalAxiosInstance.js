@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const rentalAxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL + "/api/rent/",
+  baseURL: import.meta.env.VITE_API_BASE_URL + "/api/rentals/",
   headers: {
     "Content-Type": "application/json",
   },

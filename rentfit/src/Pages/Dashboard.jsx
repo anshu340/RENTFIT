@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import donationAxios from '../services/donationAxios';
+import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
 import DashboardSidebar from '../Components/DashboardSidebar';
 import {
@@ -54,7 +55,7 @@ const Dashboard = () => {
       }
 
       // Fetch user profile
-      const profileResponse = await axiosInstance.get("accounts/customers/profile/");
+      const profileResponse = await axiosInstance.get("customers/profile/");
       const profileData = profileResponse.data?.data || profileResponse.data;
       if (profileData) {
         const name = profileData.full_name || profileData.name || "User";
@@ -68,75 +69,42 @@ const Dashboard = () => {
         });
       }
 
-      // Fetch donations count
-      try {
-        const donationsResponse = await donationAxios.get("donations/my/");
-        console.log("My donations response:", donationsResponse.data);
-        const donations = donationsResponse.data || [];
-        const donationCount = Array.isArray(donations) ? donations.length : 0;
-
-        setDashboardData(prev => ({
-          ...prev,
-          itemsDonated: donationCount
-        }));
-
-        // Add recent donation activities
-        if (donations.length > 0) {
-          const recentDonations = donations
-            .slice(0, 3)
-            .map(d => ({
-              type: 'donation',
-              title: 'Donation Submitted',
-              description: `${d.item_name} to ${d.store_name} - Status: ${d.donation_status}`,
-              time: formatTime(d.created_at)
-            }));
-
-          setDashboardData(prev => ({
-            ...prev,
-            recentActivity: [...recentDonations, ...prev.recentActivity]
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching donations:", error);
-      }
-
-      // Fetch wishlist count
-      try {
-        const wishlistResponse = await axiosInstance.get("wishlist/");
-        const wishlistCount = wishlistResponse.data?.data?.length || 0;
-        setDashboardData(prev => ({
-          ...prev,
-          wishlistItems: wishlistCount
-        }));
-      } catch (error) {
-        console.log("Error fetching wishlist:", error);
-      }
-
       // Fetch dashboard statistics
       try {
         const statsResponse = await axiosInstance.get("dashboard/stats/");
-        if (statsResponse.data) {
+        console.log("RAW STATS RESPONSE:", statsResponse.data); // debug - remove after fix confirmed
+        const stats = statsResponse.data?.data || statsResponse.data;
+        if (stats) {
           setDashboardData(prev => ({
             ...prev,
-            activeRentals: statsResponse.data.active_rentals || 0,
-            totalSpent: statsResponse.data.total_spent || 0
+            activeRentals: stats.active_rentals || 0,
+            wishlistItems: stats.wishlist_items || 0,
+            totalSpent: stats.total_spent || 0,
+            itemsDonated: stats.items_donated || 0
           }));
         }
       } catch (error) {
-        console.log("Stats endpoint not available yet");
+        console.error("Error fetching dashboard stats:", error);
       }
 
-      // Fetch current rentals
+      // Fetch current rentals (Calls api/rentals/my/)
       try {
-        const rentalsResponse = await axiosInstance.get("rentals/current/");
-        if (rentalsResponse.data) {
+        const rentalsResponse = await rentalAxiosInstance.get("my/");
+        console.log("RAW RENTALS RESPONSE:", rentalsResponse.data); // debug - remove after fix confirmed
+        const rentalsData = rentalsResponse.data?.data || rentalsResponse.data;
+        if (rentalsData) {
+          const rentals = Array.isArray(rentalsData) ? rentalsData : (rentalsData.results || []);
+          // Only show active rentals (pending, approved, rented)
+          const activeRentals = rentals.filter(r =>
+            ['pending', 'approved', 'rented'].includes(r.status)
+          );
           setDashboardData(prev => ({
             ...prev,
-            currentRentals: rentalsResponse.data.results || rentalsResponse.data || []
+            currentRentals: activeRentals
           }));
         }
       } catch (error) {
-        console.log("Rentals endpoint not available yet");
+        console.log("Rentals endpoint error:", error);
       }
 
     } catch (error) {
@@ -164,6 +132,43 @@ const Dashboard = () => {
     if (diffHours < 24) return `${diffHours} hours ago`;
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString();
+  };
+
+  // Helper to format date nicely
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Helper to get status badge styles
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-600';
+      case 'approved':
+        return 'bg-green-100 text-green-600';
+      case 'rented':
+        return 'bg-orange-100 text-orange-600';
+      case 'returned_pending':
+        return 'bg-blue-100 text-blue-600';
+      case 'returned_confirmed':
+        return 'bg-gray-100 text-gray-600';
+      default:
+        return 'bg-blue-100 text-blue-600';
+    }
+  };
+
+  // Helper to format status label
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending': return 'Pending';
+      case 'approved': return 'Approved';
+      case 'rented': return 'Rented';
+      case 'returned_pending': return 'Return Pending';
+      case 'returned_confirmed': return 'Returned';
+      default: return status || 'Active';
+    }
   };
 
   if (isLoading) {
@@ -296,26 +301,36 @@ const Dashboard = () => {
                 ) : (
                   <div className="space-y-4">
                     {dashboardData.currentRentals.map((rental, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div key={rental.id || index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-4">
+                          {/* Image: rental.clothing.image */}
                           <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg overflow-hidden">
-                            {rental.image && (
-                              <img src={rental.image} alt={rental.name} className="w-full h-full object-cover" />
+                            {rental.clothing?.image && (
+                              <img
+                                src={rental.clothing.image}
+                                alt={rental.clothing?.item_name || 'Item'}
+                                className="w-full h-full object-cover"
+                              />
                             )}
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-800">{rental.name || 'Item'}</h3>
+                            {/* Name: rental.clothing.item_name */}
+                            <h3 className="font-semibold text-gray-800">
+                              {rental.clothing?.item_name || 'Item'}
+                            </h3>
+                            {/* Size: rental.clothing.size */}
                             <p className="text-sm text-gray-600">
-                              Size: {rental.size || 'N/A'} | Rented: {rental.rental_period || 'N/A'}
+                              Size: {rental.clothing?.size || 'N/A'} | From: {formatDate(rental.rent_start_date)}
                             </p>
-                            <p className="text-sm text-gray-600">Return due: {rental.return_date || 'N/A'}</p>
+                            {/* Return due: rental.rent_end_date */}
+                            <p className="text-sm text-gray-600">
+                              Return due: {formatDate(rental.rent_end_date)}
+                            </p>
                           </div>
                         </div>
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${rental.status === 'active' ? 'bg-orange-100 text-orange-600' :
-                          rental.status === 'upcoming' ? 'bg-green-100 text-green-600' :
-                            'bg-blue-100 text-blue-600'
-                          }`}>
-                          {rental.status || 'Active'}
+                        {/* Status badge */}
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle(rental.status)}`}>
+                          {getStatusLabel(rental.status)}
                         </span>
                       </div>
                     ))}
