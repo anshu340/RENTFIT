@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../services/axiosInstance'; // Still need for user profile?
+import axiosInstance from '../services/axiosInstance';
 import chatAxiosInstance from '../services/chatAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import { FaPaperPlane, FaUserCircle, FaStore, FaClock } from 'react-icons/fa';
 
 const ChatPage = () => {
-    const { conversationId } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [conversations, setConversations] = useState([]);
     const [activeConversation, setActiveConversation] = useState(null);
@@ -17,22 +17,31 @@ const ChatPage = () => {
     const messagesEndRef = useRef(null);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Fetch user info and conversations on mount
+    // Fetch user info and conversations on mount or when ID changes
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                // Get current user role/id from token or profile endpoint if needed
-                // For now assuming we can identify sender from response using local logic or just relying on "sender" field in message
-                // Better: fetch profile to know who "I" am
-                const profileRes = await axiosInstance.get('accounts/profile/'); // Adjust endpoint if needed
+                setLoading(true);
+                const profileRes = await axiosInstance.get('accounts/profile/');
                 setCurrentUser(profileRes.data);
 
                 const convRes = await chatAxiosInstance.get('my/');
+                console.log('Fetched conversations:', convRes.data);
                 setConversations(convRes.data);
 
-                if (conversationId) {
-                    const found = convRes.data.find(c => c.id === parseInt(conversationId));
-                    if (found) setActiveConversation(found);
+                // If we have an ID in the URL, set active conversation immediately after loading
+                if (id && convRes.data.length > 0) {
+                    const found = convRes.data.find(c => c.id === parseInt(id));
+                    if (found) {
+                        console.log('Found conversation from URL:', found);
+                        setActiveConversation(found);
+                    } else {
+                        console.log('Conversation not found in loaded data, ID:', id);
+                        // Optionally redirect to /chat if conversation doesn't exist
+                        // navigate('/chat');
+                    }
+                } else if (id) {
+                    console.log('Conversation ID in URL but no conversations loaded yet');
                 }
             } catch (error) {
                 console.error("Error fetching chat data", error);
@@ -42,7 +51,7 @@ const ChatPage = () => {
         };
 
         fetchInitialData();
-    }, [conversationId]);
+    }, [id]); // Re-fetch when ID changes
 
     // Polling for messages
     useEffect(() => {
@@ -86,7 +95,7 @@ const ChatPage = () => {
     };
 
     const handleSelectConversation = (conv) => {
-        setActiveConversation(conv);
+        // Navigate instead of setting state directly - URL drives the state
         navigate(`/chat/${conv.id}`);
     };
 
@@ -95,13 +104,6 @@ const ChatPage = () => {
     };
 
     const getOtherParticipantName = (conv) => {
-        // If I am customer, show store name. If I am store, show customer name.
-        // Fallback logic if currentUser is not fully loaded yet:
-        // We can't strictly know who "we" are without checking currentUser.id vs conv.customer/store
-        // But from the serializer we have both names.
-
-        // Simple heuristic: If the user is a Store, show customer_name.
-        // We can check localStorage 'role'.
         const role = localStorage.getItem('role');
         return role === 'Store' ? conv.customer_name : conv.store_name;
     };
@@ -177,11 +179,7 @@ const ChatPage = () => {
 
                                     {/* Messages List */}
                                     <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-                                        {messages.map((msg, idx) => {
-                                            const isMe = msg.sender === currentUser?.id || (localStorage.getItem('role') === 'Store' && msg.sender_email === currentUser?.email) || (localStorage.getItem('role') === 'Customer' && msg.sender_email === currentUser?.email);
-                                            // Fallback logic for isMe check if IDs get tricky: compare sender_name or rely on a "is_me" field if added
-                                            // Here assuming we might need robust check. 
-                                            // Let's rely on simple email check if currentUser loaded
+                                        {messages.map((msg) => {
                                             const isMyMessage = currentUser ? msg.sender === currentUser.id : false;
 
                                             return (

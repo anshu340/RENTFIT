@@ -44,7 +44,7 @@ function App() {
       <Route path="/rentmanagement" element={<RentManagement />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/chat" element={<ChatPage />} />
-      <Route path="/chat/:conversationId" element={<ChatPage />} />
+      <Route path="/chat/:id" element={<ChatPage />} />
     </Routes>
   );
 }
