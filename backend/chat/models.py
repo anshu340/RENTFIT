@@ -11,8 +11,7 @@ class Conversation(models.Model):
     store = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
-        related_name='store_conversations',
-        limit_choices_to={'role': 'Store'}
+        related_name='store_conversations'
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

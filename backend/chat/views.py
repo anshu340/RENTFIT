@@ -21,7 +21,35 @@ class StartConversationView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        store = get_object_or_404(User, id=store_id, role='Store')
+        # DEBUGGING BLOCK
+        import os
+        from django.conf import settings
+        print(f"\n\n--- DEBUG START ---")
+        print(f"Checking Store ID: {store_id} (Type: {type(store_id)})")
+        print(f"DB Name in Settings: {settings.DATABASES['default']['NAME']}")
+        print(f"Current Working Dir: {os.getcwd()}")
+        
+        target_user = User.objects.filter(id=store_id).first()
+        print(f"Lookup Result: {target_user}")
+        if target_user:
+             print(f"Role: {target_user.role}")
+        else:
+             print(f"ALL USERS FIRST 5 IDS: {list(User.objects.values_list('id', flat=True)[:5])}")
+             print(f"TOTAL USERS: {User.objects.count()}")
+
+        print(f"--- DEBUG END ---\n\n")
+
+        if not target_user:
+            return Response({"error": "Store user not found (Check Server Console)"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Check role case-insensitively
+        if target_user.role.lower() != 'store':
+             return Response({"error": "User is not a store"}, status=status.HTTP_400_BAD_REQUEST)
+             
+        store = target_user
+            
+        # Optional: Check if role is store-like if needed, but finding the user is primary.
+        # Keeping it simple as per user request to avoid crashes.
         
         conversation, created = Conversation.objects.get_or_create(
             customer=request.user,
@@ -68,6 +96,8 @@ class MessageListView(APIView):
         return Response(serializer.data)
 
 
+from notifications.models import Notification
+
 class SendMessageView(APIView):
     """
     Send a message in a conversation.
@@ -88,5 +118,19 @@ class SendMessageView(APIView):
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(conversation=conversation, sender=request.user)
+            
+            # Create Notification
+            if request.user == conversation.customer:
+                recipient = conversation.store
+            else:
+                recipient = conversation.customer
+
+            Notification.objects.create(
+                user=recipient,
+                sender=request.user,
+                message="sent you a message",
+                notification_type="chat"
+            )
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

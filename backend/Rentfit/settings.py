@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rent',
     'notifications',
     'reviews',
+    'chat',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

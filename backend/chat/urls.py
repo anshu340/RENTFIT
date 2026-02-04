@@ -6,8 +6,10 @@ from .views import (
     SendMessageView
 )
 
+
 urlpatterns = [
-    path('start/<int:store_id>/', StartConversationView.as_view(), name='start_conversation'),
+    # path('ping/', PingView.as_view(), name='ping'),
+    path('start/<int:store_id>/', StartConversationView.as_view(), name='start-chat'),
     path('my/', UserConversationsView.as_view(), name='my_conversations'),
     path('<int:conversation_id>/', MessageListView.as_view(), name='conversation_messages'),
     path('<int:conversation_id>/send/', SendMessageView.as_view(), name='send_message'),

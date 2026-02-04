@@ -63,7 +63,6 @@ class StoreReadSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='name', read_only=True)
     phone_number = serializers.CharField(source='phone', read_only=True)
     store_logo_url = serializers.SerializerMethodField()
-    # Note: clothing_items and donation_requests would be added when those models exist
 
     class Meta:
         model = User
@@ -286,7 +285,7 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.store_logo.url
         return None
 
-# CLOTHING SERIALIZERS - ADD THESE TWO BEFORE ClothingDetailSerializer
+# CLOTHING SERIALIZERS
 
 class ClothingCreateSerializer(serializers.ModelSerializer):
     """
@@ -337,16 +336,18 @@ class ClothingListSerializer(serializers.ModelSerializer):
     """
     Serializer for listing clothing items
     - Used for store listing and customer browsing
+    - FIXED: Added store_user_id for chat functionality
     """
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     store_city = serializers.CharField(source='store.city', read_only=True)
+    store_user_id = serializers.IntegerField(source='store.id', read_only=True)  # CRITICAL: This is the User ID for chat!
     image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Clothing
         fields = [
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
-            'rental_price', 'clothing_status', 'store_name', 'store_city',
+            'rental_price', 'clothing_status', 'store_user_id', 'store_name', 'store_city',
             'images', 'image_url', 'average_rating', 'review_count', 'created_at', 'updated_at'
         ]
 
@@ -359,11 +360,14 @@ class ClothingListSerializer(serializers.ModelSerializer):
             return obj.images.url
         return None
 
+
 class ClothingDetailSerializer(serializers.ModelSerializer):
     """
     Serializer for full clothing item details
+    - FIXED: Added store_user_id for chat functionality
     """
     store_name = serializers.CharField(source='store.store_name', read_only=True)
+    store_user_id = serializers.IntegerField(source='store.id', read_only=True)  # CRITICAL: This is the User ID for chat!
     store_email = serializers.EmailField(source='store.email', read_only=True)
     store_phone = serializers.CharField(source='store.phone', read_only=True)
     store_address = serializers.CharField(source='store.store_address', read_only=True)
@@ -375,7 +379,7 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'description', 'rental_price', 'images', 'image_url',
-            'clothing_status', 'store_name', 'store_email', 'store_phone',
+            'clothing_status', 'store_user_id', 'store_name', 'store_email', 'store_phone',
             'store_address', 'store_city', 'average_rating', 'review_count',
             'created_at', 'updated_at'
         ]
