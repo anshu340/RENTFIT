@@ -92,19 +92,39 @@ const NotificationDropdown = ({ onClose }) => {
                                 className={`p-4 hover:bg-gray-50 transition-colors relative group ${!notification.is_read ? 'bg-blue-50/30' : ''}`}
                             >
                                 <div className="flex gap-3">
-                                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${!notification.is_read ? 'bg-blue-600' : 'bg-transparent'}`} />
+                                    {notification.notification_type === 'chat' && notification.sender_profile_image ? (
+                                        <img
+                                            src={notification.sender_profile_image}
+                                            alt={notification.sender_name}
+                                            className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                                        />
+                                    ) : (
+                                        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${!notification.is_read ? 'bg-blue-600' : 'bg-transparent'}`} />
+                                    )}
+
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${getTypeStyles(notification.notification_type)}`}>
-                                                {notification.notification_type}
-                                            </span>
-                                            <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">
+                                            {notification.notification_type !== 'chat' && (
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${getTypeStyles(notification.notification_type)}`}>
+                                                    {notification.notification_type}
+                                                </span>
+                                            )}
+                                            <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-auto">
                                                 {formatTime(notification.created_at)}
                                             </span>
                                         </div>
-                                        <p className={`text-sm leading-relaxed ${!notification.is_read ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
-                                            {notification.message}
+
+                                        <p className={`text-sm leading-relaxed ${!notification.is_read ? 'text-gray-900' : 'text-gray-600'}`}>
+                                            {notification.notification_type === 'chat' ? (
+                                                <>
+                                                    <span className="font-bold text-gray-900">{notification.sender_name || 'Someone'}</span>
+                                                    {' '}sent you a message
+                                                </>
+                                            ) : (
+                                                notification.message
+                                            )}
                                         </p>
+
                                         {!notification.is_read && (
                                             <button
                                                 onClick={() => markAsRead(notification.id)}

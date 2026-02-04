@@ -18,6 +18,7 @@ import StoreRentals from './Pages/StoreRentals.jsx';
 import RentManagement from './Pages/RentManagement.jsx';
 import AboutUs from './Pages/AboutUs.jsx';
 import ClothingDetail from './Pages/ClothingDetail.jsx';
+import ChatPage from './Pages/ChatPage.jsx';
 
 
 function App() {
@@ -42,7 +43,8 @@ function App() {
       <Route path="/storerentals" element={<StoreRentals />} />
       <Route path="/rentmanagement" element={<RentManagement />} />
       <Route path="/about" element={<AboutUs />} />
-
+      <Route path="/chat" element={<ChatPage />} />
+      <Route path="/chat/:conversationId" element={<ChatPage />} />
     </Routes>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
+import chatAxiosInstance from '../services/chatAxiosInstance';
 import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import reviewAxiosInstance from '../services/reviewAxiosInstance';
 import Navbar from '../Components/Navbar';
@@ -9,7 +10,7 @@ import ReviewSection from '../Components/ReviewSection';
 import ReviewForm from '../Components/ReviewForm';
 import RentalModal from '../Components/RentalModal';
 import Alert from '../Components/Alert';
-import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart, FaStar } from 'react-icons/fa';
+import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart, FaStar, FaComments } from 'react-icons/fa';
 
 const ClothingDetail = () => {
     const { id } = useParams();
@@ -20,8 +21,6 @@ const ClothingDetail = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isEligible, setIsEligible] = useState(false);
     const [eligibleRental, setEligibleRental] = useState(null);
-
-    // Rental UI States
     const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
     const [alert, setAlert] = useState({ message: '', type: '' });
 
@@ -33,12 +32,10 @@ const ClothingDetail = () => {
     const fetchClothingData = async () => {
         try {
             setIsLoading(true);
-            // Fetch clothing details
             const detailRes = await axiosInstance.get(`clothing/all/`);
             const item = detailRes.data.find(c => c.id === parseInt(id));
             setClothing(item);
 
-            // Fetch reviews
             const reviewsRes = await reviewAxiosInstance.get(`clothing/${id}/`);
             setReviews(reviewsRes.data.results);
             setStats({
@@ -60,15 +57,12 @@ const ClothingDetail = () => {
         try {
             const response = await rentalAxiosInstance.get('my/');
             const userRentals = response.data.results || response.data;
-
-            // Look for a completed rental for this clothing that hasn't been reviewed yet
             const eligible = userRentals.find(r => {
                 const rentalClothingId = typeof r.clothing === 'object' ? r.clothing.id : r.clothing;
                 return rentalClothingId === parseInt(id) &&
                     r.status === 'returned_confirmed' &&
                     !r.has_review;
             });
-
             if (eligible) {
                 setIsEligible(true);
                 setEligibleRental(eligible);
@@ -79,9 +73,47 @@ const ClothingDetail = () => {
     };
 
     const handleReviewSubmitted = () => {
-        fetchClothingData(); // Refresh reviews
-        setIsEligible(false); // Hide form
+        fetchClothingData();
+        setIsEligible(false);
         setAlert({ message: 'Thank you for your review!', type: 'success' });
+    };
+
+    const handleChatWithStore = async () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            navigate('/login', { state: { message: "Please login to chat with the store" } });
+            return;
+        }
+
+        const role = localStorage.getItem('role');
+        if (role !== 'Customer') {
+            showAlert('Only customers can start a chat with the store.', 'error');
+            return;
+        }
+
+        try {
+            // FIXED: Use store (ID) from the serializer as per user prompt
+            const storeUserId = clothing.store || clothing.store_user_id;
+
+            if (!storeUserId) {
+                showAlert('Store information not available.', 'error');
+                return;
+            }
+
+            console.log('Starting chat with store user ID:', storeUserId);
+            const res = await chatAxiosInstance.post(`start/${storeUserId}/`);
+            navigate(`/chat/${res.data.id}`);
+        } catch (error) {
+            console.error("Error starting chat:", error);
+            if (error.response?.status === 404) {
+                const serverMsg = error.response.data?.error || 'Store not found.';
+                showAlert(serverMsg, 'error');
+            } else if (error.response?.status === 403) {
+                showAlert('Permission denied.', 'error');
+            } else {
+                showAlert('Failed to start chat. Please try again.', 'error');
+            }
+        }
     };
 
     const showAlert = (message, type) => {
@@ -101,8 +133,8 @@ const ClothingDetail = () => {
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-gray-800">Item not found</h2>
-                    <button onClick={() => navigate('/browseClothes')} className="mt-4 text-purple-600 font-medium flex items-center gap-2 justify-center">
-                        <FaArrowLeft /> Out of context... Back to Browse
+                    <button onClick={() => navigate('/browseClothes')} className="mt-4 text-purple-600 font-medium flex items-center gap-2 justify-center mx-auto">
+                        <FaArrowLeft /> Back to Browse
                     </button>
                 </div>
             </div>
@@ -114,7 +146,6 @@ const ClothingDetail = () => {
             <Navbar />
             <div className="min-h-screen bg-gray-50 pb-20">
                 <div className="max-w-6xl mx-auto px-4 py-8">
-                    {/* Breadcrumbs / Back button */}
                     <button
                         onClick={() => navigate('/browseClothes')}
                         className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors mb-8 font-medium group"
@@ -124,7 +155,6 @@ const ClothingDetail = () => {
                     </button>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                        {/* Image Gallery */}
                         <div className="space-y-4">
                             <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100 group">
                                 <img
@@ -135,7 +165,6 @@ const ClothingDetail = () => {
                             </div>
                         </div>
 
-                        {/* Product Info */}
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2 text-purple-600 text-sm font-bold uppercase tracking-wider mb-2">
                                 <FaTag size={12} />
@@ -158,7 +187,9 @@ const ClothingDetail = () => {
                                     <span className="text-4xl font-black text-purple-700">${clothing.rental_price}</span>
                                     <span className="text-purple-600 font-medium">/day</span>
                                 </div>
-                                <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${clothing.clothing_status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${clothing.clothing_status === 'Available'
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-red-100 text-red-700'
                                     }`}>
                                     {clothing.clothing_status}
                                 </div>
@@ -189,7 +220,9 @@ const ClothingDetail = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-gray-800">Description</h4>
-                                        <p className="text-gray-600 leading-relaxed">{clothing.description || 'Premium quality clothing carefully inspected for your special occasion.'}</p>
+                                        <p className="text-gray-600 leading-relaxed">
+                                            {clothing.description || 'Premium quality clothing carefully inspected for your special occasion.'}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -202,12 +235,19 @@ const ClothingDetail = () => {
                                 <FaShoppingCart size={24} />
                                 Rent Now
                             </button>
+
+                            <button
+                                onClick={handleChatWithStore}
+                                className="w-full bg-white text-purple-600 border-2 border-purple-100 py-4 rounded-2xl font-bold text-lg hover:bg-purple-50 hover:border-purple-200 transition-all mt-4 flex items-center justify-center gap-2"
+                            >
+                                <FaComments size={20} />
+                                Chat with Store
+                            </button>
                         </div>
                     </div>
 
-                    {/* Eligibility based Review Form */}
                     {isEligible && (
-                        <div className="max-w-3xl mx-auto">
+                        <div className="max-w-3xl mx-auto mt-12">
                             <ReviewForm
                                 rental={eligibleRental}
                                 onReviewSubmitted={handleReviewSubmitted}
@@ -216,8 +256,7 @@ const ClothingDetail = () => {
                         </div>
                     )}
 
-                    {/* Review Section */}
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-4xl mx-auto mt-12">
                         <ReviewSection
                             reviews={reviews}
                             averageRating={stats.average_rating}
