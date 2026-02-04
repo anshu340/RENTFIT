@@ -21,26 +21,10 @@ class StartConversationView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # DEBUGGING BLOCK
-        import os
-        from django.conf import settings
-        print(f"\n\n--- DEBUG START ---")
-        print(f"Checking Store ID: {store_id} (Type: {type(store_id)})")
-        print(f"DB Name in Settings: {settings.DATABASES['default']['NAME']}")
-        print(f"Current Working Dir: {os.getcwd()}")
-        
+        # Look up by ID first
         target_user = User.objects.filter(id=store_id).first()
-        print(f"Lookup Result: {target_user}")
-        if target_user:
-             print(f"Role: {target_user.role}")
-        else:
-             print(f"ALL USERS FIRST 5 IDS: {list(User.objects.values_list('id', flat=True)[:5])}")
-             print(f"TOTAL USERS: {User.objects.count()}")
-
-        print(f"--- DEBUG END ---\n\n")
-
         if not target_user:
-            return Response({"error": "Store user not found (Check Server Console)"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Store user not found"}, status=status.HTTP_404_NOT_FOUND)
             
         # Check role case-insensitively
         if target_user.role.lower() != 'store':
@@ -67,9 +51,17 @@ class UserConversationsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        # DEBUGGING
+        print(f"\n--- DEBUG UserConversationsView ---")
+        print(f"Request User: {request.user.email} (ID: {request.user.id}, Role: {request.user.role})")
+        
         conversations = Conversation.objects.filter(
             Q(customer=request.user) | Q(store=request.user)
         )
+        print(f"Found {conversations.count()} conversations")
+        if conversations.count() == 0:
+            print(f"ALL CONVERSATIONS: {list(Conversation.objects.values('id', 'customer__email', 'store__email'))}")
+        
         serializer = ConversationSerializer(conversations, many=True)
         return Response(serializer.data)
 
