@@ -14,7 +14,7 @@ const ChatPage = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(true);
-    const messagesEndRef = useRef(null);
+    const containerRef = useRef(null);
     const [currentUser, setCurrentUser] = useState(null);
 
     // 1. Fetch user info and conversations ONLY ONCE on mount
@@ -26,7 +26,6 @@ const ChatPage = () => {
                 setCurrentUser(profileRes.data);
 
                 const convRes = await chatAxiosInstance.get('my/');
-                console.log('Fetched conversations:', convRes.data);
                 setConversations(convRes.data);
             } catch (error) {
                 console.error("Error fetching chat data", error);
@@ -43,11 +42,7 @@ const ChatPage = () => {
         if (id && conversations.length > 0) {
             const found = conversations.find(c => c.id === parseInt(id));
             if (found) {
-                console.log('Found conversation from URL:', found);
                 setActiveConversation(found);
-            } else {
-                console.warn('Conversation ID in URL not found in user conversations:', id);
-                // Optional: navigate('/chat') if you want to force redirect
             }
         }
     }, [id, conversations]);
@@ -71,9 +66,13 @@ const ChatPage = () => {
         return () => clearInterval(interval);
     }, [activeConversation]);
 
-    // Scroll to bottom on new messages
+    // 3. Container-only Scroll Fix (Prevents page jumping)
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Auto-scroll to bottom of the panel only
+        container.scrollTop = container.scrollHeight;
     }, [messages]);
 
     const handleSendMessage = async (e) => {
@@ -85,7 +84,6 @@ const ChatPage = () => {
                 text: newMessage
             });
             setNewMessage("");
-            // Refresh immediately
             const res = await chatAxiosInstance.get(`${activeConversation.id}/`);
             setMessages(res.data);
         } catch (error) {
@@ -94,7 +92,6 @@ const ChatPage = () => {
     };
 
     const handleSelectConversation = (conv) => {
-        // Navigate instead of setting state directly - URL drives the state
         navigate(`/chat/${conv.id}`);
     };
 
@@ -102,9 +99,18 @@ const ChatPage = () => {
         return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    const getOtherParticipant = (conv) => {
+    const getOtherUser = (conv) => {
         const role = localStorage.getItem('role');
-        return role === 'Store' ? conv.customer : conv.store;
+        if (role === 'Store') {
+            return {
+                name: conv.customer_name || 'Customer',
+                image: conv.customer_image
+            };
+        }
+        return {
+            name: conv.store_name || 'Store',
+            image: conv.store_image
+        };
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading chats...</div>;
@@ -112,12 +118,12 @@ const ChatPage = () => {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-gray-50 pt-8 pb-12">
-                <div className="max-w-6xl mx-auto px-4 h-[80vh]">
-                    <div className="grid grid-cols-1 md:grid-cols-4 bg-white rounded-2xl shadow-xl border border-gray-100 h-full overflow-hidden">
+            <div className="bg-gray-50 py-4 chat-page flex flex-col" style={{ height: "calc(100vh - 120px)" }}>
+                <div className="max-w-6xl mx-auto px-4 w-full h-full">
+                    <div className="chat-wrapper grid grid-cols-1 md:grid-cols-4 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-full">
 
                         {/* Sidebar - Conversation List */}
-                        <div className="col-span-1 border-r border-gray-100 flex flex-col bg-gray-50">
+                        <div className="col-span-1 border-r border-gray-100 flex flex-col bg-gray-50 overflow-hidden">
                             <div className="p-4 border-b border-gray-200 bg-white">
                                 <h2 className="font-bold text-gray-800 text-lg">Messages</h2>
                             </div>
@@ -128,7 +134,7 @@ const ChatPage = () => {
                                     </div>
                                 ) : (
                                     conversations.map(conv => {
-                                        const otherParticipant = getOtherParticipant(conv);
+                                        const other = getOtherUser(conv);
                                         return (
                                             <div
                                                 key={conv.id}
@@ -137,15 +143,15 @@ const ChatPage = () => {
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 overflow-hidden">
-                                                        {otherParticipant?.profile_image ? (
-                                                            <img src={otherParticipant.profile_image} alt={otherParticipant.name} className="w-full h-full object-cover" />
+                                                        {other.image ? (
+                                                            <img src={other.image} alt={other.name} className="chat-avatar w-full h-full object-cover" />
                                                         ) : (
-                                                            localStorage.getItem('role') === 'Store' ? <FaUserCircle /> : <FaStore />
+                                                            localStorage.getItem('role') === 'Store' ? <FaUserCircle size={24} /> : <FaStore size={24} />
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-bold text-gray-800 truncate text-sm">
-                                                            {otherParticipant?.name || 'User'}
+                                                            {other.name}
                                                         </h3>
                                                         {conv.last_message && (
                                                             <p className="text-xs text-gray-500 truncate">
@@ -162,22 +168,22 @@ const ChatPage = () => {
                         </div>
 
                         {/* Chat Area */}
-                        <div className="col-span-1 md:col-span-3 flex flex-col bg-white">
+                        <div className="col-span-1 md:col-span-3 flex flex-col bg-white overflow-hidden h-full">
                             {activeConversation ? (
                                 <>
                                     {/* Chat Header */}
                                     <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white shadow-sm z-10">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center overflow-hidden">
-                                                {getOtherParticipant(activeConversation)?.profile_image ? (
-                                                    <img src={getOtherParticipant(activeConversation).profile_image} alt="Profile" className="w-full h-full object-cover" />
+                                                {getOtherUser(activeConversation).image ? (
+                                                    <img src={getOtherUser(activeConversation).image} alt="Profile" className="w-full h-full object-cover" />
                                                 ) : (
                                                     localStorage.getItem('role') === 'Store' ? <FaUserCircle /> : <FaStore />
                                                 )}
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-gray-800">
-                                                    {getOtherParticipant(activeConversation)?.name || 'Chat'}
+                                                    {getOtherUser(activeConversation).name}
                                                 </h3>
                                                 <span className="text-xs text-green-500 flex items-center gap-1">
                                                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -187,8 +193,8 @@ const ChatPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* Messages List */}
-                                    <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                                    {/* Messages List - Container Only Scrolling */}
+                                    <div ref={containerRef} className="messages flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
                                         {messages.map((msg) => {
                                             const isMyMessage = currentUser ? msg.sender === currentUser.id : false;
 
@@ -207,7 +213,6 @@ const ChatPage = () => {
                                                 </div>
                                             );
                                         })}
-                                        <div ref={messagesEndRef} />
                                     </div>
 
                                     {/* Input Area */}

@@ -2,8 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import {
-    FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle,
-    FaFileAlt, FaCheckCircle, FaTshirt, FaSignOutAlt, FaCog, FaStore, FaComments
+    FaHome,
+    FaBox,
+    FaHeart,
+    FaMapMarkerAlt,
+    FaQuestionCircle,
+    FaFileAlt,
+    FaCheckCircle,
+    FaTshirt,
+    FaSignOutAlt,
+    FaCog,
+    FaStore,
+    FaComments
 } from 'react-icons/fa';
 
 const StoreSidebar = () => {
