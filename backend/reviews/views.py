@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from accounts.permissions import IsCustomer
 from .models import Review
-from .serializers import ReviewCreateSerializer, ReviewListSerializer
+from .serializers import ReviewCreateSerializer, ReviewListSerializer, ReviewUpdateSerializer
 from accounts.models import Clothing
 
 class ReviewCreateView(generics.CreateAPIView):
@@ -56,3 +56,28 @@ class ClothingReviewListView(generics.ListAPIView):
             'average_rating': round(avg_rating, 1),
             'results': serializer.data
         })
+
+class MyReviewsView(generics.ListAPIView):
+    """
+    Get all reviews written by the logged-in customer.
+    GET /api/reviews/my/
+    """
+    serializer_class = ReviewListSerializer
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def get_queryset(self):
+        return Review.objects.filter(user=self.request.user).select_related('clothing', 'clothing__store', 'user')
+
+class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a review.
+    """
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return ReviewUpdateSerializer
+        return ReviewListSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(user=self.request.user)
