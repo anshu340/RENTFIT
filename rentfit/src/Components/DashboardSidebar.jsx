@@ -9,7 +9,8 @@ import {
     FaStar,
     FaUser,
     FaShoppingBag,
-    FaBox
+    FaBox,
+    FaComments
 } from 'react-icons/fa';
 
 const DashboardSidebar = () => {
@@ -17,14 +18,6 @@ const DashboardSidebar = () => {
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6">
-            {/* Logo
-            <div className="flex items-center gap-2 mb-8">
-                <div className="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">R</span>
-                </div>
-                <span className="text-xl font-bold text-gray-800">RentFit</span>
-            </div> */}
-
             {/* Menu Items */}
             <nav className="space-y-2">
                 <a href="#" className="flex items-center gap-3 px-4 py-3 text-purple-600 bg-purple-50 rounded-lg font-medium">
@@ -50,6 +43,10 @@ const DashboardSidebar = () => {
                 <a href="/mydonations" onClick={(e) => { e.preventDefault(); navigate('/mydonations'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
                     <FaBox className="text-lg" />
                     <span>My Donations</span>
+                </a>
+                <a href="/chat" onClick={(e) => { e.preventDefault(); navigate('/chat'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <FaComments className="text-lg" />
+                    <span>Messages</span>
                 </a>
                 <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
                     <FaMapMarkerAlt className="text-lg" />

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import {
     FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle,
-    FaFileAlt, FaCheckCircle, FaTshirt, FaSignOutAlt, FaCog, FaStore
+    FaFileAlt, FaCheckCircle, FaTshirt, FaSignOutAlt, FaCog, FaStore, FaComments
 } from 'react-icons/fa';
 
 const StoreSidebar = () => {
@@ -19,6 +19,7 @@ const StoreSidebar = () => {
         { name: 'Verify Listings', icon: FaCheckCircle, path: '/myClothingItems' },
         { name: 'List Clothes', icon: FaTshirt, path: '/addClothingItem' },
         { name: 'Rental Management', icon: FaBox, path: '/rentmanagement' },
+        { name: 'Messages', icon: FaComments, path: '/chat' },
         { name: 'Donations', icon: FaHeart, path: '/storedonations' },
         { name: 'Shop Locations', icon: FaMapMarkerAlt, path: null },
         { name: 'User Support', icon: FaQuestionCircle, path: null },
@@ -81,8 +82,8 @@ const StoreSidebar = () => {
                                 }
                             }}
                             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${active
-                                    ? 'bg-purple-50 text-purple-600 font-bold shadow-sm'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                ? 'bg-purple-50 text-purple-600 font-bold shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
                             <Icon className={`text-base ${active ? 'text-purple-600' : 'text-gray-400'}`} />

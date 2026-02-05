@@ -17,32 +17,17 @@ const ChatPage = () => {
     const messagesEndRef = useRef(null);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Fetch user info and conversations on mount or when ID changes
+    // 1. Fetch user info and conversations ONLY ONCE on mount
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 setLoading(true);
-                const profileRes = await axiosInstance.get('accounts/profile/');
+                const profileRes = await axiosInstance.get('profile/');
                 setCurrentUser(profileRes.data);
 
                 const convRes = await chatAxiosInstance.get('my/');
                 console.log('Fetched conversations:', convRes.data);
                 setConversations(convRes.data);
-
-                // If we have an ID in the URL, set active conversation immediately after loading
-                if (id && convRes.data.length > 0) {
-                    const found = convRes.data.find(c => c.id === parseInt(id));
-                    if (found) {
-                        console.log('Found conversation from URL:', found);
-                        setActiveConversation(found);
-                    } else {
-                        console.log('Conversation not found in loaded data, ID:', id);
-                        // Optionally redirect to /chat if conversation doesn't exist
-                        // navigate('/chat');
-                    }
-                } else if (id) {
-                    console.log('Conversation ID in URL but no conversations loaded yet');
-                }
             } catch (error) {
                 console.error("Error fetching chat data", error);
             } finally {
@@ -51,7 +36,21 @@ const ChatPage = () => {
         };
 
         fetchInitialData();
-    }, [id]); // Re-fetch when ID changes
+    }, []);
+
+    // 2. Sync Active Conversation with URL ID
+    useEffect(() => {
+        if (id && conversations.length > 0) {
+            const found = conversations.find(c => c.id === parseInt(id));
+            if (found) {
+                console.log('Found conversation from URL:', found);
+                setActiveConversation(found);
+            } else {
+                console.warn('Conversation ID in URL not found in user conversations:', id);
+                // Optional: navigate('/chat') if you want to force redirect
+            }
+        }
+    }, [id, conversations]);
 
     // Polling for messages
     useEffect(() => {
@@ -103,9 +102,9 @@ const ChatPage = () => {
         return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    const getOtherParticipantName = (conv) => {
+    const getOtherParticipant = (conv) => {
         const role = localStorage.getItem('role');
-        return role === 'Store' ? conv.customer_name : conv.store_name;
+        return role === 'Store' ? conv.customer : conv.store;
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading chats...</div>;
@@ -128,29 +127,36 @@ const ChatPage = () => {
                                         No conversations yet.
                                     </div>
                                 ) : (
-                                    conversations.map(conv => (
-                                        <div
-                                            key={conv.id}
-                                            onClick={() => handleSelectConversation(conv)}
-                                            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-white transition-colors ${activeConversation?.id === conv.id ? 'bg-white border-l-4 border-l-purple-600 shadow-sm' : ''}`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                                    {localStorage.getItem('role') === 'Store' ? <FaUserCircle /> : <FaStore />}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-gray-800 truncate text-sm">
-                                                        {getOtherParticipantName(conv)}
-                                                    </h3>
-                                                    {conv.last_message && (
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            {conv.last_message.text}
-                                                        </p>
-                                                    )}
+                                    conversations.map(conv => {
+                                        const otherParticipant = getOtherParticipant(conv);
+                                        return (
+                                            <div
+                                                key={conv.id}
+                                                onClick={() => handleSelectConversation(conv)}
+                                                className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-white transition-colors ${activeConversation?.id === conv.id ? 'bg-white border-l-4 border-l-purple-600 shadow-sm' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 overflow-hidden">
+                                                        {otherParticipant?.profile_image ? (
+                                                            <img src={otherParticipant.profile_image} alt={otherParticipant.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            localStorage.getItem('role') === 'Store' ? <FaUserCircle /> : <FaStore />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-bold text-gray-800 truncate text-sm">
+                                                            {otherParticipant?.name || 'User'}
+                                                        </h3>
+                                                        {conv.last_message && (
+                                                            <p className="text-xs text-gray-500 truncate">
+                                                                {conv.last_message.text}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </div>
                         </div>
@@ -162,12 +168,16 @@ const ChatPage = () => {
                                     {/* Chat Header */}
                                     <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white shadow-sm z-10">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center">
-                                                {localStorage.getItem('role') === 'Store' ? <FaUserCircle /> : <FaStore />}
+                                            <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center overflow-hidden">
+                                                {getOtherParticipant(activeConversation)?.profile_image ? (
+                                                    <img src={getOtherParticipant(activeConversation).profile_image} alt="Profile" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    localStorage.getItem('role') === 'Store' ? <FaUserCircle /> : <FaStore />
+                                                )}
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-gray-800">
-                                                    {getOtherParticipantName(activeConversation)}
+                                                    {getOtherParticipant(activeConversation)?.name || 'Chat'}
                                                 </h3>
                                                 <span className="text-xs text-green-500 flex items-center gap-1">
                                                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>

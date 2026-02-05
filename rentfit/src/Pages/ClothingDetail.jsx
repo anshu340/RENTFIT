@@ -92,7 +92,6 @@ const ClothingDetail = () => {
         }
 
         try {
-            // FIXED: Use store (ID) from the serializer as per user prompt
             const storeUserId = clothing.store || clothing.store_user_id;
 
             if (!storeUserId) {
@@ -101,10 +100,17 @@ const ClothingDetail = () => {
             }
 
             console.log('Starting chat with store user ID:', storeUserId);
-            const res = await chatAxiosInstance.post(`start/${storeUserId}/`);
-            navigate(`/chat/${res.data.id}`);
+            const response = await chatAxiosInstance.post(`start/${storeUserId}/`);
+            
+            if (response.data && response.data.id) {
+                navigate(`/chat/${response.data.id}`);
+            } else {
+                console.error("Conversation not created properly", response);
+                showAlert('Failed to start conversation.', 'error');
+            }
+
         } catch (error) {
-            console.error("Error starting chat:", error);
+            console.error("Chat start failed:", error.response?.data || error.message);
             if (error.response?.status === 404) {
                 const serverMsg = error.response.data?.error || 'Store not found.';
                 showAlert(serverMsg, 'error');
