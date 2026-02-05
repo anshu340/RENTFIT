@@ -1,12 +1,14 @@
 from rest_framework import serializers
 from .models import Rental
 from accounts.models import Clothing
+from accounts.serializers import ClothingListSerializer
 from datetime import date
 
 class RentalSerializer(serializers.ModelSerializer):
     customer_email = serializers.EmailField(source='customer.email', read_only=True)
     customer_name = serializers.CharField(source='customer.name', read_only=True)
     store_name = serializers.CharField(source='store.store_name', read_only=True)
+    clothing = ClothingListSerializer(read_only=True)
     clothing_name = serializers.CharField(source='clothing.item_name', read_only=True)
     has_review = serializers.SerializerMethodField()
     

@@ -350,16 +350,22 @@ class ClothingListSerializer(serializers.ModelSerializer):
     store_user_id = serializers.IntegerField(source='store.id', read_only=True)  # CRITICAL: This is the User ID for chat!
     store_latitude = serializers.FloatField(source='store.latitude', read_only=True)
     store_longitude = serializers.FloatField(source='store.longitude', read_only=True)
+    image = serializers.SerializerMethodField()
+    name = serializers.CharField(source='item_name', read_only=True)
     image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Clothing
         fields = [
-            'id', 'item_name', 'category', 'gender', 'size', 'condition',
+            'id', 'item_name', 'name', 'category', 'gender', 'size', 'condition',
             'rental_price', 'clothing_status', 'store_user_id', 'store_name', 'store_city',
             'store_latitude', 'store_longitude',
-            'images', 'image_url', 'average_rating', 'review_count', 'created_at', 'updated_at'
+            'images', 'image', 'image_url', 'average_rating', 'review_count', 'created_at', 'updated_at'
         ]
+
+    def get_image(self, obj):
+        """Return absolute URL for clothing image (alias for image_url)"""
+        return self.get_image_url(obj)
 
     def get_image_url(self, obj):
         """Return absolute URL for clothing image"""
@@ -384,17 +390,23 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
     store_city = serializers.CharField(source='store.city', read_only=True)
     store_latitude = serializers.FloatField(source='store.latitude', read_only=True)
     store_longitude = serializers.FloatField(source='store.longitude', read_only=True)
+    image = serializers.SerializerMethodField()
+    name = serializers.CharField(source='item_name', read_only=True)
     image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Clothing
         fields = [
-            'id', 'item_name', 'category', 'gender', 'size', 'condition',
-            'description', 'rental_price', 'images', 'image_url',
+            'id', 'item_name', 'name', 'category', 'gender', 'size', 'condition',
+            'description', 'rental_price', 'images', 'image', 'image_url',
             'clothing_status', 'store_user_id', 'store_name', 'store_email', 'store_phone',
             'store_address', 'store_city', 'store_latitude', 'store_longitude', 'average_rating', 'review_count',
             'created_at', 'updated_at'
         ]
+
+    def get_image(self, obj):
+        """Return absolute URL for clothing image (alias for image_url)"""
+        return self.get_image_url(obj)
 
     def get_image_url(self, obj):
         """Return absolute URL for clothing image"""
