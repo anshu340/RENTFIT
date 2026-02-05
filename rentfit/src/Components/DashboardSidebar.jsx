@@ -20,7 +20,7 @@ const DashboardSidebar = () => {
         <aside className="w-64 bg-white border-r border-gray-200 p-6">
             {/* Menu Items */}
             <nav className="space-y-2">
-                <a href="#" className="flex items-center gap-3 px-4 py-3 text-purple-600 bg-purple-50 rounded-lg font-medium">
+                <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-purple-600 bg-purple-50 rounded-lg font-medium">
                     <FaTachometerAlt className="text-lg" />
                     <span>Dashboard</span>
                 </a>
@@ -56,7 +56,7 @@ const DashboardSidebar = () => {
                     <FaStar className="text-lg" />
                     <span>My Reviews</span>
                 </a>
-                <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <a href="/profile" onClick={(e) => { e.preventDefault(); navigate('/profile'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
                     <FaUser className="text-lg" />
                     <span>Profile</span>
                 </a>
