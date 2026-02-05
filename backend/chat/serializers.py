@@ -13,13 +13,21 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_image = serializers.ImageField(source='customer.profile_image', read_only=True)
+
     store_name = serializers.CharField(source='store.store_name', read_only=True)
-    last_message = serializers.SerializerMethodField()
+    store_image = serializers.ImageField(source='store.store_logo', read_only=True)
 
     class Meta:
         model = Conversation
-        fields = ['id', 'customer', 'customer_name', 'store', 'store_name', 'created_at', 'last_message']
-        read_only_fields = ['id', 'created_at', 'last_message']
+        fields = [
+            'id',
+            'customer_name',
+            'store_name',
+            'customer_image',
+            'store_image',
+            'created_at'
+        ]
 
     def get_last_message(self, obj):
         last_msg = obj.messages.last()

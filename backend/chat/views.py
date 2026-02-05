@@ -40,7 +40,7 @@ class StartConversationView(APIView):
             store=store
         )
         
-        serializer = ConversationSerializer(conversation)
+        serializer = ConversationSerializer(conversation, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK if not created else status.HTTP_201_CREATED)
 
 
@@ -62,7 +62,7 @@ class UserConversationsView(APIView):
         if conversations.count() == 0:
             print(f"ALL CONVERSATIONS: {list(Conversation.objects.values('id', 'customer__email', 'store__email'))}")
         
-        serializer = ConversationSerializer(conversations, many=True)
+        serializer = ConversationSerializer(conversations, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -84,7 +84,7 @@ class MessageListView(APIView):
             )
             
         messages = conversation.messages.all()
-        serializer = MessageSerializer(messages, many=True)
+        serializer = MessageSerializer(messages, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -110,6 +110,9 @@ class SendMessageView(APIView):
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(conversation=conversation, sender=request.user)
+            # Re-serialize to get absolute URLs if needed, though usually not for just creating.
+            # But let's be consistent.
+            # response_serializer = MessageSerializer(serializer.instance, context={'request': request})
             
             # Create Notification
             if request.user == conversation.customer:
@@ -119,8 +122,7 @@ class SendMessageView(APIView):
 
             Notification.objects.create(
                 user=recipient,
-                sender=request.user,
-                message="sent you a message",
+                message=f"{request.user.first_name or request.user.email} sent you a message",
                 notification_type="chat"
             )
             
