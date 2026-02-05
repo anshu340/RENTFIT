@@ -13,7 +13,42 @@ const defaultCenter = {
 
 const libraries = ['places'];
 
-const StoreLocationMap = ({ onLocationSelect, initialLocation, readonly = false }) => {
+const hasValidCoords = (lat, lng) =>
+    lat !== null && lat !== undefined &&
+    lng !== null && lng !== undefined;
+
+// Utility to geocode address and return coordinates
+export const searchAddressAndCenter = (address, callback) => {
+    if (!address) return;
+
+    if (!window.google || !window.google.maps) {
+        console.warn("Google Maps API not loaded yet");
+        return;
+    }
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address }, (results, status) => {
+        if (status === "OK" && results[0]) {
+            const loc = results[0].geometry.location;
+            const lat = loc.lat();
+            const lng = loc.lng();
+            callback({ lat, lng });
+        } else {
+            console.error("Geocoding failed with status:", status);
+            let userMessage = "Could not find the location. Try a more specific address.";
+
+            if (status === "REQUEST_DENIED") {
+                userMessage = "Google Maps API request denied. Ensure 'Geocoding API' is enabled in your Google Cloud Console and billing is active.";
+            } else if (status === "OVER_QUERY_LIMIT") {
+                userMessage = "Too many requests. Check your Google Maps billing profile.";
+            }
+
+            alert(userMessage);
+        }
+    });
+};
+
+const StoreLocationMap = ({ onLocationSelect, initialLocation, city, readonly = false }) => {
     const { isLoaded } = useJsApiLoader({
         id: "google-map-script",
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -21,39 +56,39 @@ const StoreLocationMap = ({ onLocationSelect, initialLocation, readonly = false 
     });
 
     const [map, setMap] = useState(null);
-    const [marker, setMarker] = useState(() => {
-        if (initialLocation && initialLocation.lat !== null && initialLocation.lat !== undefined) {
-            return {
-                lat: parseFloat(initialLocation.lat),
-                lng: parseFloat(initialLocation.lng)
-            };
-        }
-        return null;
-    });
+    const [marker, setMarker] = useState(null);
     const autocompleteRef = useRef(null);
     const mapRef = useRef(null);
 
+    // Smart Centering Logic
     useEffect(() => {
-        if (
-            initialLocation &&
-            initialLocation.lat !== null &&
-            initialLocation.lat !== undefined &&
-            initialLocation.lng !== null &&
-            initialLocation.lng !== undefined
-        ) {
-            const newPos = {
-                lat: parseFloat(initialLocation.lat),
-                lng: parseFloat(initialLocation.lng),
-            };
-            setMarker(newPos);
-            // If map is already loaded, pan to it
-            if (mapRef.current) {
-                mapRef.current.panTo(newPos);
+        if (mapRef.current) {
+            if (hasValidCoords(initialLocation?.lat, initialLocation?.lng)) {
+                // Precision centering on saved marker
+                const center = {
+                    lat: parseFloat(initialLocation.lat),
+                    lng: parseFloat(initialLocation.lng),
+                };
+                setMarker(center);
+                mapRef.current.panTo(center);
+                mapRef.current.setZoom(15);
+            } else if (city) {
+                // Smart fallback: center on city hint
+                searchAddressAndCenter(city, (coords) => {
+                    if (mapRef.current) {
+                        mapRef.current.panTo(coords);
+                        mapRef.current.setZoom(13);
+                    }
+                });
+            } else {
+                // Final fallback: Kathmandu
+                mapRef.current.panTo(defaultCenter);
+                mapRef.current.setZoom(12);
             }
         }
-    }, [initialLocation]);
+    }, [initialLocation, city, map]);
 
-    // Ensure map recenters dynamically when marker changes
+    // Ensure map recenters dynamically when marker changes (user clicks)
     useEffect(() => {
         if (mapRef.current && marker) {
             mapRef.current.panTo(marker);

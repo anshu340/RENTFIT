@@ -13,6 +13,10 @@ import StoreLocationMap from '../Components/StoreLocationMap';
 import Alert from '../Components/Alert';
 import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart, FaStar, FaComments, FaDirections, FaMapMarkerAlt } from 'react-icons/fa';
 
+const hasValidCoords = (lat, lng) =>
+    lat !== null && lat !== undefined &&
+    lng !== null && lng !== undefined;
+
 const ClothingDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -33,9 +37,8 @@ const ClothingDetail = () => {
     const fetchClothingData = async () => {
         try {
             setIsLoading(true);
-            const detailRes = await axiosInstance.get(`clothing/all/`);
-            const item = detailRes.data.find(c => c.id === parseInt(id));
-            setClothing(item);
+            const detailRes = await axiosInstance.get(`clothing/${id}/`);
+            setClothing(detailRes.data);
 
             const reviewsRes = await reviewAxiosInstance.get(`clothing/${id}/`);
             setReviews(reviewsRes.data.results);
@@ -121,6 +124,10 @@ const ClothingDetail = () => {
                 showAlert('Failed to start chat. Please try again.', 'error');
             }
         }
+    };
+
+    const scrollToMap = () => {
+        document.getElementById("store-map-section")?.scrollIntoView({ behavior: "smooth" });
     };
 
     const showAlert = (message, type) => {
@@ -223,6 +230,29 @@ const ClothingDetail = () => {
                                 </div>
                                 <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">
                                     <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600">
+                                        <FaMapMarkerAlt />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="font-bold text-gray-800">Store Location</h4>
+                                            {hasValidCoords(clothing.store_latitude, clothing.store_longitude) ? (
+                                                <button
+                                                    onClick={scrollToMap}
+                                                    className="text-xs text-purple-600 font-bold hover:underline"
+                                                >
+                                                    View on Map
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                        <p className="text-gray-600">
+                                            {hasValidCoords(clothing.store_latitude, clothing.store_longitude)
+                                                ? `${clothing.store_city || ''} ${clothing.store_address || ''}`
+                                                : 'Location not provided by store'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">
+                                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600">
                                         <FaCheckCircle />
                                     </div>
                                     <div>
@@ -264,8 +294,8 @@ const ClothingDetail = () => {
                     )}
 
                     {/* Store Location Map */}
-                    {clothing.store_latitude && clothing.store_longitude && (
-                        <div className="max-w-4xl mx-auto mt-12 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                    {hasValidCoords(clothing.store_latitude, clothing.store_longitude) && (
+                        <div id="store-map-section" className="max-w-4xl mx-auto mt-12 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
                                     <FaMapMarkerAlt className="text-purple-500" /> Store Location

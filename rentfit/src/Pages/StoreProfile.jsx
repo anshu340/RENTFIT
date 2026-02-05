@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import StoreSidebar from "../Components/StoreSidebar";
-import StoreLocationMap from "../Components/StoreLocationMap";
+import StoreLocationMap, { searchAddressAndCenter } from "../Components/StoreLocationMap";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import Alert from "../Components/Alert";
@@ -13,6 +13,7 @@ const StoreProfile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [alert, setAlert] = useState({ message: "", type: "" });
+    const [locationChanged, setLocationChanged] = useState(false);
 
     const [formData, setFormData] = useState({
         store_name: "",
@@ -67,30 +68,19 @@ const StoreProfile = () => {
 
     const handleLocationSelect = (lat, lng) => {
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        setLocationChanged(true);
     };
 
     const handleLocateAddress = () => {
-        if (!window.google) return;
-
-        const geocoder = new window.google.maps.Geocoder();
         const address = `${formData.city}, ${formData.store_address}`;
-
-        geocoder.geocode({ address }, (results, status) => {
-            if (status === "OK" && results[0]) {
-                const location = results[0].geometry.location;
-                const lat = location.lat();
-                const lng = location.lng();
-
-                setFormData(prev => ({
-                    ...prev,
-                    latitude: lat,
-                    longitude: lng
-                }));
-
-                setAlert({ message: "Location found and marked on map!", type: "success" });
-            } else {
-                setAlert({ message: "Address not found. Please check your City and Address.", type: "error" });
-            }
+        searchAddressAndCenter(address, (coords) => {
+            setFormData(prev => ({
+                ...prev,
+                latitude: coords.lat,
+                longitude: coords.lng
+            }));
+            setLocationChanged(true);
+            setAlert({ message: "Location found and marked on map! Remember to Save Changes.", type: "success" });
         });
     };
 
@@ -112,6 +102,7 @@ const StoreProfile = () => {
             });
 
             setAlert({ message: "Profile updated successfully!", type: "success" });
+            setLocationChanged(false);
             fetchProfile(); // Refresh
         } catch (error) {
             console.error("Error saving profile:", error);
@@ -144,12 +135,24 @@ const StoreProfile = () => {
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
-                                className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition flex items-center gap-2 shadow-lg shadow-purple-100 disabled:opacity-50"
+                                className={`px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg disabled:opacity-50 ${locationChanged
+                                    ? "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-100 border-2 border-orange-200 animate-pulse highlight-save"
+                                    : "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-100"
+                                    }`}
                             >
                                 {isSaving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <FaSave />}
-                                Save Changes
+                                {locationChanged ? "Save Location Changes" : "Save Changes"}
                             </button>
                         </div>
+
+                        {locationChanged && (
+                            <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mb-6 flex items-center gap-3 animate-fade-in">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-ping"></div>
+                                <p className="text-orange-700 text-sm font-bold">
+                                    Location updated! Click "Save Location Changes" above to persist your new shop position.
+                                </p>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Left Column: Profile Info */}
@@ -252,6 +255,7 @@ const StoreProfile = () => {
                                     <StoreLocationMap
                                         onLocationSelect={handleLocationSelect}
                                         initialLocation={{ lat: formData.latitude, lng: formData.longitude }}
+                                        city={formData.city}
                                     />
 
                                     <div className="mt-4 grid grid-cols-2 gap-4">
@@ -281,3 +285,15 @@ const StoreProfile = () => {
 };
 
 export default StoreProfile;
+
+// Add this style to handle the save button highlight
+const style = document.createElement("style");
+style.innerHTML = `
+.highlight-save {
+  border: 2px solid #ff9800 !important;
+  box-shadow: 0 0 15px rgba(255,152,0,0.6) !important;
+  transform: scale(1.02);
+}
+`;
+document.head.appendChild(style);
+
