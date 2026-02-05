@@ -19,6 +19,8 @@ import RentManagement from './Pages/RentManagement.jsx';
 import AboutUs from './Pages/AboutUs.jsx';
 import ClothingDetail from './Pages/ClothingDetail.jsx';
 import ChatPage from './Pages/ChatPage.jsx';
+import StoreProfile from './Pages/StoreProfile.jsx';
+import NearbyStores from './Pages/NearbyStores.jsx';
 
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
       <Route path="/about" element={<AboutUs />} />
       <Route path="/chat" element={<ChatPage />} />
       <Route path="/chat/:id" element={<ChatPage />} />
+      <Route path="/storeProfile" element={<StoreProfile />} />
+      <Route path="/nearbyStores" element={<NearbyStores />} />
     </Routes>
   );
 }

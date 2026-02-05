@@ -80,14 +80,14 @@ const Navbar = () => {
             </Link>
 
             {/* Logged Out Links - Locations & About */}
+            <Link
+              to="/nearbyStores"
+              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+            >
+              Nearby Stores
+            </Link>
             {!isLoggedIn && (
               <>
-                <Link
-                  to="/locations"
-                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-                >
-                  Locations
-                </Link>
                 <Link
                   to="/about"
                   className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"

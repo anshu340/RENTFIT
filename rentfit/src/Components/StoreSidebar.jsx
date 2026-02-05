@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import {
     FaHome,
@@ -31,7 +31,7 @@ const StoreSidebar = () => {
         { name: 'Rental Management', icon: FaBox, path: '/rentmanagement' },
         { name: 'Messages', icon: FaComments, path: '/chat' },
         { name: 'Donations', icon: FaHeart, path: '/storedonations' },
-        { name: 'Shop Locations', icon: FaMapMarkerAlt, path: null },
+        { name: 'Shop Locations', icon: FaMapMarkerAlt, path: '/storeProfile' },
         { name: 'User Support', icon: FaQuestionCircle, path: null },
         { name: 'Reports', icon: FaFileAlt, path: null },
     ];
@@ -104,10 +104,16 @@ const StoreSidebar = () => {
             </nav>
 
             <div className="p-3 border-t border-gray-100 space-y-1">
-                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors text-sm">
-                    <FaCog className="text-base text-gray-400" />
+                <Link
+                    to="/storeProfile"
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location.pathname === '/storeProfile'
+                        ? 'bg-purple-50 text-purple-600 font-bold'
+                        : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                >
+                    <FaCog className={`text-base ${location.pathname === '/storeProfile' ? 'text-purple-600' : 'text-gray-400'}`} />
                     <span>Settings</span>
-                </button>
+                </Link>
                 <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"

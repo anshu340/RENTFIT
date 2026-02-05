@@ -9,8 +9,9 @@ import Footer from '../Components/Footer';
 import ReviewSection from '../Components/ReviewSection';
 import ReviewForm from '../Components/ReviewForm';
 import RentalModal from '../Components/RentalModal';
+import StoreLocationMap from '../Components/StoreLocationMap';
 import Alert from '../Components/Alert';
-import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart, FaStar, FaComments } from 'react-icons/fa';
+import { FaTag, FaRuler, FaCheckCircle, FaStore, FaArrowLeft, FaShoppingCart, FaStar, FaComments, FaDirections, FaMapMarkerAlt } from 'react-icons/fa';
 
 const ClothingDetail = () => {
     const { id } = useParams();
@@ -101,7 +102,7 @@ const ClothingDetail = () => {
 
             console.log('Starting chat with store user ID:', storeUserId);
             const response = await chatAxiosInstance.post(`start/${storeUserId}/`);
-            
+
             if (response.data && response.data.id) {
                 navigate(`/chat/${response.data.id}`);
             } else {
@@ -259,6 +260,32 @@ const ClothingDetail = () => {
                                 onReviewSubmitted={handleReviewSubmitted}
                                 onCancel={() => setIsEligible(false)}
                             />
+                        </div>
+                    )}
+
+                    {/* Store Location Map */}
+                    {clothing.store_latitude && clothing.store_longitude && (
+                        <div className="max-w-4xl mx-auto mt-12 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                                    <FaMapMarkerAlt className="text-purple-500" /> Store Location
+                                </h3>
+                                <a
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=${clothing.store_latitude},${clothing.store_longitude}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-purple-50 text-purple-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-100 transition flex items-center gap-2"
+                                >
+                                    <FaDirections /> Get Directions
+                                </a>
+                            </div>
+                            <StoreLocationMap
+                                readonly={true}
+                                initialLocation={{ lat: clothing.store_latitude, lng: clothing.store_longitude }}
+                            />
+                            <p className="text-xs text-gray-500 mt-2 italic">
+                                {clothing.store_address}, {clothing.store_city}
+                            </p>
                         </div>
                     )}
 
