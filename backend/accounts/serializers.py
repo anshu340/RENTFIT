@@ -69,7 +69,7 @@ class StoreReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'store_name', 'owner_name', 'email', 'phone_number',
             'store_address', 'city', 'store_description', 'store_logo',
-            'store_logo_url', 'is_verified', 'date_joined', 'role'
+            'store_logo_url', 'latitude', 'longitude', 'is_verified', 'date_joined', 'role'
         ]
         read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role']
 
@@ -96,8 +96,15 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'store_name', 'owner_name', 'phone_number', 'store_address',
-            'city', 'store_description', 'store_logo'
+            'city', 'store_description', 'store_logo', 'latitude', 'longitude'
         ]
+
+    def validate(self, data):
+        """Only allow stores to update location"""
+        if self.instance and self.instance.role != "Store":
+            if 'latitude' in data or 'longitude' in data:
+                raise serializers.ValidationError("Only stores can set shop location.")
+        return data
 
     def validate_phone_number(self, value):
         if value:
@@ -264,7 +271,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'name', 'phone', 'role', 
             'store_name', 'store_address', 'city', 'store_description', 
-            'store_logo', 'store_logo_url',
+            'store_logo', 'store_logo_url', 'latitude', 'longitude',
             'profile_image', 'profile_image_url',
             'is_verified', 'date_joined'
         ]
@@ -341,6 +348,8 @@ class ClothingListSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     store_city = serializers.CharField(source='store.city', read_only=True)
     store_user_id = serializers.IntegerField(source='store.id', read_only=True)  # CRITICAL: This is the User ID for chat!
+    store_latitude = serializers.FloatField(source='store.latitude', read_only=True)
+    store_longitude = serializers.FloatField(source='store.longitude', read_only=True)
     image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -348,6 +357,7 @@ class ClothingListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'rental_price', 'clothing_status', 'store_user_id', 'store_name', 'store_city',
+            'store_latitude', 'store_longitude',
             'images', 'image_url', 'average_rating', 'review_count', 'created_at', 'updated_at'
         ]
 
@@ -372,6 +382,8 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
     store_phone = serializers.CharField(source='store.phone', read_only=True)
     store_address = serializers.CharField(source='store.store_address', read_only=True)
     store_city = serializers.CharField(source='store.city', read_only=True)
+    store_latitude = serializers.FloatField(source='store.latitude', read_only=True)
+    store_longitude = serializers.FloatField(source='store.longitude', read_only=True)
     image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -380,7 +392,7 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'description', 'rental_price', 'images', 'image_url',
             'clothing_status', 'store_user_id', 'store_name', 'store_email', 'store_phone',
-            'store_address', 'store_city', 'average_rating', 'review_count',
+            'store_address', 'store_city', 'store_latitude', 'store_longitude', 'average_rating', 'review_count',
             'created_at', 'updated_at'
         ]
 

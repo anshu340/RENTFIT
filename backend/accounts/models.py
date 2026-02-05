@@ -49,6 +49,10 @@ class User(AbstractUser):
     store_description = models.TextField(blank=True, null=True)
     store_logo = models.ImageField(upload_to='store_logos/', blank=True, null=True)
     profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    
+    # Location fields
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     date_joined = models.DateTimeField(auto_now_add=True)
     objects = CustomUserManager()

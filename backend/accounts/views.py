@@ -184,6 +184,27 @@ class CustomerDashboardStatsView(APIView):
             }
         }, status=status.HTTP_200_OK)
 
+
+class NearbyStoresView(APIView):
+    """
+    Get all stores that have set their location
+    GET /api/accounts/stores/nearby/
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        stores = User.objects.filter(
+            role='Store',
+            latitude__isnull=False,
+            longitude__isnull=False
+        )
+        serializer = StoreReadSerializer(stores, many=True, context={'request': request})
+        return Response({
+            "message": "Stores retrieved successfully",
+            "count": stores.count(),
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
 # CUSTOMER CRUD VIEWS
 
 

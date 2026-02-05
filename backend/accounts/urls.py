@@ -22,6 +22,7 @@ from .views import (
     WishlistCheckView,
     WishlistClearView,
     CustomerDashboardStatsView,
+    NearbyStoresView,
 )
 
 urlpatterns = [
@@ -30,6 +31,9 @@ urlpatterns = [
     path("register/store/", StoreRegisterView.as_view(), name="register-store"),
     path("verify-otp/", VerifyOTPView.as_view(), name="verify-otp"),
     path("login/", LoginView.as_view(), name="login"),
+    
+    # Location Endpoints
+    path("stores/nearby/", NearbyStoresView.as_view(), name="nearby-stores"),
     
     # Legacy Endpoints
     path("profile/", ProfileView.as_view(), name="profile"),
