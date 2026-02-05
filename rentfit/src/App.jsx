@@ -21,6 +21,7 @@ import ClothingDetail from './Pages/ClothingDetail.jsx';
 import ChatPage from './Pages/ChatPage.jsx';
 import StoreProfile from './Pages/StoreProfile.jsx';
 import NearbyStores from './Pages/NearbyStores.jsx';
+import MyReviews from './Pages/MyReviews.jsx';
 
 
 function App() {
@@ -49,7 +50,9 @@ function App() {
       <Route path="/chat/:id" element={<ChatPage />} />
       <Route path="/storeProfile" element={<StoreProfile />} />
       <Route path="/nearbyStores" element={<NearbyStores />} />
+      <Route path="/myreviews" element={<MyReviews />} />
     </Routes>
+
   );
 }
 

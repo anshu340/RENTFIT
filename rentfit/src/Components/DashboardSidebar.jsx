@@ -52,9 +52,9 @@ const DashboardSidebar = () => {
                     <FaMapMarkerAlt className="text-lg" />
                     <span>Nearby Shops</span>
                 </a>
-                <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <a href="/myreviews" onClick={(e) => { e.preventDefault(); navigate('/myreviews'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
                     <FaStar className="text-lg" />
-                    <span>Reviews</span>
+                    <span>My Reviews</span>
                 </a>
                 <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
                     <FaUser className="text-lg" />
