@@ -89,7 +89,7 @@ class EsewaVerifyView(APIView):
             payment.save()
             
             rental = payment.rental
-            rental.status = "approved"
+            rental.status = "rented"
             rental.save()
 
             # Create Notification for Store Owner
