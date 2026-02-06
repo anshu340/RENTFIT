@@ -41,7 +41,7 @@ class RentalCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("End date cannot be before start date.")
 
         # 2. Check available quantity
-        if clothing.available_quantity <= 0:
+        if clothing.stock_quantity <= 0:
             raise serializers.ValidationError("This item is currently out of stock for rent.")
 
         return data

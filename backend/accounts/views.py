@@ -449,6 +449,22 @@ class ClothingCreateView(generics.CreateAPIView):
     serializer_class = ClothingCreateSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
+    def post(self, request, *args, **kwargs):
+        """Create clothing item with error logging"""
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print(f"DEBUG: ClothingCreateView validation errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(f"DEBUG: ClothingCreateView server error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({"error": "Internal Server Error", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def perform_create(self, serializer):
         """Create clothing item with store from request user"""
         serializer.save()
@@ -505,6 +521,27 @@ class ClothingUpdateView(generics.UpdateAPIView):
     def get_queryset(self):
         """Return only clothing items belonging to the authenticated store"""
         return Clothing.objects.filter(store=self.request.user)
+
+    def patch(self, request, *args, **kwargs):
+        """Update clothing item with error logging"""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if not serializer.is_valid():
+            print(f"DEBUG: ClothingUpdateView validation errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"DEBUG: ClothingUpdateView server error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({"error": "Internal Server Error", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def perform_update(self, serializer):
+        """Return only clothing items belonging to the authenticated store"""
+        serializer.save()
 
 
 class ClothingDeleteView(generics.DestroyAPIView):

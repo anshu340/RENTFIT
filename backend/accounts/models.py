@@ -89,14 +89,17 @@ class Clothing(models.Model):
     """
     
     class Category(models.TextChoices):
-        SHIRT = "Shirt", "Shirt"
-        PANTS = "Pants", "Pants"
-        DRESS = "Dress", "Dress"
-        JACKET = "Jacket", "Jacket"
-        SKIRT = "Skirt", "Skirt"
-        SHOES = "Shoes", "Shoes"
-        ACCESSORIES = "Accessories", "Accessories"
-        OTHER = "Other", "Other"
+        FORMAL_WEAR = "Formal Wear", "Formal Wear"
+        CASUAL = "Casual", "Casual"
+        PARTY_WEAR = "Party Wear", "Party Wear"
+        TRADITIONAL = "Traditional", "Traditional"
+        SPORTS_WEAR = "Sports Wear", "Sports Wear"
+
+    class EventType(models.TextChoices):
+        WEDDING = "Wedding", "Wedding"
+        PARTY = "Party", "Party"
+        FORMAL = "Formal", "Formal"
+        CASUAL = "Casual", "Casual"
 
     class Condition(models.TextChoices):
         NEW = "New", "New"
@@ -120,6 +123,7 @@ class Clothing(models.Model):
     # Clothing details
     item_name = models.CharField(max_length=255)
     category = models.CharField(max_length=50, choices=Category.choices)
+    event_type = models.CharField(max_length=50, choices=EventType.choices, default=EventType.CASUAL)
     gender = models.CharField(
         max_length=20, 
         choices=[
@@ -132,7 +136,8 @@ class Clothing(models.Model):
     condition = models.CharField(max_length=20, choices=Condition.choices)
     description = models.TextField(blank=True, null=True)
     rental_price = models.DecimalField(max_digits=10, decimal_places=2)
-    available_quantity = models.IntegerField(default=1)  # Added for rental system
+    security_deposit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    stock_quantity = models.IntegerField(default=1)  # Renamed from available_quantity
     images = models.ImageField(upload_to='clothing_images/', blank=True, null=True)
     
     # Status tracking
@@ -146,6 +151,15 @@ class Clothing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        # Automatically update status based on stock
+        if self.stock_quantity is not None and self.stock_quantity > 0:
+            if self.clothing_status == 'Unavailable':
+                self.clothing_status = 'Available'
+        else:
+            self.clothing_status = 'Unavailable'
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Clothing Item'
@@ -156,16 +170,34 @@ class Clothing(models.Model):
 
     @property
     def average_rating(self):
-        from reviews.models import Review
-        reviews = Review.objects.filter(clothing=self)
-        if reviews.exists():
-            return round(sum(r.rating for r in reviews) / reviews.count(), 1)
-        return 0.0
+        """
+        DEPRECATED: This property causes circular import issues.
+        Use serializer's get_average_rating() method instead.
+        Kept for backward compatibility only.
+        """
+        try:
+            from reviews.models import Review
+            reviews = Review.objects.filter(clothing=self)
+            if reviews.exists():
+                return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+            return 0.0
+        except Exception as e:
+            # Avoid breaking serialization if Review model doesn't exist yet
+            return 0.0
 
     @property
     def review_count(self):
-        from reviews.models import Review
-        return Review.objects.filter(clothing=self).count()
+        """
+        DEPRECATED: This property causes circular import issues.
+        Use serializer's get_review_count() method instead.
+        Kept for backward compatibility only.
+        """
+        try:
+            from reviews.models import Review
+            return Review.objects.filter(clothing=self).count()
+        except Exception as e:
+            # Avoid breaking serialization if Review model doesn't exist yet
+            return 0
 
 class Wishlist(models.Model):
     """
