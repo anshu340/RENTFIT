@@ -180,10 +180,17 @@ const ClothingDetail = () => {
                         </div>
 
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-2 text-purple-600 text-sm font-bold uppercase tracking-wider mb-2">
-                                <FaTag size={12} />
-                                {clothing.category}
+                            <div className="flex flex-wrap items-center gap-4 mb-6">
+                                <div className="flex items-center gap-2 text-purple-600 text-sm font-bold uppercase tracking-wider">
+                                    <FaTag size={12} />
+                                    {clothing.category}
+                                </div>
+                                <div className="w-1.5 h-1.5 bg-gray-200 rounded-full"></div>
+                                <div className="text-gray-500 text-sm font-bold uppercase tracking-wider">
+                                    {clothing.event_type}
+                                </div>
                             </div>
+
                             <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{clothing.item_name}</h1>
 
                             <div className="flex items-center gap-4 mb-6">
@@ -195,17 +202,33 @@ const ClothingDetail = () => {
                                 <span className="text-gray-500 font-medium">({stats.count} reviews)</span>
                             </div>
 
-                            <div className="bg-purple-50 rounded-2xl p-6 mb-8 flex justify-between items-center border border-purple-100">
-                                <div>
-                                    <span className="text-sm text-purple-600 font-bold block">Rental Price</span>
-                                    <span className="text-4xl font-black text-purple-700">${clothing.rental_price}</span>
-                                    <span className="text-purple-600 font-medium">/day</span>
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="bg-purple-50 rounded-2xl p-6 border border-purple-100 shadow-sm transition-all hover:shadow-md">
+                                    <span className="text-xs text-purple-600 font-black uppercase tracking-widest block mb-1">Rental Price</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black text-purple-700">₹{clothing.rental_price}</span>
+                                        <span className="text-purple-600 font-bold text-xs">/day</span>
+                                    </div>
                                 </div>
-                                <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${clothing.clothing_status === 'Available'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-red-100 text-red-700'
+                                <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100 shadow-sm transition-all hover:shadow-md">
+                                    <span className="text-xs text-blue-600 font-black uppercase tracking-widest block mb-1">Security Deposit</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black text-blue-700">₹{clothing.security_deposit}</span>
+                                        <span className="text-blue-600 font-bold text-xs">ref.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mb-8 px-2">
+                                <div className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-sm ${clothing.stock_quantity > 0
+                                    ? 'bg-green-100 text-green-700 border border-green-200'
+                                    : 'bg-red-100 text-red-700 border border-red-200'
                                     }`}>
-                                    {clothing.clothing_status}
+                                    {clothing.stock_quantity > 0 ? 'Available' : 'Stock is over'}
+                                </div>
+                                <div className="text-sm font-bold text-gray-500 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-gray-300 rounded-full"></span>
+                                    In Stock: <span className="text-gray-900 font-black">{clothing.stock_quantity}</span>
                                 </div>
                             </div>
 
@@ -266,11 +289,11 @@ const ClothingDetail = () => {
 
                             <button
                                 onClick={() => setIsRentalModalOpen(true)}
-                                disabled={clothing.clothing_status !== 'Available'}
+                                disabled={clothing.stock_quantity === 0}
                                 className="w-full bg-purple-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-purple-700 shadow-xl shadow-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1 flex items-center justify-center gap-3"
                             >
                                 <FaShoppingCart size={24} />
-                                Rent Now
+                                {clothing.stock_quantity > 0 ? 'Rent Now' : 'Stock Over'}
                             </button>
 
                             <button

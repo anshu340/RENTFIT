@@ -11,33 +11,31 @@ const AddClothingItem = () => {
   const editId = searchParams.get('edit');
   const isEditMode = !!editId;
 
+  const categories = ['Formal Wear', 'Casual', 'Party Wear', 'Traditional', 'Sports Wear'];
+  const eventTypes = ['Wedding', 'Party', 'Formal', 'Casual'];
+  const conditions = ['New', 'Like New', 'Good', 'Used'];
+  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free', 'Custom'];
+
   const [formData, setFormData] = useState({
     item_name: '',
     category: '',
+    event_type: '',
     gender: '',
     size: '',
     condition: '',
     rental_price: '',
+    security_deposit: '',
+    stock_quantity: '1',
     description: '',
     clothing_status: 'Available'
   });
-  
+
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [existingImage, setExistingImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-
-  const categories = [
-    'Shirt', 'Pants', 'Dress', 'Jacket', 'Skirt', 'Shoes', 'Accessories', 'Other'
-  ];
-
-  const conditions = ['New', 'Like New', 'Good', 'Used'];
-  
-  const genders = ['Male', 'Female', 'Other'];
-  
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free', 'Custom'];
 
   useEffect(() => {
     if (isEditMode) {
@@ -54,10 +52,13 @@ const AddClothingItem = () => {
         setFormData({
           item_name: item.item_name || '',
           category: item.category || '',
-          gender: item.gender || '',
+          event_type: item.event_type || '',
+          gender: item.gender || 'Female',
           size: item.size || '',
           condition: item.condition || '',
           rental_price: item.rental_price || '',
+          security_deposit: item.security_deposit || '',
+          stock_quantity: item.stock_quantity || '1',
           description: item.description || '',
           clothing_status: item.clothing_status || 'Available'
         });
@@ -99,18 +100,29 @@ const AddClothingItem = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess(false);
 
     try {
       const formDataToSend = new FormData();
-      
-      // Append all fields
+
+      // Append all fields with cleanup
       Object.keys(formData).forEach(key => {
-        if (formData[key]) {
-          formDataToSend.append(key, formData[key]);
+        let value = formData[key];
+
+        // Data Cleanup: Ensure numeric fields are correctly handled
+        if (['rental_price', 'security_deposit', 'stock_quantity'].includes(key)) {
+          if (value === "" || value === null || value === undefined) {
+            // Let backend handle defaults or required validation
+            return;
+          }
+          value = Number(value);
+        }
+
+        if (value !== undefined && value !== null) {
+          formDataToSend.append(key, value);
         }
       });
 
@@ -119,15 +131,14 @@ const AddClothingItem = () => {
         formDataToSend.append('images', imageFile);
       }
 
-      let response;
       if (isEditMode) {
-        response = await axiosInstance.put(`clothing/${editId}/update/`, formDataToSend, {
+        await axiosInstance.put(`clothing/${editId}/update/`, formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           }
         });
       } else {
-        response = await axiosInstance.post('clothing/create/', formDataToSend, {
+        await axiosInstance.post('clothing/create/', formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           }
@@ -135,15 +146,30 @@ const AddClothingItem = () => {
       }
 
       setSuccess(true);
-      
-      // Redirect to my clothing items after successful submission
       setTimeout(() => {
-        navigate('/my-clothing-items');
+        navigate('/myClothingItems');
       }, 1500);
 
     } catch (err) {
       console.error('Error saving clothing item:', err);
-      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to save clothing item');
+
+      // Improved Error Handling: Show field-level errors
+      if (err.response?.data) {
+        const backendErrors = err.response.data;
+        if (typeof backendErrors === 'object' && !Array.isArray(backendErrors)) {
+          const errorMessages = Object.keys(backendErrors).map(field => {
+            const messages = Array.isArray(backendErrors[field])
+              ? backendErrors[field].join(", ")
+              : backendErrors[field];
+            return `${field.replace('_', ' ')}: ${messages}`;
+          });
+          setError(errorMessages.join(" | "));
+        } else {
+          setError(err.response?.data?.message || err.response?.data?.error || 'Failed to save clothing item');
+        }
+      } else {
+        setError('Failed to connect to server. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -180,273 +206,341 @@ const AddClothingItem = () => {
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="mb-6">
-            <button 
-              onClick={() => navigate('/myclothingitems')}
-              className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                {isEditMode ? 'Edit Clothing Item' : 'Add New Clothing Item'}
+              </h1>
+              <p className="text-gray-500 mt-1">
+                Fill in the details below to {isEditMode ? 'update' : 'add'} a new clothing item to the rental platform
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/myClothingItems')}
+              className="px-6 py-2.5 bg-white border border-gray-100 rounded-xl shadow-sm text-sm font-bold text-gray-600 hover:text-purple-600 transition-all flex items-center gap-2"
             >
-              <FaArrowLeft className="mr-2" />
+              <FaArrowLeft size={12} />
               Back to Inventory
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? 'Edit Clothing Item' : 'Add New Clothing Item'}
-            </h1>
-            <p className="text-gray-600 text-sm mt-1">
-              Fill in the details below to {isEditMode ? 'update' : 'add'} a clothing item to the rental platform
-            </p>
           </div>
 
-          {/* Success Message */}
-          {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-              {isEditMode ? 'Clothing item updated successfully!' : 'Clothing item added successfully!'}
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-              {error}
-            </div>
-          )}
-
-          <div>
-            {/* Item Information Card */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-purple-600 font-semibold">+</span>
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Item Information</h2>
-                  <p className="text-sm text-gray-600">Provide accurate details for better customer experience</p>
-                </div>
+          <div className="space-y-6">
+            {/* Success Message */}
+            {success && (
+              <div className="p-4 bg-green-50 border border-green-100 rounded-2xl text-green-700 font-medium animate-pulse">
+                {isEditMode ? 'Item updated successfully!' : 'Item added successfully to inventory!'}
               </div>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Item Name */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Item Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="item_name"
-                    value={formData.item_name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Designer Evening Gown"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  />
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 font-medium">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Item Information Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-50 bg-gray-50/30">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                      <span className="text-2xl font-bold">+</span>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">Item Information</h2>
+                      <p className="text-sm text-gray-500">Provide accurate details for better customer experience</p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
+                <div className="p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Item Name */}
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Item Name *</label>
+                      <input
+                        type="text"
+                        name="item_name"
+                        value={formData.item_name}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Designer Evening Gown"
+                        className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium"
+                        required
+                      />
+                    </div>
 
-                {/* Condition */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Condition *
-                  </label>
-                  <select
-                    name="condition"
-                    value={formData.condition}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Condition</option>
-                    {conditions.map(cond => (
-                      <option key={cond} value={cond}>{cond}</option>
-                    ))}
-                  </select>
-                </div>
+                    {/* Category */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Category *</label>
+                      <div className="relative">
+                        <select
+                          name="category"
+                          value={formData.category}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none text-sm font-medium transition-all"
+                          required
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                        <FaArrowLeft className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-90 text-gray-400 pointer-events-none" size={12} />
+                      </div>
+                    </div>
 
-                {/* Gender */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Gender *
-                  </label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Gender</option>
-                    {genders.map(gen => (
-                      <option key={gen} value={gen}>{gen}</option>
-                    ))}
-                  </select>
-                </div>
+                    {/* Gender Selection */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Gender *</label>
+                      <div className="relative">
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none text-sm font-medium transition-all"
+                          required
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <FaArrowLeft className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-90 text-gray-400 pointer-events-none" size={12} />
+                      </div>
+                    </div>
 
-                {/* Rental Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rental Price (per day) *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-gray-500">$</span>
-                    <input
-                      type="number"
-                      name="rental_price"
-                      value={formData.rental_price}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      required
-                    />
+                    {/* Condition */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Condition *</label>
+                      <div className="relative">
+                        <select
+                          name="condition"
+                          value={formData.condition}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none text-sm font-medium transition-all"
+                          required
+                        >
+                          <option value="">Select Condition</option>
+                          {conditions.map(cond => (
+                            <option key={cond} value={cond}>{cond}</option>
+                          ))}
+                        </select>
+                        <FaArrowLeft className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-90 text-gray-400 pointer-events-none" size={12} />
+                      </div>
+                    </div>
+
+                    {/* Event Type */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Event Type *</label>
+                      <div className="relative">
+                        <select
+                          name="event_type"
+                          value={formData.event_type}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none text-sm font-medium transition-all"
+                          required
+                        >
+                          <option value="">Select Event Type</option>
+                          {eventTypes.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                        </select>
+                        <FaArrowLeft className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-90 text-gray-400 pointer-events-none" size={12} />
+                      </div>
+                    </div>
+
+                    {/* Stock Quantity */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Stock Quantity *</label>
+                      <input
+                        type="number"
+                        name="stock_quantity"
+                        value={formData.stock_quantity}
+                        onChange={handleInputChange}
+                        placeholder="0"
+                        min="1"
+                        className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium"
+                        required
+                      />
+                    </div>
+
+                    {/* Size Selection */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Size *</label>
+                      <div className="flex flex-wrap gap-2">
+                        {sizes.map(size => (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, size }))}
+                            className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${formData.size === size
+                              ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-105'
+                              : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'
+                              }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Product Images */}
+                    <div className="md:row-span-3">
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Product Images *</label>
+                      <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer group relative">
+                        {imagePreview || existingImage ? (
+                          <div className="relative inline-block w-full">
+                            <img
+                              src={imagePreview || existingImage}
+                              alt="Item Preview"
+                              className="w-full aspect-[4/5] object-cover rounded-2xl shadow-md"
+                            />
+                            <button
+                              type="button"
+                              onClick={removeImage}
+                              className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md text-red-500 rounded-full shadow-lg hover:bg-white hover:scale-110 transition-all"
+                            >
+                              <FaTimes size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <label htmlFor="image-upload" className="block cursor-pointer py-10">
+                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                              <FaUpload className="text-purple-600" size={24} />
+                            </div>
+                            <h3 className="text-gray-900 font-bold mb-1">
+                              {imageFile ? `Selected: ${imageFile.name}` : 'Click to upload images'}
+                            </h3>
+                            <p className="text-xs text-gray-400 font-medium">PNG, JPG up to 10MB each</p>
+                            <div className="mt-6 px-6 py-2.5 bg-purple-600 text-white text-xs font-black uppercase tracking-widest rounded-xl inline-block shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all">
+                              {imageFile ? 'Change File' : 'Choose Files'}
+                            </div>
+                          </label>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                          id="image-upload"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Rental Price */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Rental Price (per day) *</label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                        <input
+                          type="number"
+                          name="rental_price"
+                          value={formData.rental_price}
+                          onChange={handleInputChange}
+                          placeholder="0.00"
+                          step="0.01"
+                          className="w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Security Deposit */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Security Deposit *</label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                        <input
+                          type="number"
+                          name="security_deposit"
+                          value={formData.security_deposit}
+                          onChange={handleInputChange}
+                          placeholder="0.00"
+                          step="0.01"
+                          className="w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="md:col-span-1">
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Description</label>
+                      <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        placeholder="Describe the item details, material, occasion, care instructions..."
+                        rows="6"
+                        className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium resize-none"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Size Selection */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Size *
-                </label>
-                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                  {sizes.map(size => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, size }))}
-                      className={`py-2 px-4 border rounded-lg text-sm font-medium transition-colors ${
-                        formData.size === size
-                          ? 'bg-purple-600 text-white border-purple-600'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-purple-300'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Product Images */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Images {!isEditMode && '*'}
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  {imagePreview ? (
-                    <div className="relative inline-block">
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
-                        className="max-h-48 rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      >
-                        <FaTimes className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : existingImage && !imageFile ? (
-                    <div className="relative inline-block">
-                      <img 
-                        src={existingImage} 
-                        alt="Current" 
-                        className="max-h-48 rounded-lg"
-                      />
-                      <p className="text-sm text-gray-500 mt-2">Current Image</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <FaUpload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-600 mb-1">Click to upload images</p>
-                      <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className="mt-4 inline-block px-6 py-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 transition-colors"
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pb-20">
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-white border border-gray-100 text-gray-700 font-bold rounded-xl shadow-sm hover:bg-gray-50 transition-all uppercase tracking-widest text-xs"
+                >
+                  Save as Draft
+                </button>
+                <div className="flex w-full sm:w-auto gap-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/myClothingItems')}
+                    className="flex-1 sm:flex-none px-8 py-3.5 bg-white border border-gray-100 text-gray-500 font-bold rounded-xl hover:text-red-500 transition-all uppercase tracking-widest text-xs"
                   >
-                    {imagePreview || existingImage ? 'Change Image' : 'Choose File'}
-                  </label>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 sm:flex-none px-12 py-3.5 bg-purple-600 text-white font-black rounded-xl hover:bg-purple-700 transition-all disabled:bg-purple-300 shadow-xl shadow-purple-100 uppercase tracking-widest text-xs flex items-center justify-center gap-3"
+                  >
+                    {loading ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <span>{isEditMode ? 'Update Item' : '+ Add Item to Inventory'}</span>
+                    )}
+                  </button>
                 </div>
               </div>
+            </form>
 
-              {/* Description */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe the item details, material, occasion, care instructions..."
-                  rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-between gap-3">
-              <button
-                type="button"
-                onClick={handleSaveDraft}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Save as Draft
-              </button>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => navigate('/myclothingitems')}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-purple-400 disabled:cursor-not-allowed flex items-center"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      {isEditMode ? 'Updating...' : 'Adding...'}
-                    </>
-                  ) : (
-                    isEditMode ? 'Update Item' : '+ Add Item to Inventory'
-                  )}
-                </button>
+            {/* Quick Tips Section */}
+            <div className="bg-blue-50/50 rounded-2xl p-8 border border-blue-100/50">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                  <span className="text-xl font-bold">💡</span>
+                </div>
+                <div>
+                  <h3 className="text-blue-900 font-black uppercase tracking-tighter text-sm mb-4">Quick Tips for Better Listings</h3>
+                  <ul className="space-y-3">
+                    <li className="text-blue-700/80 text-sm font-medium flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      Use high-quality, well-lit photos from multiple angles
+                    </li>
+                    <li className="text-blue-700/80 text-sm font-medium flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      Include detailed measurements and fabric information
+                    </li>
+                    <li className="text-blue-700/80 text-sm font-medium flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      Mention any special care instructions or restrictions
+                    </li>
+                    <li className="text-blue-700/80 text-sm font-medium flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      Set competitive pricing based on similar items in your area
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

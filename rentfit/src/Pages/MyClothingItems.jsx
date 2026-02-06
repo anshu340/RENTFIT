@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { FaTshirt,  FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaDollarSign, FaBox } from "react-icons/fa";
+import { FaTshirt, FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaDollarSign, FaBox } from "react-icons/fa";
 
 const MyClothingItems = () => {
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const MyClothingItems = () => {
   };
 
   const handleEdit = (id) => {
-    navigate(`/add-clothing?edit=${id}`);
+    navigate(`/addClothingItem?edit=${id}`);
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
@@ -90,11 +90,12 @@ const MyClothingItems = () => {
 
     const config = statusConfig[status] || statusConfig.Available;
     const Icon = config.icon;
+    const label = status === 'Unavailable' ? 'Stock Over' : status;
 
     return (
       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
         <Icon className="text-xs" />
-        {status}
+        {label}
       </span>
     );
   };
@@ -147,11 +148,10 @@ const MyClothingItems = () => {
           {/* Message Display */}
           {message.text && (
             <div
-              className={`mb-6 p-4 rounded-lg ${
-                message.type === "success"
-                  ? "bg-green-50 text-green-800 border border-green-200"
-                  : "bg-red-50 text-red-800 border border-red-200"
-              }`}
+              className={`mb-6 p-4 rounded-lg ${message.type === "success"
+                ? "bg-green-50 text-green-800 border border-green-200"
+                : "bg-red-50 text-red-800 border border-red-200"
+                }`}
             >
               {message.text}
             </div>
@@ -193,15 +193,16 @@ const MyClothingItems = () => {
 
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm">
-                        <FaDollarSign className="text-purple-600" />
-                        <span className="font-semibold text-purple-600">${item.rental_price}/day</span>
+                        <span className="font-semibold text-purple-600">₹{item.rental_price}/day</span>
+                        <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <span className="text-blue-600 font-bold">₹{item.security_deposit} ref.</span>
                       </div>
                       <div className="text-sm text-gray-600">
-                        <span className="font-medium">Category:</span> {item.category}
+                        <span className="font-medium">Category:</span> {item.category} | {item.event_type}
                       </div>
                       <div className="text-sm text-gray-600">
                         <span className="font-medium">Size:</span> {item.size} |{" "}
-                        <span className="font-medium">Condition:</span> {item.condition}
+                        <span className="font-medium">Stock:</span> {item.stock_quantity}
                       </div>
                       <div className="text-xs text-gray-500">
                         Added: {formatDate(item.created_at)}
@@ -293,7 +294,10 @@ const MyClothingItems = () => {
                   <div className="flex items-center gap-3">
                     {getStatusBadge(selectedItem.clothing_status)}
                     <span className="text-lg font-bold text-purple-600">
-                      ${selectedItem.rental_price}/day
+                      ₹{selectedItem.rental_price}/day
+                    </span>
+                    <span className="text-lg font-bold text-blue-600">
+                      ₹{selectedItem.security_deposit} Ref.
                     </span>
                   </div>
                 </div>
@@ -304,12 +308,12 @@ const MyClothingItems = () => {
                     <p className="font-medium">{selectedItem.category}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Gender</p>
-                    <p className="font-medium">{selectedItem.gender}</p>
+                    <p className="text-sm text-gray-600">Event Type</p>
+                    <p className="font-medium">{selectedItem.event_type}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Size</p>
-                    <p className="font-medium">{selectedItem.size}</p>
+                    <p className="text-sm text-gray-600">Stock Quantity</p>
+                    <p className="font-medium">{selectedItem.stock_quantity}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Condition</p>
