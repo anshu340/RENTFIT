@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'notifications',
     'reviews',
     'chat',
+    'payments',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -159,3 +160,9 @@ import os
 # Media files (uploaded files like store logos)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# eSewa ePay v2 Configuration
+ESEWA_SECRET_KEY = "8gBm/:&EnhH.1/q"
+ESEWA_PRODUCT_CODE = "EPAYTEST"
+ESEWA_PAYMENT_URL = "https://rc-epay.esewa.com.np/api/epay/main/v2/form"
+ESEWA_VERIFY_URL = "https://rc-epay.esewa.com.np/api/epay/transaction/status/"
