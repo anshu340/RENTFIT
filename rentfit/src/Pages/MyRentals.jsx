@@ -115,7 +115,7 @@ const MyRentals = () => {
                 <DashboardSidebar />
 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col min-h-screen">
+                <div className="flex-1 flex flex-col min-h-screen p-6 md:p-8 space-y-6">
 
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

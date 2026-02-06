@@ -160,9 +160,9 @@ const DonateClothing = () => {
         <DashboardSidebar />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col min-h-screen p-6 md:p-8 space-y-8">
           {/* Header Section */}
-          <div className="text-center mb-12">
+          <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
               Give Your Clothes a <span className="text-purple-600">New Life</span>
             </h1>
@@ -175,7 +175,7 @@ const DonateClothing = () => {
           {/* Donation Steps Component - Always Visible */}
           <DonationSteps />
 
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto w-full">
             {/* Conditional Rendering: Form or CTA */}
             {isAuthenticated && userRole === "Customer" ? (
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">

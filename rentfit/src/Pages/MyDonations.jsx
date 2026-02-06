@@ -119,8 +119,8 @@ const MyDonations = () => {
         <DashboardSidebar />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen">
-          <div className="flex items-center justify-between mb-6">
+        <div className="flex-1 flex flex-col min-h-screen p-6 md:p-8 space-y-6">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                 <FaTshirt className="text-purple-600 text-xl" />
@@ -138,7 +138,7 @@ const MyDonations = () => {
           {/* Message Display */}
           {message.text && (
             <div
-              className={`mb-6 p-4 rounded-lg ${
+              className={`p-4 rounded-lg ${
                 message.type === "success"
                   ? "bg-green-50 text-green-800 border border-green-200"
                   : "bg-red-50 text-red-800 border border-red-200"
