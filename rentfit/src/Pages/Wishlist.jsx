@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  AiFillHeart, 
-  AiOutlineHeart, 
+import {
+  AiFillHeart,
+  AiOutlineHeart,
   AiOutlineLoading3Quarters,
   AiOutlineWarning
 } from 'react-icons/ai';
+import Navbar from '../Components/Navbar';
+import Footer from "../Components/Footer";
+import DashboardSidebar from '../Components/DashboardSidebar';
 import { BsGrid3X3Gap, BsList } from 'react-icons/bs';
 import axiosInstance from "../services/axiosInstance";
 
@@ -82,7 +85,7 @@ const Wishlist = () => {
     if (!window.confirm('Are you sure you want to clear your entire wishlist?')) {
       return;
     }
-    
+
     try {
       const response = await axiosInstance.delete('wishlist/clear/');
       setWishlist([]);
@@ -129,8 +132,8 @@ const Wishlist = () => {
   const ItemCard = ({ item, compact = false }) => (
     <div className={`bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${compact ? 'flex flex-col h-full' : ''}`}>
       <div className="relative">
-        <img 
-          src={item.image_url || item.images || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=400&fit=crop'} 
+        <img
+          src={item.image_url || item.images || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=400&fit=crop'}
           alt={item.item_name}
           className={`w-full object-cover ${compact ? 'h-48' : 'h-64'}`}
         />
@@ -176,7 +179,7 @@ const Wishlist = () => {
             <span className="text-2xl font-bold text-purple-600">${item.rental_price}</span>
             <span className="text-sm text-gray-500">/day</span>
           </div>
-          <button 
+          <button
             onClick={() => createRental(item.id)}
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={item.clothing_status !== 'Available'}
@@ -269,13 +272,22 @@ const Wishlist = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Error Message */}
-      {error && <ErrorMessage message={error} />}
+    <>
+      <Navbar />
+      <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        <DashboardSidebar />
 
-      {/* Page Content */}
-      <WishlistPage />
-    </div>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen">
+          {/* Error Message */}
+          {error && <ErrorMessage message={error} />}
+
+          {/* Page Content */}
+          <WishlistPage />
+        </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 

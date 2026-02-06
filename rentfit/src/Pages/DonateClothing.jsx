@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import donationAxios from "../services/donationAxios";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import DashboardSidebar from '../Components/DashboardSidebar';
 import DonationSteps from "../Components/DonationSteps";
 import { FaTshirt, FaStore, FaImage, FaLock, FaUserPlus, FaSignInAlt } from "react-icons/fa";
 
@@ -155,8 +156,11 @@ const DonateClothing = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        <DashboardSidebar />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen">
           {/* Header Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">

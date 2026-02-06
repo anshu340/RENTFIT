@@ -3,7 +3,8 @@ import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-map
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { FaStore, FaMapMarkerAlt, FaPhone, FaArrowRight } from "react-icons/fa";
+import DashboardSidebar from '../Components/DashboardSidebar';
+import { FaStore, FaMapMarkerAlt, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const containerStyle = {
@@ -60,7 +61,11 @@ const NearbyStores = () => {
         <div className="min-h-screen bg-white flex flex-col">
             <Navbar />
 
-            <div className="flex-1 relative flex flex-col lg:flex-row">
+            <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        <DashboardSidebar />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen">
                 {/* Sidebar - Store List */}
                 <div className="w-full lg:w-96 bg-white border-r border-gray-100 flex flex-col h-[40vh] lg:h-auto overflow-hidden">
                     <div className="p-6 border-b border-gray-50">
@@ -146,7 +151,7 @@ const NearbyStores = () => {
                     </GoogleMap>
                 </div>
             </div>
-
+                </div>
             <Footer />
         </div>
     );

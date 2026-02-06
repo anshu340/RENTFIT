@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import DashboardSidebar from '../Components/DashboardSidebar';
 import Alert from "../Components/Alert";
 import RentalModal from "../Components/RentalModal";
 import { FaHeart, FaRegHeart, FaTh, FaList, FaStar, FaFilter } from "react-icons/fa";
@@ -269,8 +270,11 @@ const BrowseClothes = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+       <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        <DashboardSidebar />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Filters Sidebar */}
             <div className="lg:w-64 flex-shrink-0">

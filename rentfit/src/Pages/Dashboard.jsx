@@ -4,6 +4,7 @@ import axiosInstance from '../services/axiosInstance';
 import donationAxios from '../services/donationAxios';
 import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
+import Footer from '../Components/Footer';
 import DashboardSidebar from '../Components/DashboardSidebar';
 import {
   FaHeart,
@@ -388,6 +389,7 @@ const Dashboard = () => {
           </main>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

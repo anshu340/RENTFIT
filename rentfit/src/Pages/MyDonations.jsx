@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import donationAxios from "../services/donationAxios";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import DashboardSidebar from '../Components/DashboardSidebar';
 import { FaTshirt, FaStore, FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaBox } from "react-icons/fa";
 
 const MyDonations = () => {
@@ -114,8 +115,11 @@ const MyDonations = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-6xl mx-auto px-4">
+      <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        <DashboardSidebar />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">

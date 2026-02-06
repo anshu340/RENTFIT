@@ -4,6 +4,7 @@ import axiosInstance from '../services/axiosInstance';
 import chatAxiosInstance from '../services/chatAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import DashboardSidebar from '../Components/DashboardSidebar';
 import { FaPaperPlane, FaUserCircle, FaStore, FaClock } from 'react-icons/fa';
 
 const ChatPage = () => {
@@ -118,7 +119,11 @@ const ChatPage = () => {
     return (
         <>
             <Navbar />
-            <div className="bg-gray-50 py-4 chat-page flex flex-col" style={{ height: "calc(100vh - 120px)" }}>
+            <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        <DashboardSidebar />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen" style={{ height: "calc(100vh - 120px)" }}>
                 <div className="max-w-6xl mx-auto px-4 w-full h-full">
                     <div className="chat-wrapper grid grid-cols-1 md:grid-cols-4 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-full">
 
@@ -248,7 +253,9 @@ const ChatPage = () => {
                     </div>
                 </div>
             </div>
+            </div>
             <Footer />
+
         </>
     );
 };
