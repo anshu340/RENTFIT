@@ -23,6 +23,8 @@ import StoreProfile from './Pages/StoreProfile.jsx';
 import NearbyStores from './Pages/NearbyStores.jsx';
 import MyReviews from './Pages/MyReviews.jsx';
 import UserProfile from './Pages/UserProfile.jsx';
+import PaymentSuccess from './Pages/PaymentSuccess.jsx';
+import PaymentFailure from './Pages/PaymentFailure.jsx';
 
 
 function App() {
@@ -53,6 +55,8 @@ function App() {
       <Route path="/storeProfile" element={<StoreProfile />} />
       <Route path="/nearbyStores" element={<NearbyStores />} />
       <Route path="/myreviews" element={<MyReviews />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/payment-failure" element={<PaymentFailure />} />
     </Routes>
 
   );
