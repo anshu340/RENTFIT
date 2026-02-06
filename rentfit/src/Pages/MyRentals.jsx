@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import rentalAxiosInstance from '../services/rentalAxiosInstance';
+import paymentAxiosInstance from '../services/paymentAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Alert from '../Components/Alert';
-import { FaCalendarAlt, FaDollarSign, FaClock, FaCheckCircle, FaTimesCircle, FaUndo } from 'react-icons/fa';
+import EsewaPayment from '../Components/EsewaPayment';
+import { FaCalendarAlt, FaDollarSign, FaClock, FaCheckCircle, FaTimesCircle, FaUndo, FaCreditCard } from 'react-icons/fa';
 
 const MyRentals = () => {
     const [rentals, setRentals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [alert, setAlert] = useState({ message: '', type: '' });
+    const [paymentData, setPaymentData] = useState(null);
 
     useEffect(() => {
         fetchRentals();
@@ -38,6 +41,19 @@ const MyRentals = () => {
         }
     };
 
+    const handlePayment = async (rentalId) => {
+        try {
+            const paymentRes = await paymentAxiosInstance.post('initiate/', {
+                rental_id: rentalId
+            });
+            setPaymentData(paymentRes.data);
+            showAlert('Redirecting to eSewa...', 'success');
+        } catch (error) {
+            console.error('Payment Error:', error);
+            showAlert('Failed to initiate payment.', 'error');
+        }
+    };
+
     const showAlert = (message, type) => {
         setAlert({ message, type });
     };
@@ -56,6 +72,7 @@ const MyRentals = () => {
 
     return (
         <>
+            {paymentData && <EsewaPayment data={paymentData} />}
             <Navbar />
             <div className="min-h-screen bg-gray-50 py-12 px-4">
                 <div className="max-w-6xl mx-auto">
@@ -121,12 +138,20 @@ const MyRentals = () => {
                                     </div>
 
                                     <div className="p-4 bg-gray-50 border-t border-gray-100">
-                                        {(rental.status === 'approved' || rental.status === 'rented') && (
+                                        {rental.status === 'rented' && (
                                             <button
                                                 onClick={() => handleMarkReturned(rental.id)}
                                                 className="w-full py-2 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 transition-colors shadow-sm"
                                             >
                                                 Mark as Returned
+                                            </button>
+                                        )}
+                                        {rental.status === 'approved' && (
+                                            <button
+                                                onClick={() => handlePayment(rental.id)}
+                                                className="w-full py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+                                            >
+                                                <FaCreditCard /> Pay Now
                                             </button>
                                         )}
                                         {rental.status === 'pending' && (

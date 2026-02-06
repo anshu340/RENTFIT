@@ -19,21 +19,14 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
 
         try {
             // Step 1: Create Rental
-            const response = await rentalAxiosInstance.post('create/', {
+            await rentalAxiosInstance.post('create/', {
                 clothing: clothing.id,
                 rent_start_date: startDate,
                 rent_end_date: endDate,
             });
 
-            const rentalId = response.data.id;
-
-            // Step 2: Initiate Payment
-            const paymentRes = await paymentAxiosInstance.post('initiate/', {
-                rental_id: rentalId
-            });
-
-            setPaymentData(paymentRes.data);
-            onRentalCreated('Rental created! Redirecting to eSewa...', 'success');
+            onRentalCreated('Rental request sent to store! Waiting for approval.', 'success');
+            onClose();
 
         } catch (err) {
             console.error('Rental Creation Error:', err.response?.data);
@@ -120,7 +113,7 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
                                 className={`flex-1 py-3 bg-purple-600 rounded-xl text-white font-bold shadow-lg transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700 hover:-translate-y-0.5'
                                     }`}
                             >
-                                {isLoading ? 'Processing...' : 'Pay with eSewa'}
+                                {isLoading ? 'Sending Request...' : 'Request Rental'}
                             </button>
                         </div>
                     </form>
