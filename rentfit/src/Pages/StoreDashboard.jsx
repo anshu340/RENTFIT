@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import donationAxios from "../services/donationAxios";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 import StoreSidebar from "../Components/StoreSidebar";
 import {
   FaBell, FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle,
@@ -215,199 +217,209 @@ const StoreDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex justify-center items-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <StoreSidebar />
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Navbar />
+      
+      <div className="flex flex-1">
+        <StoreSidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="px-8 py-5 flex items-center justify-between">
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-800">{storeInfo.storeName || "Store Dashboard"}</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {storeInfo.description || "Monitor and manage rental operations"}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer">
-                  {storeInfo.storeImage ? (
-                    <img src={storeInfo.storeImage} alt="Store Logo" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm font-bold">
-                      {storeInfo.ownerName?.charAt(0)?.toUpperCase() || 'S'}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{storeInfo.ownerName || "Store Owner"}</p>
-                  <p className="text-xs text-gray-500">Sub-Admin</p>
-                </div>
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="px-8 py-5 flex items-center justify-between">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-800">{storeInfo.storeName || "Store Dashboard"}</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {storeInfo.description || "Monitor and manage rental operations"}
+                </p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Dashboard Content */}
-        <div className="p-8">
-          {/* Metrics Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-            <InfoCard icon={FaTshirt} label="Total Listings" value={stats.totalClothes} color="purple" trend={`${stats.availableClothes} available`} />
-            <InfoCard icon={FaBox} label="Currently Rented" value={stats.unavailableClothes} color="orange" trend={`${stats.totalClothes - stats.unavailableClothes} ready to rent`} />
-            <InfoCard icon={FaHeart} label="Total Donations" value={stats.approvedDonations + stats.collectedDonations} color="blue" trend={`${stats.collectedDonations} collected`} />
-            <InfoCard icon={FaClock} label="Pending Reviews" value={stats.pendingDonations} color="green" trend="Needs attention" />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaTshirt className="text-purple-500" />Clothing Breakdown</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Available</span><span className="text-lg font-bold text-green-600">{stats.availableClothes}</span></div>
-                <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-green-500 h-2 rounded-full" style={{ width: `${stats.totalClothes > 0 ? (stats.availableClothes / stats.totalClothes) * 100 : 0}%` }}></div></div>
-                <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Rented</span><span className="text-lg font-bold text-orange-600">{stats.unavailableClothes}</span></div>
-                <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-orange-500 h-2 rounded-full" style={{ width: `${stats.totalClothes > 0 ? (stats.unavailableClothes / stats.totalClothes) * 100 : 0}%` }}></div></div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaHeart className="text-blue-500" />Donations status</h3>
-              <div className="space-y-3 font-semibold text-sm">
-                <div className="flex justify-between"><span>Approved</span><span className="text-green-600">{stats.approvedDonations}</span></div>
-                <div className="flex justify-between"><span>Collected</span><span className="text-blue-600">{stats.collectedDonations}</span></div>
-                <div className="flex justify-between"><span>Pending</span><span className="text-yellow-600">{stats.pendingDonations}</span></div>
-                <div className="flex justify-between"><span>Rejected</span><span className="text-red-600">{stats.rejectedDonations}</span></div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaCheckCircle className="text-green-500" />Summary</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between"><span>Total Items</span><span className="font-bold">{stats.totalClothes}</span></div>
-                <div className="flex justify-between"><span>Utilization</span><span className="font-bold text-purple-600">{stats.totalClothes > 0 ? Math.round((stats.unavailableClothes / stats.totalClothes) * 100) : 0}%</span></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Donation Status Chart */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-6">Donation Status</h3>
-              <div className="relative w-48 h-48 mx-auto mb-6">
-                <svg viewBox="0 0 100 100" className="transform -rotate-90">
-                  <circle cx="50" cy="50" r="35" fill="none" stroke="#e5e7eb" strokeWidth="10" />
-                  {(() => {
-                    const total = Math.max(stats.approvedDonations + stats.pendingDonations + stats.rejectedDonations + stats.collectedDonations, 1);
-                    const circumference = 2 * Math.PI * 35;
-                    const approvedPercent = stats.approvedDonations / total;
-                    const collectedPercent = stats.collectedDonations / total;
-                    const pendingPercent = stats.pendingDonations / total;
-
-                    return (
-                      <>
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="35"
-                          fill="none"
-                          stroke="#10b981"
-                          strokeWidth="10"
-                          strokeDasharray={circumference}
-                          strokeDashoffset={circumference - (circumference * approvedPercent)}
-                          strokeLinecap="round"
-                        />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="35"
-                          fill="none"
-                          stroke="#3b82f6"
-                          strokeWidth="10"
-                          strokeDasharray={circumference}
-                          strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent))}
-                          strokeLinecap="round"
-                        />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="35"
-                          fill="none"
-                          stroke="#f59e0b"
-                          strokeWidth="10"
-                          strokeDasharray={circumference}
-                          strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent + pendingPercent))}
-                          strokeLinecap="round"
-                        />
-                      </>
-                    );
-                  })()}
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-center">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer">
+                    {storeInfo.storeImage ? (
+                      <img src={storeInfo.storeImage} alt="Store Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm font-bold">
+                        {storeInfo.ownerName?.charAt(0)?.toUpperCase() || 'S'}
+                      </div>
+                    )}
+                  </div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-800">
-                      {stats.approvedDonations + stats.collectedDonations + stats.pendingDonations + stats.rejectedDonations}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">Total Donations</div>
+                    <p className="text-sm font-medium text-gray-800">{storeInfo.ownerName || "Store Owner"}</p>
+                    <p className="text-xs text-gray-500">Sub-Admin</p>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-gray-600">Approved ({stats.approvedDonations})</span>
+            </div>
+          </div>
+
+          {/* Dashboard Content */}
+          <div className="p-8">
+            {/* Metrics Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+              <InfoCard icon={FaTshirt} label="Total Listings" value={stats.totalClothes} color="purple" trend={`${stats.availableClothes} available`} />
+              <InfoCard icon={FaBox} label="Currently Rented" value={stats.unavailableClothes} color="orange" trend={`${stats.totalClothes - stats.unavailableClothes} ready to rent`} />
+              <InfoCard icon={FaHeart} label="Total Donations" value={stats.approvedDonations + stats.collectedDonations} color="blue" trend={`${stats.collectedDonations} collected`} />
+              <InfoCard icon={FaClock} label="Pending Reviews" value={stats.pendingDonations} color="green" trend="Needs attention" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaTshirt className="text-purple-500" />Clothing Breakdown</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Available</span><span className="text-lg font-bold text-green-600">{stats.availableClothes}</span></div>
+                  <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-green-500 h-2 rounded-full" style={{ width: `${stats.totalClothes > 0 ? (stats.availableClothes / stats.totalClothes) * 100 : 0}%` }}></div></div>
+                  <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Rented</span><span className="text-lg font-bold text-orange-600">{stats.unavailableClothes}</span></div>
+                  <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-orange-500 h-2 rounded-full" style={{ width: `${stats.totalClothes > 0 ? (stats.unavailableClothes / stats.totalClothes) * 100 : 0}%` }}></div></div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-gray-600">Collected ({stats.collectedDonations})</span>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaHeart className="text-blue-500" />Donations status</h3>
+                <div className="space-y-3 font-semibold text-sm">
+                  <div className="flex justify-between"><span>Approved</span><span className="text-green-600">{stats.approvedDonations}</span></div>
+                  <div className="flex justify-between"><span>Collected</span><span className="text-blue-600">{stats.collectedDonations}</span></div>
+                  <div className="flex justify-between"><span>Pending</span><span className="text-yellow-600">{stats.pendingDonations}</span></div>
+                  <div className="flex justify-between"><span>Rejected</span><span className="text-red-600">{stats.rejectedDonations}</span></div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <span className="text-gray-600">Pending ({stats.pendingDonations})</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-gray-600">Rejected ({stats.rejectedDonations})</span>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaCheckCircle className="text-green-500" />Summary</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between"><span>Total Items</span><span className="font-bold">{stats.totalClothes}</span></div>
+                  <div className="flex justify-between"><span>Utilization</span><span className="font-bold text-purple-600">{stats.totalClothes > 0 ? Math.round((stats.unavailableClothes / stats.totalClothes) * 100) : 0}%</span></div>
                 </div>
               </div>
             </div>
 
-            {/* Recent Activities */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
-                {recentActivities.length > 0 ? (
-                  recentActivities.map((activity, index) => (
-                    <ActivityItem key={index} {...activity} />
-                  ))
-                ) : (
-                  <p className="text-gray-400 text-sm">No recent activities</p>
-                )}
-              </div>
-            </div>
+            {/* Bottom Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Donation Status Chart */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-6">Donation Status</h3>
+                <div className="relative w-48 h-48 mx-auto mb-6">
+                  <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#e5e7eb" strokeWidth="10" />
+                    {(() => {
+                      const total = Math.max(stats.approvedDonations + stats.pendingDonations + stats.rejectedDonations + stats.collectedDonations, 1);
+                      const circumference = 2 * Math.PI * 35;
+                      const approvedPercent = stats.approvedDonations / total;
+                      const collectedPercent = stats.collectedDonations / total;
+                      const pendingPercent = stats.pendingDonations / total;
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-              <div className="space-y-3 text-sm">
-                <QuickActionButton label="Verify Listings" color="purple" onClick={() => navigate('/myClothingItems')} />
-                <QuickActionButton label="List Clothes" color="green" onClick={() => navigate('/addClothingItem')} />
-                <QuickActionButton label="Handle Donations" color="blue" onClick={() => navigate('/storedonations')} />
+                      return (
+                        <>
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="35"
+                            fill="none"
+                            stroke="#10b981"
+                            strokeWidth="10"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (circumference * approvedPercent)}
+                            strokeLinecap="round"
+                          />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="35"
+                            fill="none"
+                            stroke="#3b82f6"
+                            strokeWidth="10"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent))}
+                            strokeLinecap="round"
+                          />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="35"
+                            fill="none"
+                            stroke="#f59e0b"
+                            strokeWidth="10"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (circumference * (approvedPercent + collectedPercent + pendingPercent))}
+                            strokeLinecap="round"
+                          />
+                        </>
+                      );
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center text-center">
+                    <div>
+                      <div className="text-3xl font-bold text-gray-800">
+                        {stats.approvedDonations + stats.collectedDonations + stats.pendingDonations + stats.rejectedDonations}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Total Donations</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="text-gray-600">Approved ({stats.approvedDonations})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="text-gray-600">Collected ({stats.collectedDonations})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <span className="text-gray-600">Pending ({stats.pendingDonations})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span className="text-gray-600">Rejected ({stats.rejectedDonations})</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Activities */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map((activity, index) => (
+                      <ActivityItem key={index} {...activity} />
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-sm">No recent activities</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                <div className="space-y-3 text-sm">
+                  <QuickActionButton label="Verify Listings" color="purple" onClick={() => navigate('/myClothingItems')} />
+                  <QuickActionButton label="List Clothes" color="green" onClick={() => navigate('/addClothingItem')} />
+                  <QuickActionButton label="Handle Donations" color="blue" onClick={() => navigate('/storedonations')} />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

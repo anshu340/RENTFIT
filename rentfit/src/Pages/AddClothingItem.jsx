@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import StoreSidebar from "../Components/StoreSidebar";
 
 const AddClothingItem = () => {
   const navigate = useNavigate();
@@ -208,8 +209,10 @@ const AddClothingItem = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="flex flex-1">
+        <StoreSidebar />
+        
+        <div className="flex-1 py-8 px-4 overflow-auto">
           {/* Header */}
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>

@@ -114,18 +114,24 @@ const StoreProfile = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+                <Navbar />
+                <div className="flex-1 flex justify-center items-center">
+                    <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <Footer />
             </div>
         );
     }
 
     return (
-        <>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navbar />
-            <div className="min-h-screen bg-gray-50 flex">
+            
+            <div className="flex flex-1">
                 <StoreSidebar />
-                <div className="flex-1 p-8">
+                
+                <div className="flex-1 p-8 overflow-auto">
                     <div className="max-w-5xl mx-auto">
                         <div className="flex items-center justify-between mb-8">
                             <div>
@@ -274,13 +280,15 @@ const StoreProfile = () => {
                     </div>
                 </div>
             </div>
+            
             <Footer />
+            
             <Alert
                 message={alert.message}
                 type={alert.type}
                 onClose={() => setAlert({ message: "", type: "" })}
             />
-        </>
+        </div>
     );
 };
 
@@ -296,4 +304,3 @@ style.innerHTML = `
 }
 `;
 document.head.appendChild(style);
-
