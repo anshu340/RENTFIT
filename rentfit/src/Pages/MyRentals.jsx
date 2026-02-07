@@ -267,7 +267,7 @@ const MyRentals = () => {
                                                 <div>
                                                     <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Store</p>
                                                     <div className="flex items-center gap-1 font-semibold text-purple-600">
-                                                        <FaStore className="text-xs" /> {rental.store_name}
+                                                        <FaStore className="text-xs" /> {rental.store_name || 'RentFit Store'}
                                                     </div>
                                                 </div>
                                                 <div>

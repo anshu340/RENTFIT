@@ -240,10 +240,6 @@ const StoreDashboard = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <button className="relative p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                <FaBell className="text-lg" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
               <div className="flex items-center gap-3">
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer">
                   {storeInfo.storeImage ? (

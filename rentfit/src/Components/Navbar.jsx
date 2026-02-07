@@ -72,20 +72,24 @@ const Navbar = () => {
 
           {/* NAV LINKS */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/browseClothes"
-              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-            >
-              Browse
-            </Link>
+            {(!isLoggedIn || userRole === 'Customer') && (
+              <Link
+                to="/browseClothes"
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                Browse
+              </Link>
+            )}
 
             {/* Logged Out Links - Locations & About */}
-            <Link
-              to="/nearbyStores"
-              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-            >
-              Nearby Stores
-            </Link>
+            {(!isLoggedIn || userRole === 'Customer') && (
+              <Link
+                to="/nearbyStores"
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                Nearby Stores
+              </Link>
+            )}
             {!isLoggedIn && (
               <>
                 <Link
@@ -113,12 +117,26 @@ const Navbar = () => {
               </Link>
             )}
             {isLoggedIn && userRole === 'Store' && (
-              <Link
-                to="/rentmanagement"
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-              >
-                Rental Requests
-              </Link>
+              <>
+                <Link
+                  to="/rentmanagement"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                >
+                  Rental Requests
+                </Link>
+                <Link
+                  to="/addClothingItem"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                >
+                  List Clothes
+                </Link>
+                <Link
+                  to="/storedonations"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                >
+                  Donations
+                </Link>
+              </>
             )}
             {isLoggedIn && userRole === 'Customer' && (
               <Link

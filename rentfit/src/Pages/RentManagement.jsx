@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import rentalAxiosInstance from '../services/rentalAxiosInstance';
+import Navbar from '../Components/Navbar';
 import StoreSidebar from '../Components/StoreSidebar';
 import { FaCheck, FaTimes, FaUser, FaTshirt, FaCalendarAlt, FaHistory } from 'react-icons/fa';
 

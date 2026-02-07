@@ -18,6 +18,10 @@ const BrowseClothes = () => {
   const [favorites, setFavorites] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   // Rental states
   const [selectedClothing, setSelectedClothing] = useState(null);
   const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
@@ -165,6 +169,27 @@ const BrowseClothes = () => {
 
     setFilteredClothes(result);
   };
+
+  // Reset to page 1 when filters or sort change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, sortBy, clothes]);
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const paginatedClothes = filteredClothes.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredClothes.length / itemsPerPage);
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const nextPage = () => goToPage(currentPage + 1);
+  const prevPage = () => goToPage(currentPage - 1);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => {
@@ -453,7 +478,7 @@ const BrowseClothes = () => {
                     </div>
                   ) : (
                     <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid-cols-1 gap-6'}`}>
-                      {filteredClothes.map((item) => (
+                      {paginatedClothes.map((item) => (
                         <div
                           key={item.id}
                           className={`group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex ${viewMode === 'grid' ? 'flex-col' : 'flex-row'}`}
@@ -528,18 +553,37 @@ const BrowseClothes = () => {
               {/* Pagination */}
               {filteredClothes.length > 0 && (
                 <div className="mt-8 flex justify-center">
-                  <div className="flex items-center gap-2">
-                    <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      &lt;
-                    </button>
-                    <button className="px-4 py-2 bg-purple-600 text-white rounded-lg">1</button>
-                    <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">2</button>
-                    <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">3</button>
-                    <span className="px-3 py-2">...</span>
-                    <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">7</button>
-                    <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      &gt;
-                    </button>
+                  <div className="mt-8 flex justify-center">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={prevPage}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        &lt;
+                      </button>
+
+                      {[...Array(totalPages)].map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => goToPage(i + 1)}
+                          className={`px-4 py-2 rounded-lg transition-colors ${currentPage === i + 1
+                              ? 'bg-purple-600 text-white shadow-md'
+                              : 'border border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+
+                      <button
+                        onClick={nextPage}
+                        disabled={currentPage === totalPages}
+                        className={`px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        &gt;
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
