@@ -238,8 +238,14 @@ const ClothingDetail = () => {
                                         <FaRuler />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-gray-800">Size & Fit</h4>
-                                        <p className="text-gray-600">{clothing.size} — Relaxed standard fit</p>
+                                        <h4 className="font-bold text-gray-800">Available Sizes</h4>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {clothing.size?.split(',').map(s => s.trim()).filter(Boolean).map(size => (
+                                                <span key={size} className="px-3 py-1 bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-widest rounded-lg border border-gray-200">
+                                                    {size}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">

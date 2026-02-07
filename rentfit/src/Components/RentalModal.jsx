@@ -6,6 +6,7 @@ import EsewaPayment from './EsewaPayment';
 const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [selectedSize, setSelectedSize] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentData, setPaymentData] = useState(null);
@@ -21,6 +22,7 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
             // Step 1: Create Rental
             await rentalAxiosInstance.post('create/', {
                 clothing: clothing.id,
+                selected_size: selectedSize,
                 rent_start_date: startDate,
                 rent_end_date: endDate,
             });
@@ -91,6 +93,27 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
                             />
                         </div>
 
+                        {/* Size Selection */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-700 block">Select Your Size *</label>
+                            <div className="flex flex-wrap gap-2">
+                                {clothing.size?.split(',').map(s => s.trim()).filter(Boolean).map(size => (
+                                    <button
+                                        key={size}
+                                        type="button"
+                                        onClick={() => setSelectedSize(size)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${selectedSize === size
+                                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-105'
+                                            : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'
+                                            }`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                            {!selectedSize && <p className="text-[10px] text-red-500 font-medium italic">Please pick one available size to continue.</p>}
+                        </div>
+
                         <div className="p-4 bg-gray-50 rounded-xl flex justify-between items-center">
                             <div className="flex flex-col">
                                 <span className="text-gray-600 font-medium">Price per day:</span>
@@ -109,8 +132,8 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
                             </button>
                             <button
                                 type="submit"
-                                disabled={isLoading}
-                                className={`flex-1 py-3 bg-purple-600 rounded-xl text-white font-bold shadow-lg transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700 hover:-translate-y-0.5'
+                                disabled={isLoading || !selectedSize}
+                                className={`flex-1 py-3 bg-purple-600 rounded-xl text-white font-bold shadow-lg transition-all ${isLoading || !selectedSize ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700 hover:-translate-y-0.5'
                                     }`}
                             >
                                 {isLoading ? 'Sending Request...' : 'Request Rental'}

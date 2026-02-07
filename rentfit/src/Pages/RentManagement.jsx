@@ -143,6 +143,9 @@ const RentManagement = () => {
                                                     <div className="flex items-center gap-2">
                                                         <FaTshirt className="text-purple-400" />
                                                         <span>{rental.clothing_name}</span>
+                                                        <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200">
+                                                            Size: {rental.selected_size || 'N/A'}
+                                                        </span>
                                                     </div>
                                                     <p className="text-xs text-gray-400 mt-1 uppercase font-bold tracking-tight">ID: #{rental.id}</p>
                                                 </td>

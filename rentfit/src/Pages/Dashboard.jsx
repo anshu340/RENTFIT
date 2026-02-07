@@ -39,8 +39,8 @@ const Dashboard = () => {
     wishlistItems: 0,
     totalSpent: 0,
     itemsDonated: 0,
-    currentRentals: [],
-    recentActivity: []
+    suggestedItems: [],
+    rentalHistory: []
   });
 
   useEffect(() => {
@@ -88,24 +88,51 @@ const Dashboard = () => {
         console.error("Error fetching dashboard stats:", error);
       }
 
-      // Fetch current rentals (Calls api/rentals/my/)
+      // Fetch current rentals & recent activity
+      let allUserRentals = [];
       try {
         const rentalsResponse = await rentalAxiosInstance.get("my/");
-        console.log("RAW RENTALS RESPONSE:", rentalsResponse.data); // debug - remove after fix confirmed
         const rentalsData = rentalsResponse.data?.data || rentalsResponse.data;
         if (rentalsData) {
-          const rentals = Array.isArray(rentalsData) ? rentalsData : (rentalsData.results || []);
-          // Only show active rentals (pending, approved, rented)
-          const activeRentals = rentals.filter(r =>
-            ['pending', 'approved', 'rented'].includes(r.status)
-          );
+          allUserRentals = Array.isArray(rentalsData) ? rentalsData : (rentalsData.results || []);
+
+          // Recent Activity: Sort by updated_at (or created_at) DESC and take 5
+          const history = [...allUserRentals].sort((a, b) =>
+            new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)
+          ).slice(0, 5);
+
           setDashboardData(prev => ({
             ...prev,
-            currentRentals: activeRentals
+            rentalHistory: history
           }));
         }
       } catch (error) {
         console.log("Rentals endpoint error:", error);
+      }
+
+      // Fetch suggested clothes
+      try {
+        const clothesResponse = await axiosInstance.get("clothing/all/");
+        const clothesData = clothesResponse.data?.data || clothesResponse.data;
+        if (clothesData) {
+          const clothes = Array.isArray(clothesData) ? clothesData : (clothesData.results || []);
+
+          // Get IDs of items already rented/requested by user
+          const rentedClothingIds = new Set(allUserRentals.map(r => r.clothing?.id || r.clothing_id));
+
+          // Suggested: Newest first (created_at DESC), excluding already rented, take 5
+          const suggestions = clothes
+            .filter(item => !rentedClothingIds.has(item.id))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 5);
+
+          setDashboardData(prev => ({
+            ...prev,
+            suggestedItems: suggestions
+          }));
+        }
+      } catch (error) {
+        console.log("Clothes endpoint error:", error);
       }
 
     } catch (error) {
@@ -203,7 +230,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-4">
                 <button className="relative p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                   <FaBell className="text-lg" />
-                  {dashboardData.recentActivity.length > 0 && (
+                  {dashboardData.rentalHistory.length > 0 && (
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
                 </button>
@@ -284,55 +311,59 @@ const Dashboard = () => {
 
             {/* Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Current Rentals */}
+              {/* Suggested For You */}
               <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Current Rentals</h2>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800">Suggested For You</h2>
+                    <p className="text-sm text-gray-500">Discover newly added outfits you might like.</p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/browseClothes')}
+                    className="text-sm font-bold text-purple-600 hover:text-purple-700"
+                  >
+                    View All
+                  </button>
+                </div>
 
-                {dashboardData.currentRentals.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <FaShoppingBag className="text-4xl mx-auto mb-2 opacity-50" />
-                    <p>No active rentals yet</p>
+                {dashboardData.suggestedItems.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <FaShoppingBag className="text-4xl mx-auto mb-3 text-gray-300" />
+                    <p className="text-gray-500 font-medium">No new outfits available right now.</p>
                     <button
                       onClick={() => navigate('/browseClothes')}
-                      className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                      className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-md"
                     >
-                      Browse Clothes
+                      Explore Collection
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {dashboardData.currentRentals.map((rental, index) => (
-                      <div key={rental.id || index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-4">
-                          {/* Image: rental.clothing.image */}
-                          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg overflow-hidden">
-                            {rental.clothing?.image && (
-                              <img
-                                src={rental.clothing.image}
-                                alt={rental.clothing?.item_name || 'Item'}
-                                className="w-full h-full object-cover"
-                              />
-                            )}
-                          </div>
-                          <div>
-                            {/* Name: rental.clothing.item_name */}
-                            <h3 className="font-semibold text-gray-800">
-                              {rental.clothing?.item_name || 'Item'}
-                            </h3>
-                            {/* Size: rental.clothing.size */}
-                            <p className="text-sm text-gray-600">
-                              Size: {rental.clothing?.size || 'N/A'} | From: {formatDate(rental.rent_start_date)}
-                            </p>
-                            {/* Return due: rental.rent_end_date */}
-                            <p className="text-sm text-gray-600">
-                              Return due: {formatDate(rental.rent_end_date)}
-                            </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {dashboardData.suggestedItems.map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => navigate(`/clothing/${item.id}`)}
+                        className="group flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-transparent hover:border-purple-200 hover:bg-white hover:shadow-md transition-all cursor-pointer"
+                      >
+                        <div className="w-20 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                          {item.images && (
+                            <img
+                              src={item.images}
+                              alt={item.item_name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-gray-800 truncate group-hover:text-purple-600 transition-colors">
+                            {item.item_name}
+                          </h3>
+                          <p className="text-xs text-gray-500 mb-2">{item.category}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-black text-gray-900">${item.rental_price}</span>
+                            <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded uppercase">New</span>
                           </div>
                         </div>
-                        {/* Status badge */}
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle(rental.status)}`}>
-                          {getStatusLabel(rental.status)}
-                        </span>
                       </div>
                     ))}
                   </div>
@@ -363,21 +394,31 @@ const Dashboard = () => {
                 {/* Recent Activity */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
-                  {dashboardData.recentActivity.length === 0 ? (
+                  {dashboardData.rentalHistory.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
                   ) : (
                     <div className="space-y-4">
-                      {dashboardData.recentActivity.slice(0, 5).map((activity, index) => (
-                        <div key={index} className="flex gap-3">
-                          <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'payment' ? 'bg-green-500' :
-                            activity.type === 'wishlist' ? 'bg-blue-500' :
-                              activity.type === 'donation' ? 'bg-purple-500' :
-                                'bg-gray-500'
-                            }`}></div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">{activity.title}</p>
-                            <p className="text-xs text-gray-600">{activity.description}</p>
-                            <p className="text-xs text-gray-500">{activity.time}</p>
+                      {dashboardData.rentalHistory.map((rental, index) => (
+                        <div key={rental.id || index} className="flex gap-3 pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+                          <div className="w-12 h-14 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                            {rental.clothing?.images && (
+                              <img
+                                src={rental.clothing.images}
+                                alt={rental.clothing_name}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="text-sm font-bold text-gray-800 truncate">{rental.clothing_name}</p>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getStatusStyle(rental.status)}`}>
+                                {getStatusLabel(rental.status)}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-gray-500">
+                              {formatTime(rental.updated_at || rental.created_at)}
+                            </p>
                           </div>
                         </div>
                       ))}

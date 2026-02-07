@@ -54,7 +54,7 @@ const AddClothingItem = () => {
           category: item.category || '',
           event_type: item.event_type || '',
           gender: item.gender || 'Female',
-          size: item.size || '',
+          size: item.size || '', // Backend sends comma separated string
           condition: item.condition || '',
           rental_price: item.rental_price || '',
           security_deposit: item.security_deposit || '',
@@ -62,6 +62,9 @@ const AddClothingItem = () => {
           description: item.description || '',
           clothing_status: item.clothing_status || 'Available'
         });
+
+        // Convert comma-separated size string from backend to array for local UI state if needed
+        // But we'll handle join/split logic in the render/submit
         if (item.images) {
           setExistingImage(item.images);
         }
@@ -371,20 +374,35 @@ const AddClothingItem = () => {
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Size *</label>
                       <div className="flex flex-wrap gap-2">
-                        {sizes.map(size => (
-                          <button
-                            key={size}
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, size }))}
-                            className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${formData.size === size
-                              ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-105'
-                              : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'
-                              }`}
-                          >
-                            {size}
-                          </button>
-                        ))}
+                        {sizes.map(size => {
+                          const selectedSizes = formData.size ? formData.size.split(',').map(s => s.trim()).filter(Boolean) : [];
+                          const isSelected = selectedSizes.includes(size);
+
+                          return (
+                            <button
+                              key={size}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setFormData(prev => {
+                                  const current = prev.size ? prev.size.split(',').map(s => s.trim()).filter(Boolean) : [];
+                                  const updated = current.includes(size)
+                                    ? current.filter(s => s !== size)
+                                    : [...current, size];
+                                  return { ...prev, size: updated.join(', ') };
+                                });
+                              }}
+                              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${isSelected
+                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-105'
+                                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'
+                                }`}
+                            >
+                              {size}
+                            </button>
+                          );
+                        })}
                       </div>
+                      <p className="text-[10px] text-gray-400 mt-2 italic">Select all sizes available (Multiple choices allowed).</p>
                     </div>
 
                     {/* Product Images */}

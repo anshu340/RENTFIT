@@ -243,7 +243,11 @@ const MyRentals = () => {
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <h3 className="text-lg font-bold text-gray-900 leading-tight">{rental.clothing_name}</h3>
-                                                    <p className="text-sm text-gray-500 font-medium mt-1">{rental.clothing.category} • {rental.clothing.gender}</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <p className="text-sm text-gray-500 font-medium">{rental.clothing.category} • {rental.clothing.gender}</p>
+                                                        <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+                                                        <span className="text-sm font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded leading-none">Size: {rental.selected_size || 'N/A'}</span>
+                                                    </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-lg font-bold text-gray-900">${rental.total_price}</p>
