@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import donationAxios from "../services/donationAxios";
 import { FaTshirt, FaCheckCircle, FaTimesCircle, FaBox, FaEye, FaBoxOpen } from "react-icons/fa";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
+import StoreSidebar from "../Components/StoreSidebar";
 
 const StoreDonations = () => {
   const [donations, setDonations] = useState([]);
@@ -134,160 +137,195 @@ const StoreDonations = () => {
     });
   };
 
-  const filteredDonations = filterStatus === "All" 
-    ? donations 
+  const filteredDonations = filterStatus === "All"
+    ? donations
     : donations.filter(d => d.donation_status === filterStatus);
+
+  const isLoggedIn = !!localStorage.getItem("access_token");
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading donations...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading donations...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <FaTshirt className="text-purple-600 text-xl" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-800">Donation Management</h1>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col uppercase-none">
+      <Navbar />
 
-        {/* Message Display */}
-        {message.text && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              message.type === "success"
-                ? "bg-green-50 text-green-800 border border-green-200"
-                : "bg-red-50 text-red-800 border border-red-200"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
-
-        {/* Filter Tabs */}
-        <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
-          <div className="flex gap-2 overflow-x-auto">
-            {["All", "Pending", "Approved", "Rejected", "Collected"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
-                  filterStatus === status
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {status}
-                {status !== "All" && (
-                  <span className="ml-2 bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs">
-                    {donations.filter(d => d.donation_status === status).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {filteredDonations.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <FaTshirt className="text-6xl text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">No Donations</h2>
-            <p className="text-gray-600">
-              {filterStatus === "All"
-                ? "No donations have been submitted to your store yet."
-                : `No ${filterStatus.toLowerCase()} donations.`}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDonations.map((donation) => (
-              <div
-                key={donation.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                {donation.image_url && (
-                  <img
-                    src={donation.image_url}
-                    alt={donation.item_name}
-                    className="w-full h-48 object-cover"
-                  />
-                )}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-bold text-gray-800 truncate">
-                      {donation.item_name}
-                    </h3>
-                    {getStatusBadge(donation.donation_status)}
+      {isLoggedIn ? (
+        <div className="flex flex-1 min-h-screen">
+          <StoreSidebar />
+          <main className="flex-1 p-6 md:p-8 space-y-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <FaTshirt className="text-purple-600 text-xl" />
                   </div>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">From:</span> {donation.customer_name}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">Category:</span> {donation.category}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">Size:</span> {donation.size} |{" "}
-                      <span className="font-medium">Condition:</span> {donation.condition}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Received: {formatDate(donation.created_at)}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleViewDetail(donation.id)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-purple-50 text-purple-600 px-3 py-2 rounded-lg hover:bg-purple-100 transition text-sm font-medium"
-                    >
-                      <FaEye />
-                      View
-                    </button>
-                    {donation.donation_status === "Pending" && (
-                      <>
-                        <button
-                          onClick={() => handleApprove(donation.id)}
-                          className="flex items-center justify-center gap-2 bg-green-50 text-green-600 px-3 py-2 rounded-lg hover:bg-green-100 transition text-sm font-medium"
-                          title="Approve"
-                        >
-                          <FaCheckCircle />
-                        </button>
-                        <button
-                          onClick={() => handleReject(donation.id)}
-                          className="flex items-center justify-center gap-2 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm font-medium"
-                          title="Reject"
-                        >
-                          <FaTimesCircle />
-                        </button>
-                      </>
-                    )}
-                    {donation.donation_status === "Approved" && (
-                      <button
-                        onClick={() => handleCollect(donation.id)}
-                        className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium"
-                        title="Mark as Collected"
-                      >
-                        <FaBoxOpen />
-                      </button>
-                    )}
-                  </div>
+                  <h1 className="text-3xl font-bold text-gray-800">Donation Management</h1>
                 </div>
               </div>
-            ))}
+
+              {/* Message Display */}
+              {message.text && (
+                <div
+                  className={`mb-6 p-4 rounded-lg ${message.type === "success"
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
+                    }`}
+                >
+                  {message.text}
+                </div>
+              )}
+
+              {/* Filter Tabs */}
+              <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+                <div className="flex gap-2 overflow-x-auto">
+                  {["All", "Pending", "Approved", "Rejected", "Collected"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setFilterStatus(status)}
+                      className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${filterStatus === status
+                        ? "bg-purple-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                    >
+                      {status}
+                      {status !== "All" && (
+                        <span className="ml-2 bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs">
+                          {donations.filter(d => d.donation_status === status).length}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredDonations.length === 0 ? (
+                <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                  <FaTshirt className="text-6xl text-gray-300 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">No Donations</h2>
+                  <p className="text-gray-600">
+                    {filterStatus === "All"
+                      ? "No donations have been submitted to your store yet."
+                      : `No ${filterStatus.toLowerCase()} donations.`}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredDonations.map((donation) => (
+                    <div
+                      key={donation.id}
+                      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                    >
+                      {donation.image_url && (
+                        <img
+                          src={donation.image_url}
+                          alt={donation.item_name}
+                          className="w-full h-48 object-cover"
+                        />
+                      )}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="text-lg font-bold text-gray-800 truncate">
+                            {donation.item_name}
+                          </h3>
+                          {getStatusBadge(donation.donation_status)}
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">From:</span> {donation.customer_name}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Category:</span> {donation.category}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Size:</span> {donation.size} |{" "}
+                            <span className="font-medium">Condition:</span> {donation.condition}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Received: {formatDate(donation.created_at)}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleViewDetail(donation.id)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-purple-50 text-purple-600 px-3 py-2 rounded-lg hover:bg-purple-100 transition text-sm font-medium"
+                          >
+                            <FaEye />
+                            View
+                          </button>
+                          {donation.donation_status === "Pending" && (
+                            <>
+                              <button
+                                onClick={() => handleApprove(donation.id)}
+                                className="flex items-center justify-center gap-2 bg-green-50 text-green-600 px-3 py-2 rounded-lg hover:bg-green-100 transition text-sm font-medium"
+                                title="Approve"
+                              >
+                                <FaCheckCircle />
+                              </button>
+                              <button
+                                onClick={() => handleReject(donation.id)}
+                                className="flex items-center justify-center gap-2 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm font-medium"
+                                title="Reject"
+                              >
+                                <FaTimesCircle />
+                              </button>
+                            </>
+                          )}
+                          {donation.donation_status === "Approved" && (
+                            <button
+                              onClick={() => handleCollect(donation.id)}
+                              className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium"
+                              title="Mark as Collected"
+                            >
+                              <FaBoxOpen />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-1 flex flex-col items-center justify-center text-center">
+          <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-12 shadow-lg max-w-2xl">
+            <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaBox className="text-3xl" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Store Access Required</h2>
+            <p className="text-gray-600 mb-8 text-lg">
+              This page is reserved for RentFit store partners to manage incoming clothing donations.
+              Please log in with your store account to view and manage donations.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => (window.location.href = "/login")}
+                className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition transform hover:-translate-y-1 shadow-md shadow-purple-200"
+              >
+                Go to Login
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      <Footer />
 
       {/* Detail Modal */}
       {showDetailModal && selectedDonation && (

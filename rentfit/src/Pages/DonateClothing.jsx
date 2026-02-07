@@ -151,17 +151,309 @@ const DonateClothing = () => {
     }
   };
 
+  const isLoggedIn = !!localStorage.getItem("access_token");
   const userRole = localStorage.getItem("role");
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className="flex min-h-screen bg-gray-50 text-gray-800">
-        <DashboardSidebar />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen p-6 md:p-8 space-y-8">
-          {/* Header Section */}
+      {isLoggedIn ? (
+        <div className="flex flex-1 min-h-screen">
+          <DashboardSidebar />
+          <main className="flex-1 p-6 md:p-8 space-y-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+                  Give Your Clothes a <span className="text-purple-600">New Life</span>
+                </h1>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Join RentFit's sustainable fashion movement. Donate your gently used clothes
+                  and help us reduce textile waste while supporting others.
+                </p>
+              </div>
+
+              {/* Donation Steps Component - Always Visible */}
+              <DonationSteps />
+
+              <div className="max-w-3xl mx-auto w-full">
+                {/* Conditional Rendering: Form or CTA */}
+                {isAuthenticated && userRole === "Customer" ? (
+                  <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                    <div className="bg-purple-600 p-6 text-white">
+                      <div className="flex items-center gap-3">
+                        <FaTshirt className="text-2xl" />
+                        <h2 className="text-2xl font-bold">Donation Form</h2>
+                      </div>
+                      <p className="text-purple-100 mt-1">Provide details of the item you wish to donate.</p>
+                    </div>
+
+                    <div className="p-8">
+                      {/* Message Display */}
+                      {message.text && (
+                        <div
+                          className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === "success"
+                            ? "bg-green-50 text-green-800 border border-green-200"
+                            : "bg-red-50 text-red-800 border border-red-200"
+                            }`}
+                        >
+                          <div className={`w-2 h-2 rounded-full ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`} />
+                          {message.text}
+                        </div>
+                      )}
+
+                      <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Store Selection */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <FaStore className="inline mr-2 text-purple-600" />
+                            Select Store *
+                          </label>
+                          {isLoadingStores ? (
+                            <div className="p-4 border border-dashed rounded-xl bg-gray-50 text-gray-500 animate-pulse">
+                              Finding available stores...
+                            </div>
+                          ) : (
+                            <select
+                              name="store_id"
+                              value={formData.store_id}
+                              onChange={handleChange}
+                              className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.store_id ? "border-red-500" : "border-gray-200"
+                                }`}
+                            >
+                              <option value="">-- Select a store near you --</option>
+                              {stores.map((store) => (
+                                <option key={store.id} value={store.id}>
+                                  {store.store_name} {store.city ? `- ${store.city}` : ""}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          {errors.store_id && (
+                            <p className="text-red-500 text-xs mt-1 font-medium">{errors.store_id}</p>
+                          )}
+                        </div>
+
+                        {/* Item Name */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Item Name *
+                          </label>
+                          <input
+                            type="text"
+                            name="item_name"
+                            placeholder="e.g., Vintage Silk Dress"
+                            value={formData.item_name}
+                            onChange={handleChange}
+                            className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.item_name ? "border-red-500" : "border-gray-200"
+                              }`}
+                          />
+                          {errors.item_name && (
+                            <p className="text-red-500 text-xs mt-1 font-medium">{errors.item_name}</p>
+                          )}
+                        </div>
+
+                        {/* Category and Gender */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Category *
+                            </label>
+                            <select
+                              name="category"
+                              value={formData.category}
+                              onChange={handleChange}
+                              className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.category ? "border-red-500" : "border-gray-200"
+                                }`}
+                            >
+                              <option value="">-- Select category --</option>
+                              <option value="Shirt">Shirt</option>
+                              <option value="Pants">Pants</option>
+                              <option value="Dress">Dress</option>
+                              <option value="Jacket">Jacket</option>
+                              <option value="Skirt">Skirt</option>
+                              <option value="Shoes">Shoes</option>
+                              <option value="Accessories">Accessories</option>
+                              <option value="Other">Other</option>
+                            </select>
+                            {errors.category && (
+                              <p className="text-red-500 text-xs mt-1 font-medium">{errors.category}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Gender *
+                            </label>
+                            <select
+                              name="gender"
+                              value={formData.gender}
+                              onChange={handleChange}
+                              className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.gender ? "border-red-500" : "border-gray-200"
+                                }`}
+                            >
+                              <option value="">-- Select gender --</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                              <option value="Unisex">Unisex</option>
+                              <option value="Other">Other</option>
+                            </select>
+                            {errors.gender && (
+                              <p className="text-red-500 text-xs mt-1 font-medium">{errors.gender}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Size and Condition */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Size *
+                            </label>
+                            <input
+                              type="text"
+                              name="size"
+                              placeholder="e.g., M, L, 40 etc."
+                              value={formData.size}
+                              onChange={handleChange}
+                              className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.size ? "border-red-500" : "border-gray-200"
+                                }`}
+                            />
+                            {errors.size && (
+                              <p className="text-red-500 text-xs mt-1 font-medium">{errors.size}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Condition *
+                            </label>
+                            <select
+                              name="condition"
+                              value={formData.condition}
+                              onChange={handleChange}
+                              className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.condition ? "border-red-500" : "border-gray-200"
+                                }`}
+                            >
+                              <option value="">-- Select condition --</option>
+                              <option value="New">New</option>
+                              <option value="Like New">Like New</option>
+                              <option value="Good">Good</option>
+                              <option value="Used">Used</option>
+                            </select>
+                            {errors.condition && (
+                              <p className="text-red-500 text-xs mt-1 font-medium">{errors.condition}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Description (Optional)
+                          </label>
+                          <textarea
+                            name="description"
+                            placeholder="Briefly describe the item (brand, fabric, etc.)..."
+                            value={formData.description}
+                            onChange={handleChange}
+                            rows="4"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                          />
+                        </div>
+
+                        {/* Image Upload */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <FaImage className="inline mr-2 text-purple-600" />
+                            Item Photo
+                          </label>
+                          <div className="flex items-center justify-center w-full">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
+                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <FaImage className="w-8 h-8 mb-3 text-gray-400" />
+                                <p className="mb-2 text-sm text-gray-500 font-medium">
+                                  {formData.images ? formData.images.name : "Click to upload garment photo"}
+                                </p>
+                              </div>
+                              <input
+                                type="file"
+                                name="images"
+                                accept="image/*"
+                                onChange={handleChange}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Submit Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                          <button
+                            type="submit"
+                            disabled={isLoading || isLoadingStores}
+                            className="flex-1 bg-purple-600 text-white p-4 rounded-xl font-bold hover:bg-purple-700 shadow-lg shadow-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1"
+                          >
+                            {isLoading ? "Submitting Request..." : "Submit Donation Pledge"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => navigate("/mydonations")}
+                            className="px-8 bg-gray-100 text-gray-700 p-4 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                ) : userRole === "Store" ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center shadow-sm">
+                    <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaLock className="text-2xl" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Store Account Restricted</h2>
+                    <p className="text-gray-600 mb-6">
+                      Only Customer accounts can pledge donations. If you'd like to donate, please use a customer account.
+                    </p>
+                    <button
+                      onClick={() => navigate("/storeDashboard")}
+                      className="bg-amber-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-amber-700 transition"
+                    >
+                      Back to Dashboard
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center shadow-lg">
+                    <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <FaLock className="text-3xl" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Want to donate your clothes?</h2>
+                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                      Please login or create an account to start your donation journey and help build a sustainable future.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <Link
+                        to="/login"
+                        className="flex items-center justify-center gap-2 bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition transform hover:-translate-y-1 shadow-md shadow-purple-200"
+                      >
+                        <FaSignInAlt /> Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        className="flex items-center justify-center gap-2 bg-white text-purple-600 border-2 border-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-purple-50 transition transform hover:-translate-y-1 shadow-sm"
+                      >
+                        <FaUserPlus /> Join RentFit
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </main>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
               Give Your Clothes a <span className="text-purple-600">New Life</span>
@@ -172,286 +464,38 @@ const DonateClothing = () => {
             </p>
           </div>
 
-          {/* Donation Steps Component - Always Visible */}
           <DonationSteps />
 
           <div className="max-w-3xl mx-auto w-full">
-            {/* Conditional Rendering: Form or CTA */}
-            {isAuthenticated && userRole === "Customer" ? (
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-                <div className="bg-purple-600 p-6 text-white">
-                  <div className="flex items-center gap-3">
-                    <FaTshirt className="text-2xl" />
-                    <h2 className="text-2xl font-bold">Donation Form</h2>
-                  </div>
-                  <p className="text-purple-100 mt-1">Provide details of the item you wish to donate.</p>
-                </div>
-
-                <div className="p-8">
-                  {/* Message Display */}
-                  {message.text && (
-                    <div
-                      className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === "success"
-                        ? "bg-green-50 text-green-800 border border-green-200"
-                        : "bg-red-50 text-red-800 border border-red-200"
-                        }`}
-                    >
-                      <div className={`w-2 h-2 rounded-full ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`} />
-                      {message.text}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Store Selection */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        <FaStore className="inline mr-2 text-purple-600" />
-                        Select Store *
-                      </label>
-                      {isLoadingStores ? (
-                        <div className="p-4 border border-dashed rounded-xl bg-gray-50 text-gray-500 animate-pulse">
-                          Finding available stores...
-                        </div>
-                      ) : (
-                        <select
-                          name="store_id"
-                          value={formData.store_id}
-                          onChange={handleChange}
-                          className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.store_id ? "border-red-500" : "border-gray-200"
-                            }`}
-                        >
-                          <option value="">-- Select a store near you --</option>
-                          {stores.map((store) => (
-                            <option key={store.id} value={store.id}>
-                              {store.store_name} {store.city ? `- ${store.city}` : ""}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                      {errors.store_id && (
-                        <p className="text-red-500 text-xs mt-1 font-medium">{errors.store_id}</p>
-                      )}
-                    </div>
-
-                    {/* Item Name */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Item Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="item_name"
-                        placeholder="e.g., Vintage Silk Dress"
-                        value={formData.item_name}
-                        onChange={handleChange}
-                        className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.item_name ? "border-red-500" : "border-gray-200"
-                          }`}
-                      />
-                      {errors.item_name && (
-                        <p className="text-red-500 text-xs mt-1 font-medium">{errors.item_name}</p>
-                      )}
-                    </div>
-
-                    {/* Category and Gender */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Category *
-                        </label>
-                        <select
-                          name="category"
-                          value={formData.category}
-                          onChange={handleChange}
-                          className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.category ? "border-red-500" : "border-gray-200"
-                            }`}
-                        >
-                          <option value="">-- Select category --</option>
-                          <option value="Shirt">Shirt</option>
-                          <option value="Pants">Pants</option>
-                          <option value="Dress">Dress</option>
-                          <option value="Jacket">Jacket</option>
-                          <option value="Skirt">Skirt</option>
-                          <option value="Shoes">Shoes</option>
-                          <option value="Accessories">Accessories</option>
-                          <option value="Other">Other</option>
-                        </select>
-                        {errors.category && (
-                          <p className="text-red-500 text-xs mt-1 font-medium">{errors.category}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Gender *
-                        </label>
-                        <select
-                          name="gender"
-                          value={formData.gender}
-                          onChange={handleChange}
-                          className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.gender ? "border-red-500" : "border-gray-200"
-                            }`}
-                        >
-                          <option value="">-- Select gender --</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Unisex">Unisex</option>
-                          <option value="Other">Other</option>
-                        </select>
-                        {errors.gender && (
-                          <p className="text-red-500 text-xs mt-1 font-medium">{errors.gender}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Size and Condition */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Size *
-                        </label>
-                        <input
-                          type="text"
-                          name="size"
-                          placeholder="e.g., M, L, 40 etc."
-                          value={formData.size}
-                          onChange={handleChange}
-                          className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.size ? "border-red-500" : "border-gray-200"
-                            }`}
-                        />
-                        {errors.size && (
-                          <p className="text-red-500 text-xs mt-1 font-medium">{errors.size}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Condition *
-                        </label>
-                        <select
-                          name="condition"
-                          value={formData.condition}
-                          onChange={handleChange}
-                          className={`w-full p-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${errors.condition ? "border-red-500" : "border-gray-200"
-                            }`}
-                        >
-                          <option value="">-- Select condition --</option>
-                          <option value="New">New</option>
-                          <option value="Like New">Like New</option>
-                          <option value="Good">Good</option>
-                          <option value="Used">Used</option>
-                        </select>
-                        {errors.condition && (
-                          <p className="text-red-500 text-xs mt-1 font-medium">{errors.condition}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Description (Optional)
-                      </label>
-                      <textarea
-                        name="description"
-                        placeholder="Briefly describe the item (brand, fabric, etc.)..."
-                        value={formData.description}
-                        onChange={handleChange}
-                        rows="4"
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                      />
-                    </div>
-
-                    {/* Image Upload */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        <FaImage className="inline mr-2 text-purple-600" />
-                        Item Photo
-                      </label>
-                      <div className="flex items-center justify-center w-full">
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <FaImage className="w-8 h-8 mb-3 text-gray-400" />
-                            <p className="mb-2 text-sm text-gray-500 font-medium">
-                              {formData.images ? formData.images.name : "Click to upload garment photo"}
-                            </p>
-                          </div>
-                          <input
-                            type="file"
-                            name="images"
-                            accept="image/*"
-                            onChange={handleChange}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Submit Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                      <button
-                        type="submit"
-                        disabled={isLoading || isLoadingStores}
-                        className="flex-1 bg-purple-600 text-white p-4 rounded-xl font-bold hover:bg-purple-700 shadow-lg shadow-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1"
-                      >
-                        {isLoading ? "Submitting Request..." : "Submit Donation Pledge"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => navigate("/mydonations")}
-                        className="px-8 bg-gray-100 text-gray-700 p-4 rounded-xl font-bold hover:bg-gray-200 transition-all"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </div>
+            <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center shadow-lg">
+              <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaLock className="text-3xl" />
               </div>
-            ) : userRole === "Store" ? (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center shadow-sm">
-                <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FaLock className="text-2xl" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Store Account Restricted</h2>
-                <p className="text-gray-600 mb-6">
-                  Only Customer accounts can pledge donations. If you'd like to donate, please use a customer account.
-                </p>
-                <button
-                  onClick={() => navigate("/storeDashboard")}
-                  className="bg-amber-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-amber-700 transition"
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Want to donate your clothes?</h2>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Please login or create an account to start your donation journey and help build a sustainable future.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  to="/login"
+                  className="flex items-center justify-center gap-2 bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition transform hover:-translate-y-1 shadow-md shadow-purple-200"
                 >
-                  Back to Dashboard
-                </button>
+                  <FaSignInAlt /> Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="flex items-center justify-center gap-2 bg-white text-purple-600 border-2 border-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-purple-50 transition transform hover:-translate-y-1 shadow-sm"
+                >
+                  <FaUserPlus /> Join RentFit
+                </Link>
               </div>
-            ) : (
-              <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center shadow-lg">
-                <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <FaLock className="text-3xl" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Want to donate your clothes?</h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  Please login or create an account to start your donation journey and help build a sustainable future.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    to="/login"
-                    className="flex items-center justify-center gap-2 bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition transform hover:-translate-y-1 shadow-md shadow-purple-200"
-                  >
-                    <FaSignInAlt /> Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="flex items-center justify-center gap-2 bg-white text-purple-600 border-2 border-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-purple-50 transition transform hover:-translate-y-1 shadow-sm"
-                  >
-                    <FaUserPlus /> Join RentFit
-                  </Link>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <Footer />
-    </>
+    </div>
+
   );
 };
 

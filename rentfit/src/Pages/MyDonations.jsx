@@ -97,30 +97,145 @@ const MyDonations = () => {
     });
   };
 
+  const isLoggedIn = !!localStorage.getItem("access_token");
+
   if (isLoading) {
     return (
-      <>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading donations...</p>
           </div>
         </div>
         <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className="flex min-h-screen bg-gray-50 text-gray-800">
-        <DashboardSidebar />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen p-6 md:p-8 space-y-6">
-          <div className="flex items-center justify-between">
+      {isLoggedIn ? (
+        <div className="flex flex-1 min-h-screen">
+          <DashboardSidebar />
+          <main className="flex-1 p-6 md:p-8 space-y-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <FaTshirt className="text-purple-600 text-xl" />
+                  </div>
+                  <h1 className="text-3xl font-bold text-gray-800">My Donations</h1>
+                </div>
+                <button
+                  onClick={() => navigate("/donate")}
+                  className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition"
+                >
+                  + New Donation
+                </button>
+              </div>
+
+              {message.text && (
+                <div
+                  className={`p-4 rounded-lg mb-6 ${message.type === "success"
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
+                    }`}
+                >
+                  {message.text}
+                </div>
+              )}
+
+              {donations.length === 0 ? (
+                <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                  <FaTshirt className="text-6xl text-gray-300 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">No Donations Yet</h2>
+                  <p className="text-gray-600 mb-6">Start donating your clothing items to stores!</p>
+                  <button
+                    onClick={() => navigate("/donate")}
+                    className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+                  >
+                    Donate Now
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {donations.map((donation) => (
+                    <div
+                      key={donation.id}
+                      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                    >
+                      {donation.image_url && (
+                        <img
+                          src={donation.image_url}
+                          alt={donation.item_name}
+                          className="w-full h-48 object-cover"
+                        />
+                      )}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="text-lg font-bold text-gray-800 truncate">
+                            {donation.item_name}
+                          </h3>
+                          {getStatusBadge(donation.donation_status)}
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FaStore className="text-purple-600" />
+                            <span className="truncate">{donation.store_name}</span>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Category:</span> {donation.category}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Size:</span> {donation.size} |{" "}
+                            <span className="font-medium">Condition:</span> {donation.condition}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Donated: {formatDate(donation.created_at)}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleViewDetail(donation.id)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-purple-50 text-purple-600 px-3 py-2 rounded-lg hover:bg-purple-100 transition text-sm font-medium"
+                          >
+                            <FaEye />
+                            View
+                          </button>
+                          {donation.donation_status === "Pending" && (
+                            <>
+                              <button
+                                onClick={() => handleEdit(donation.id)}
+                                className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium"
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(donation.id)}
+                                className="flex items-center justify-center gap-2 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm font-medium"
+                              >
+                                <FaTrash />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                 <FaTshirt className="text-purple-600 text-xl" />
@@ -135,14 +250,12 @@ const MyDonations = () => {
             </button>
           </div>
 
-          {/* Message Display */}
           {message.text && (
             <div
-              className={`p-4 rounded-lg ${
-                message.type === "success"
-                  ? "bg-green-50 text-green-800 border border-green-200"
-                  : "bg-red-50 text-red-800 border border-red-200"
-              }`}
+              className={`p-4 rounded-lg mb-6 ${message.type === "success"
+                ? "bg-green-50 text-green-800 border border-green-200"
+                : "bg-red-50 text-red-800 border border-red-200"
+                }`}
             >
               {message.text}
             </div>
@@ -230,7 +343,7 @@ const MyDonations = () => {
             </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Detail Modal */}
       {showDetailModal && selectedDonation && (
@@ -311,7 +424,8 @@ const MyDonations = () => {
       )}
 
       <Footer />
-    </>
+    </div>
+
   );
 };
 
