@@ -51,7 +51,7 @@ class Donation(models.Model):
         ('Unisex', 'Unisex'),
         ('Other', 'Other'),
     ])
-    size = models.CharField(max_length=10)
+    size = models.CharField(max_length=255)
     condition = models.CharField(max_length=20, choices=Condition.choices)
     description = models.TextField(blank=True, null=True)
     images = models.ImageField(upload_to='donation_images/', blank=True, null=True)

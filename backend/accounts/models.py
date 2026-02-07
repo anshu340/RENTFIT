@@ -33,7 +33,7 @@ class User(AbstractUser):
         ('Female', 'Female'),
         ('Other', 'Other'),
     ])
-    preferred_clothing_size = models.CharField(max_length=10, blank=True, null=True, choices=[
+    preferred_clothing_size = models.CharField(max_length=255, blank=True, null=True, choices=[
         ('XS', 'XS'),
         ('S', 'S'),
         ('M', 'M'),
@@ -132,7 +132,7 @@ class Clothing(models.Model):
             ('Other', 'Other'),
         ]
     )
-    size = models.CharField(max_length=10)
+    size = models.CharField(max_length=255, help_text="Comma-separated sizes like S, M, L")
     condition = models.CharField(max_length=20, choices=Condition.choices)
     description = models.TextField(blank=True, null=True)
     rental_price = models.DecimalField(max_digits=10, decimal_places=2)
