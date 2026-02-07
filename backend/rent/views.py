@@ -63,10 +63,10 @@ class RentalApproveView(generics.UpdateAPIView):
         rental = get_object_or_404(Rental, pk=pk, store=request.user, status='pending')
         clothing = rental.clothing
         
-        if clothing.available_quantity > 0:
+        if clothing.stock_quantity > 0:
             rental.status = 'approved'
             rental.save()
-            clothing.available_quantity -= 1
+            clothing.stock_quantity -= 1
             clothing.save()
 
             Notification.objects.create(
@@ -147,7 +147,7 @@ class RentalConfirmReturnView(generics.UpdateAPIView):
         rental.save()
         
         clothing = rental.clothing
-        clothing.available_quantity += 1
+        clothing.stock_quantity += 1
         clothing.save()
         
         Notification.objects.create(
