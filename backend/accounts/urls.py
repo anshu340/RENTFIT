@@ -24,8 +24,20 @@ from .views import (
     CustomerDashboardStatsView,
     NearbyStoresView,
 )
+from .admin_views import (
+    AdminStatsView,
+    AdminUserListView,
+    AdminUserDeactivateView,
+    AdminGlobalActivityView,
+)
 
 urlpatterns = [
+    
+    # Admin Endpoints
+    path("admin/stats/", AdminStatsView.as_view(), name="admin-stats"),
+    path("admin/users/", AdminUserListView.as_view(), name="admin-users"),
+    path("admin/users/<int:pk>/deactivate/", AdminUserDeactivateView.as_view(), name="admin-user-deactivate"),
+    path("admin/activity/", AdminGlobalActivityView.as_view(), name="admin-activity"),
     # Authentication Endpoints
     path("register/customer/", CustomerRegisterView.as_view(), name="register-customer"),
     path("register/store/", StoreRegisterView.as_view(), name="register-store"),

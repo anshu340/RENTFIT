@@ -7,6 +7,9 @@ from .views import (
     RentalRejectView,
     RentalMarkReturnedView,
     RentalConfirmReturnView,
+    DamageReportSubmitView,
+    DamageReportStoreView,
+    DamageReportActionView,
 )
 
 urlpatterns = [
@@ -17,4 +20,9 @@ urlpatterns = [
     path('<int:pk>/reject/', RentalRejectView.as_view(), name='rental-reject'),
     path('<int:pk>/mark-return/', RentalMarkReturnedView.as_view(), name='rental-mark-return'),
     path('<int:pk>/confirm-return/', RentalConfirmReturnView.as_view(), name='rental-confirm-return'),
+    
+    # Damage Report URLs
+    path('damage-report/submit/', DamageReportSubmitView.as_view(), name='damage-report-submit'),
+    path('damage-report/store/', DamageReportStoreView.as_view(), name='damage-report-store'),
+    path('damage-report/<int:pk>/action/', DamageReportActionView.as_view(), name='damage-report-action'),
 ]

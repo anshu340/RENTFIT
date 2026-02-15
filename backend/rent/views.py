@@ -1,9 +1,9 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Rental
-from .serializers import RentalSerializer, RentalCreateSerializer
 from django.shortcuts import get_object_or_404
+from .models import Rental, DamageReport
+from .serializers import RentalSerializer, RentalCreateSerializer, DamageReportSerializer
 from notifications.models import Notification
 
 class RentalCreateView(generics.CreateAPIView):
@@ -157,3 +157,73 @@ class RentalConfirmReturnView(generics.UpdateAPIView):
         )
         
         return Response({"message": "Return confirmed and stock updated."}, status=status.HTTP_200_OK)
+
+class DamageReportSubmitView(generics.CreateAPIView):
+    """
+    POST /api/rentals/damage-report/submit/
+    Customer only: submit damage report for their rental.
+    """
+    serializer_class = DamageReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        rental = serializer.validated_data['rental']
+        serializer.save(
+            user=self.request.user,
+            clothing=rental.clothing
+        )
+        # Notify store
+        Notification.objects.create(
+            user=rental.store,
+            message=f"New damage report submitted for {rental.clothing.item_name} by {self.request.user.email}.",
+            notification_type='rental'
+        )
+
+class DamageReportStoreView(generics.ListAPIView):
+    """
+    GET /api/rentals/damage-report/store/
+    Store only: list damage reports for their items.
+    """
+    serializer_class = DamageReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role != 'Store':
+            return DamageReport.objects.none()
+        return DamageReport.objects.filter(clothing__store=self.request.user)
+
+class DamageReportActionView(generics.UpdateAPIView):
+    """
+    PATCH /api/rentals/damage-report/{id}/action/
+    Store only: accept/reject report and add extra charge.
+    """
+    serializer_class = DamageReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        if request.user.role != 'Store':
+            return Response({"error": "Only stores can manage damage reports."}, status=status.HTTP_403_FORBIDDEN)
+        
+        report = get_object_or_404(DamageReport, pk=pk, clothing__store=request.user)
+        
+        # Simple update for status and extra_charge
+        status_val = request.data.get('status')
+        extra_charge = request.data.get('extra_charge')
+        
+        if status_val:
+            if status_val not in DamageReport.Status.values:
+                return Response({"error": "Invalid status."}, status=status.HTTP_400_BAD_REQUEST)
+            report.status = status_val
+        
+        if extra_charge:
+            report.extra_charge = extra_charge
+            
+        report.save()
+
+        Notification.objects.create(
+            user=report.user,
+            message=f"Your damage report for {report.clothing.item_name} has been {report.status}.",
+            notification_type='rental'
+        )
+        
+        return Response(DamageReportSerializer(report).data, status=status.HTTP_200_OK)
