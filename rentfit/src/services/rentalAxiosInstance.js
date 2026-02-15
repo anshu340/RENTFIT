@@ -21,4 +21,19 @@ rentalAxiosInstance.interceptors.request.use(
   }
 );
 
+// Damage Report APIs
+export const submitDamageReport = (data) => {
+  return rentalAxiosInstance.post("damage-report/submit/", data, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+};
+
+export const getStoreDamageReports = () => {
+  return rentalAxiosInstance.get("damage-report/store/");
+};
+
+export const takeActionOnDamageReport = (id, data) => {
+  return rentalAxiosInstance.patch(`damage-report/${id}/action/`, data);
+};
+
 export default rentalAxiosInstance;

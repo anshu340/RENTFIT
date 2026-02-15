@@ -359,12 +359,14 @@ const ClothingDetail = () => {
             </div>
             <Footer />
 
-            <RentalModal
-                isOpen={isRentalModalOpen}
-                onClose={() => setIsRentalModalOpen(false)}
-                clothing={clothing}
-                onRentalCreated={showAlert}
-            />
+            {isRentalModalOpen && (
+                <RentalModal
+                    isOpen={isRentalModalOpen}
+                    onClose={() => setIsRentalModalOpen(false)}
+                    clothing={clothing}
+                    onRentalCreated={showAlert}
+                />
+            )}
 
             <Alert
                 message={alert.message}

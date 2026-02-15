@@ -20,6 +20,7 @@ const Navbar = () => {
       // Normalize role names
       if (role === 'Store' || role === 'store') setUserRole('Store');
       else if (role === 'Customer' || role === 'user') setUserRole('Customer');
+      else if (role === 'Admin' || role === 'admin') setUserRole('Admin');
       else setUserRole('');
     };
 
@@ -150,7 +151,7 @@ const Navbar = () => {
             {/* Dashboard - Logged In Only */}
             {isLoggedIn && (
               <Link
-                to={userRole === 'Store' ? "/storeDashboard" : "/dashboard"}
+                to={userRole === 'Store' ? "/storeDashboard" : userRole === 'Admin' ? "/adminDashboard" : "/dashboard"}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
               >
                 Dashboard

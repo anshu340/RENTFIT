@@ -11,7 +11,17 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
     const [error, setError] = useState('');
     const [paymentData, setPaymentData] = useState(null);
 
+    React.useEffect(() => {
+        if (isOpen) {
+            console.log('RentalModal opened for:', clothing.item_name, 'available sizes:', clothing.size);
+            setSelectedSize(''); // Reset size selection when opening
+            setError('');
+        }
+    }, [isOpen, clothing.id]);
+
     if (!isOpen) return null;
+
+    console.log('RentalModal Render - selectedSize:', selectedSize);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -119,7 +129,7 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
                                 <span className="text-gray-600 font-medium">Price per day:</span>
                                 <span className="text-xs text-gray-400">Secure payment via eSewa</span>
                             </div>
-                            <span className="text-xl font-bold text-purple-600">${clothing.rental_price}</span>
+                            <span className="text-xl font-bold text-purple-600">₹{clothing.rental_price}</span>
                         </div>
 
                         <div className="flex gap-3 pt-4">

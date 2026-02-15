@@ -5,7 +5,7 @@ import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import StoreSidebar from '../Components/StoreSidebar';
-import { FaCheck, FaTimes, FaUser, FaTshirt, FaCalendarAlt, FaHistory } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaUser, FaTshirt, FaCalendarAlt, FaHistory, FaExclamationTriangle } from 'react-icons/fa';
 
 const RentManagement = () => {
     const navigate = useNavigate();
@@ -70,7 +70,7 @@ const RentManagement = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col uppercase-none">
             <Navbar />
-            
+
             <div className="flex flex-1">
                 <StoreSidebar />
 
@@ -162,9 +162,20 @@ const RentManagement = () => {
                                                         <p className="text-xs font-bold text-green-600 mt-1">${rental.total_price} Total</p>
                                                     </td>
                                                     <td className="px-6 py-6 text-center">
-                                                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-extrabold border ${getStatusStyle(rental.status)}`}>
-                                                            {rental.status.replace('_', ' ').toUpperCase()}
-                                                        </span>
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-extrabold border ${getStatusStyle(rental.status)}`}>
+                                                                {rental.status.replace('_', ' ').toUpperCase()}
+                                                            </span>
+                                                            {rental.has_damage_report && (
+                                                                <span
+                                                                    onClick={() => navigate('/damaged-items')}
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors uppercase tracking-wider"
+                                                                >
+                                                                    <FaExclamationTriangle className="text-xs" />
+                                                                    Damage Reported
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-6 text-right">
                                                         {rental.status === 'pending' ? (
@@ -205,7 +216,7 @@ const RentManagement = () => {
                     </div>
                 </div>
             </div>
-            
+
             <Footer />
         </div>
     );

@@ -25,6 +25,9 @@ import MyReviews from './Pages/MyReviews.jsx';
 import UserProfile from './Pages/UserProfile.jsx';
 import PaymentSuccess from './Pages/PaymentSuccess.jsx';
 import PaymentFailure from './Pages/PaymentFailure.jsx';
+import DamageReports from './Pages/DamageReports.jsx';
+import AdminDashboard from './Pages/AdminDashboard.jsx';
+import AdminUserManagement from './Pages/AdminUserManagement.jsx';
 
 
 function App() {
@@ -57,6 +60,9 @@ function App() {
       <Route path="/myreviews" element={<MyReviews />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failure" element={<PaymentFailure />} />
+      <Route path="/damaged-items" element={<DamageReports />} />
+      <Route path="/adminDashboard" element={<AdminDashboard />} />
+      <Route path="/adminUsers" element={<AdminUserManagement />} />
     </Routes>
 
   );
