@@ -31,13 +31,49 @@ class AdminStatsView(APIView):
         total_donations = Donation.objects.count()
         collected_donations = Donation.objects.filter(donation_status='collected').count()
 
+        # Revenue History (Last 30 days)
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.db.models.functions import TruncDate
+
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        revenue_history_qs = Rental.objects.filter(
+            status__in=['approved', 'rented', 'returned_confirmed'],
+            created_at__gte=thirty_days_ago
+        ).annotate(date=TruncDate('created_at')).values('date').annotate(
+            daily_total=Sum('total_price')
+        ).order_by('date')
+
+        revenue_history = []
+        # Fill gaps with zero revenue
+        current_date = thirty_days_ago.date()
+        end_date = timezone.now().date()
+        
+        history_dict = {item['date']: float(item['daily_total']) for item in revenue_history_qs}
+        
+        while current_date <= end_date:
+            revenue_history.append({
+                "date": current_date.strftime('%Y-%m-%d'),
+                "revenue": history_dict.get(current_date, 0.0)
+            })
+            current_date += timedelta(days=1)
+
+        # User distribution for Pie Chart
+        user_distribution = [
+            {"name": "Customers", "value": total_customers, "color": "#6366f1"},  # Indigo-500
+            {"name": "Stores", "value": total_stores, "color": "#f59e0b"},     # Amber-500
+            {"name": "Admins", "value": User.objects.filter(role='Admin').count(), "color": "#8b5cf6"} # Violet-500
+        ]
+
         return Response({
             "total_users": total_users,
             "total_customers": total_customers,
             "total_stores": total_stores,
             "total_revenue": float(total_revenue),
             "total_donations": total_donations,
-            "collected_donations": collected_donations
+            "collected_donations": collected_donations,
+            "revenue_history": revenue_history,
+            "user_distribution": user_distribution
         }, status=status.HTTP_200_OK)
 
 class AdminUserListView(generics.ListAPIView):
