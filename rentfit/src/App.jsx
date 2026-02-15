@@ -28,6 +28,7 @@ import PaymentFailure from './Pages/PaymentFailure.jsx';
 import DamageReports from './Pages/DamageReports.jsx';
 import AdminDashboard from './Pages/AdminDashboard.jsx';
 import AdminUserManagement from './Pages/AdminUserManagement.jsx';
+import AdminActivity from './Pages/AdminActivity.jsx';
 
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
       <Route path="/damaged-items" element={<DamageReports />} />
       <Route path="/adminDashboard" element={<AdminDashboard />} />
       <Route path="/adminUsers" element={<AdminUserManagement />} />
+      <Route path="/adminActivity" element={<AdminActivity />} />
     </Routes>
 
   );

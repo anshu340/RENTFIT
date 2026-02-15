@@ -10,6 +10,19 @@ import {
     FaChartLine,
     FaStore
 } from 'react-icons/fa';
+import {
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
+    Legend
+} from 'recharts';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -18,14 +31,16 @@ const AdminDashboard = () => {
         total_stores: 0,
         total_revenue: 0,
         total_donations: 0,
-        collected_donations: 0
+        collected_donations: 0,
+        revenue_history: [],
+        user_distribution: []
     });
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await axiosInstance.get('accounts/admin/stats/');
+                const response = await axiosInstance.get('admin/stats/');
                 setStats(response.data);
             } catch (error) {
                 console.error("Error fetching admin stats:", error);
@@ -42,6 +57,18 @@ const AdminDashboard = () => {
         { title: 'Registered Stores', value: stats.total_stores, icon: FaStore, color: 'bg-amber-500', trend: '+4.1%' },
         { title: 'Donations Processed', value: stats.total_donations, icon: FaHandHoldingHeart, color: 'bg-rose-500', trend: '+15.3%' },
     ];
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-white p-4 shadow-xl rounded-2xl border border-slate-100">
+                    <p className="text-xs font-black text-slate-400 uppercase mb-1">{label}</p>
+                    <p className="text-lg font-black text-indigo-600">${payload[0].value.toLocaleString()}</p>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -80,44 +107,103 @@ const AdminDashboard = () => {
                             ))}
                         </div>
 
-                        {/* Charts Area (Placeholders) */}
+                        {/* Charts Area */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 h-96 flex flex-col">
+                            <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 h-[30rem] flex flex-col">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
                                         <FaChartLine className="text-indigo-500" /> Revenue Growth
                                     </h2>
-                                    <select className="bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-500 px-4 py-2 focus:ring-0">
-                                        <option>Last 7 Days</option>
-                                        <option>Last 30 Days</option>
-                                    </select>
+                                    <div className="text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                                        Last 30 Days
+                                    </div>
                                 </div>
-                                <div className="flex-1 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-400 font-bold">
-                                    Chart Visualization Placeholder
+                                <div className="flex-1 w-full h-full">
+                                    {isLoading ? (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">Loading chart...</div>
+                                    ) : (
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={stats.revenue_history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                                <defs>
+                                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis
+                                                    dataKey="date"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                                    minTickGap={30}
+                                                    tickFormatter={(str) => {
+                                                        const date = new Date(str);
+                                                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                                    }}
+                                                />
+                                                <YAxis
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                                    tickFormatter={(val) => `$${val}`}
+                                                />
+                                                <Tooltip content={<CustomTooltip />} />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="revenue"
+                                                    stroke="#6366f1"
+                                                    strokeWidth={4}
+                                                    fillOpacity={1}
+                                                    fill="url(#colorRevenue)"
+                                                />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col">
+                            <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col h-[30rem]">
                                 <h2 className="text-xl font-black text-slate-900 mb-6">User Distribution</h2>
-                                <div className="flex-1 space-y-6">
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm font-bold text-slate-600">
-                                            <span>Customers</span>
-                                            <span>{Math.round((stats.total_customers / stats.total_users) * 100 || 0)}%</span>
-                                        </div>
-                                        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                                            <div className="h-full bg-indigo-500" style={{ width: `${(stats.total_customers / stats.total_users) * 100}%` }}></div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm font-bold text-slate-600">
-                                            <span>Stores</span>
-                                            <span>{Math.round((stats.total_stores / stats.total_users) * 100 || 0)}%</span>
-                                        </div>
-                                        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                                            <div className="h-full bg-amber-500" style={{ width: `${(stats.total_stores / stats.total_users) * 100}%` }}></div>
-                                        </div>
-                                    </div>
+                                <div className="flex-1 w-full h-full flex flex-col">
+                                    {isLoading ? (
+                                        <div className="flex-1 flex items-center justify-center text-slate-400 font-bold">Loading...</div>
+                                    ) : (
+                                        <>
+                                            <div className="flex-1">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={stats.user_distribution}
+                                                            innerRadius={60}
+                                                            outerRadius={100}
+                                                            paddingAngle={8}
+                                                            dataKey="value"
+                                                        >
+                                                            {stats.user_distribution.map((entry, index) => (
+                                                                <Cell key={`cell-${index}`} fill={entry.color} cornerRadius={10} />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip
+                                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                                            itemStyle={{ fontWeight: 900, fontSize: '12px' }}
+                                                        />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                            <div className="mt-4 space-y-3">
+                                                {stats.user_distribution.map((item, idx) => (
+                                                    <div key={idx} className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                                            <span className="text-sm font-bold text-slate-600">{item.name}</span>
+                                                        </div>
+                                                        <span className="text-sm font-black text-slate-900">{item.value}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
