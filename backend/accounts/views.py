@@ -219,12 +219,22 @@ class StoreDashboardStatsView(APIView):
         
         recent_transactions = []
         for p in recent_transactions_qs:
+            customer_image = None
+            if p.rental.customer.profile_image:
+                customer_image = request.build_absolute_uri(p.rental.customer.profile_image.url)
+            
+            clothing_image = None
+            if p.rental.clothing.images:
+                clothing_image = request.build_absolute_uri(p.rental.clothing.images.url)
+
             recent_transactions.append({
                 "id": p.id,
                 "transaction_id": p.transaction_id,
                 "amount": float(p.amount),
                 "item_name": p.rental.clothing.item_name,
+                "item_image": clothing_image,
                 "customer_name": p.rental.customer.name or p.rental.customer.email,
+                "customer_image": customer_image,
                 "date": p.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 "status": p.status
             })
