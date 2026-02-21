@@ -185,6 +185,87 @@ class CustomerDashboardStatsView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class StoreDashboardStatsView(APIView):
+    """
+    Get summary statistics for the authenticated store dashboard
+    - Total Earnings
+    - Recent Transactions
+    - Earnings History (30 days)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'Store':
+            return Response(
+                {"error": "Only stores can access these statistics"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        user = request.user
+        Rental = apps.get_model('rent', 'Rental')
+        Payment = apps.get_model('payments', 'Payment')
+        
+        # 1. Total Earnings (Sum of completed payments for this store's rentals)
+        total_earnings = Payment.objects.filter(
+            rental__store=user,
+            status='completed'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # 2. Recent Transactions (Last 10 completed payments)
+        recent_transactions_qs = Payment.objects.filter(
+            rental__store=user,
+            status='completed'
+        ).select_related('rental', 'rental__clothing', 'rental__customer').order_by('-created_at')[:10]
+        
+        recent_transactions = []
+        for p in recent_transactions_qs:
+            recent_transactions.append({
+                "id": p.id,
+                "transaction_id": p.transaction_id,
+                "amount": float(p.amount),
+                "item_name": p.rental.clothing.item_name,
+                "customer_name": p.rental.customer.name or p.rental.customer.email,
+                "date": p.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                "status": p.status
+            })
+
+        # 3. Earnings History (Last 30 days for charts)
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.db.models.functions import TruncDate
+
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        history_qs = Payment.objects.filter(
+            rental__store=user,
+            status='completed',
+            created_at__gte=thirty_days_ago
+        ).annotate(date=TruncDate('created_at')).values('date').annotate(
+            daily_total=Sum('amount')
+        ).order_by('date')
+
+        earnings_history = []
+        current_date = thirty_days_ago.date()
+        end_date = timezone.now().date()
+        
+        history_dict = {item['date']: float(item['daily_total']) for item in history_qs}
+        
+        while current_date <= end_date:
+            earnings_history.append({
+                "date": current_date.strftime('%Y-%m-%d'),
+                "earnings": history_dict.get(current_date, 0.0)
+            })
+            current_date += timedelta(days=1)
+
+        return Response({
+            "message": "Success",
+            "data": {
+                "total_earnings": float(total_earnings),
+                "recent_transactions": recent_transactions,
+                "earnings_history": earnings_history
+            }
+        }, status=status.HTTP_200_OK)
+
+
 class NearbyStoresView(APIView):
     """
     Get all stores that have set their location

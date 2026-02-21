@@ -12,13 +12,16 @@ class RentalSerializer(serializers.ModelSerializer):
     clothing_name = serializers.CharField(source='clothing.item_name', read_only=True)
     has_review = serializers.SerializerMethodField()
     has_damage_report = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
+    payment_details = serializers.SerializerMethodField()
     
     class Meta:
         model = Rental
         fields = [
             'id', 'customer', 'customer_email', 'customer_name', 'store', 'store_name',
             'clothing', 'clothing_name', 'selected_size', 'rent_start_date', 'rent_end_date',
-            'total_price', 'status', 'has_review', 'has_damage_report', 'created_at'
+            'total_price', 'status', 'has_review', 'has_damage_report', 'payment_status', 
+            'payment_details', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
 
@@ -27,6 +30,23 @@ class RentalSerializer(serializers.ModelSerializer):
 
     def get_has_damage_report(self, obj):
         return obj.damage_reports.exists()
+
+    def get_payment_status(self, obj):
+        payment = obj.payment_set.filter(status='completed').first()
+        if payment:
+            return 'paid'
+        return 'pending'
+
+    def get_payment_details(self, obj):
+        payment = obj.payment_set.filter(status='completed').first()
+        if payment:
+            return {
+                'transaction_id': payment.transaction_id,
+                'amount': float(payment.amount),
+                'date': payment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'status': payment.status
+            }
+        return None
 
 class RentalCreateSerializer(serializers.ModelSerializer):
     class Meta:
