@@ -5,13 +5,15 @@ import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import StoreSidebar from '../Components/StoreSidebar';
-import { FaCheck, FaTimes, FaUser, FaTshirt, FaCalendarAlt, FaHistory, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaUser, FaTshirt, FaCalendarAlt, FaHistory, FaExclamationTriangle, FaInfoCircle, FaDollarSign } from 'react-icons/fa';
 
 const RentManagement = () => {
     const navigate = useNavigate();
     const [rentals, setRentals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [alert, setAlert] = useState({ message: '', type: '' });
+    const [selectedRental, setSelectedRental] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const role = localStorage.getItem('role');
@@ -108,6 +110,7 @@ const RentManagement = () => {
                                             <th className="px-6 py-4 text-sm font-bold text-white uppercase tracking-wider">Customer</th>
                                             <th className="px-6 py-4 text-sm font-bold text-white uppercase tracking-wider">Item Details</th>
                                             <th className="px-6 py-4 text-sm font-bold text-white uppercase tracking-wider">Rental Period</th>
+                                            <th className="px-6 py-4 text-sm font-bold text-white uppercase tracking-wider text-center">Payment</th>
                                             <th className="px-6 py-4 text-sm font-bold text-white uppercase tracking-wider text-center">Status</th>
                                             <th className="px-6 py-4 text-sm font-bold text-white uppercase tracking-wider text-right">Actions</th>
                                         </tr>
@@ -160,6 +163,27 @@ const RentManagement = () => {
                                                             <span>{rental.rent_start_date} <span className="text-gray-300 px-1">|</span> {rental.rent_end_date}</span>
                                                         </div>
                                                         <p className="text-xs font-bold text-green-600 mt-1">${rental.total_price} Total</p>
+                                                    </td>
+                                                    <td className="px-6 py-6 text-center">
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider ${rental.payment_status === 'paid'
+                                                                ? 'bg-green-50 text-green-700 border-green-200'
+                                                                : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                                }`}>
+                                                                {rental.payment_status?.toUpperCase() || 'PENDING'}
+                                                            </span>
+                                                            {rental.payment_status === 'paid' && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedRental(rental);
+                                                                        setIsModalOpen(true);
+                                                                    }}
+                                                                    className="text-purple-600 hover:text-purple-800 flex items-center gap-1 text-[10px] font-bold"
+                                                                >
+                                                                    <FaInfoCircle /> Details
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-6 text-center">
                                                         <div className="flex flex-col items-center gap-2">
@@ -216,6 +240,77 @@ const RentManagement = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Payment Details Modal */}
+            {isModalOpen && selectedRental && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="bg-purple-600 p-6 flex justify-between items-center text-white">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                <FaDollarSign /> Payment Details
+                            </h3>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="p-8">
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-start border-b border-gray-100 pb-4">
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Customer</p>
+                                        <p className="text-lg font-bold text-gray-900">{selectedRental.customer_name}</p>
+                                        <p className="text-sm text-gray-500">{selectedRental.customer_email}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Amount Paid</p>
+                                        <p className="text-2xl font-black text-green-600">Rs. {selectedRental.payment_details?.amount}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Item Details</p>
+                                        <p className="text-sm font-bold text-gray-800">{selectedRental.clothing_name}</p>
+                                        <p className="text-xs text-gray-500">Rental ID: #{selectedRental.id}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Rental Period</p>
+                                        <p className="text-sm font-bold text-gray-800">{selectedRental.rent_start_date}</p>
+                                        <p className="text-sm font-bold text-gray-800">{selectedRental.rent_end_date}</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Transaction Info</p>
+                                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-black uppercase rounded border border-green-200">
+                                            Verified
+                                        </span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">Transaction ID</span>
+                                            <span className="font-mono font-bold text-gray-800">{selectedRental.payment_details?.transaction_id}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">Payment Date</span>
+                                            <span className="font-bold text-gray-800">{selectedRental.payment_details?.date}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-6 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-100 transition-all shadow-sm"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <Footer />
         </div>

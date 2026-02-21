@@ -8,7 +8,7 @@ import StoreSidebar from "../Components/StoreSidebar";
 import {
   FaBell, FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle,
   FaFileAlt, FaChevronRight, FaCheckCircle, FaClock, FaExclamationCircle,
-  FaStore, FaTshirt, FaSignOutAlt, FaCog
+  FaStore, FaTshirt, FaSignOutAlt, FaCog, FaDollarSign
 } from 'react-icons/fa';
 
 const InfoCard = ({ icon: Icon, label, value, color = "gray", trend }) => (
@@ -71,13 +71,33 @@ const StoreDashboard = () => {
     availableClothes: 0,
     unavailableClothes: 0,
     totalClothes: 0,
+    totalEarnings: 0,
   });
+
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [earningsHistory, setEarningsHistory] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
     fetchDonationsData();
     fetchClothingItemsData();
+    fetchEarningsData();
   }, []);
+
+  const fetchEarningsData = async () => {
+    try {
+      const response = await axiosInstance.get("accounts/dashboard/store/stats/");
+      const data = response.data.data;
+      setStats(prev => ({
+        ...prev,
+        totalEarnings: data.total_earnings,
+      }));
+      setRecentTransactions(data.recent_transactions || []);
+      setEarningsHistory(data.earnings_history || []);
+    } catch (error) {
+      console.error("Error fetching earnings data:", error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -233,7 +253,7 @@ const StoreDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      
+
       <div className="flex flex-1">
         <StoreSidebar />
 
@@ -275,7 +295,7 @@ const StoreDashboard = () => {
               <InfoCard icon={FaTshirt} label="Total Listings" value={stats.totalClothes} color="purple" trend={`${stats.availableClothes} available`} />
               <InfoCard icon={FaBox} label="Currently Rented" value={stats.unavailableClothes} color="orange" trend={`${stats.totalClothes - stats.unavailableClothes} ready to rent`} />
               <InfoCard icon={FaHeart} label="Total Donations" value={stats.approvedDonations + stats.collectedDonations} color="blue" trend={`${stats.collectedDonations} collected`} />
-              <InfoCard icon={FaClock} label="Pending Reviews" value={stats.pendingDonations} color="green" trend="Needs attention" />
+              <InfoCard icon={FaDollarSign} label="Total Earnings" value={`Rs. ${stats.totalEarnings}`} color="green" trend="Verified revenue" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -391,6 +411,27 @@ const StoreDashboard = () => {
                 </div>
               </div>
 
+              {/* Recent Transactions */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Transactions</h3>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {recentTransactions.length > 0 ? (
+                    recentTransactions.map((tx, index) => (
+                      <ActivityItem
+                        key={index}
+                        icon={FaDollarSign}
+                        color="bg-green-100 text-green-600"
+                        title={`Received Rs. ${tx.amount}`}
+                        desc={`${tx.item_name} - ${tx.customer_name}`}
+                        time={formatTime(tx.date)}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-sm">No recent transactions</p>
+                  )}
+                </div>
+              </div>
+
               {/* Recent Activities */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
@@ -418,7 +459,7 @@ const StoreDashboard = () => {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
