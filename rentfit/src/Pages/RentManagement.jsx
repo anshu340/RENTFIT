@@ -118,14 +118,14 @@ const RentManagement = () => {
                                     <tbody className="divide-y divide-gray-100">
                                         {isLoading ? (
                                             <tr>
-                                                <td colSpan="5" className="px-6 py-20 text-center">
+                                                <td colSpan="6" className="px-6 py-12 text-center">
                                                     <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                                                     <p className="text-gray-500 font-medium">Fetching your rentals...</p>
                                                 </td>
                                             </tr>
                                         ) : rentals.length === 0 ? (
                                             <tr>
-                                                <td colSpan="5" className="px-6 py-20 text-center">
+                                                <td colSpan="6" className="px-6 py-12 text-center">
                                                     <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                                         <FaTshirt className="text-gray-300 text-2xl" />
                                                     </div>
@@ -135,42 +135,68 @@ const RentManagement = () => {
                                             </tr>
                                         ) : (
                                             rentals.map((rental) => (
-                                                <tr key={rental.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="px-6 py-6">
+                                                <tr key={rental.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-0 uppercase-none">
+                                                    {/* Customer Column */}
+                                                    <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
-                                                                <FaUser />
+                                                            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 border-2 border-white shadow-sm overflow-hidden flex-shrink-0">
+                                                                {rental.customer_profile_image ? (
+                                                                    <img src={rental.customer_profile_image} alt={rental.customer_name} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <FaUser className="text-sm" />
+                                                                )}
                                                             </div>
-                                                            <div>
-                                                                <p className="font-bold text-gray-900">{rental.customer_name || 'Customer'}</p>
-                                                                <p className="text-xs text-gray-500">{rental.customer_email}</p>
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold text-gray-900 text-sm truncate">{rental.customer_name || 'Customer'}</p>
+                                                                <p className="text-[10px] text-gray-400 truncate">{rental.customer_email}</p>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-6 font-medium text-gray-800">
-                                                        <div className="flex items-center gap-2">
-                                                            <FaTshirt className="text-purple-400" />
-                                                            <span>{rental.clothing_name}</span>
-                                                            <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200">
-                                                                Size: {rental.selected_size || 'N/A'}
-                                                            </span>
+
+                                                    {/* Item Details Column */}
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-11 h-11 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 flex-shrink-0">
+                                                                {rental.clothing_image ? (
+                                                                    <img src={rental.clothing_image} alt={rental.clothing_name} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <FaTshirt className="text-gray-300" />
+                                                                )}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold text-gray-800 text-sm truncate">{rental.clothing_name}</p>
+                                                                <div className="mt-0.5">
+                                                                    <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded text-[9px] font-black uppercase tracking-widest border border-purple-100">
+                                                                        Size: {rental.selected_size || 'N/A'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <p className="text-xs text-gray-400 mt-1 uppercase font-bold tracking-tight">ID: #{rental.id}</p>
                                                     </td>
-                                                    <td className="px-6 py-6">
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <FaCalendarAlt className="text-purple-400" />
-                                                            <span>{rental.rent_start_date} <span className="text-gray-300 px-1">|</span> {rental.rent_end_date}</span>
+
+                                                    {/* Rental Period Column */}
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex flex-col">
+                                                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600">
+                                                                <FaCalendarAlt className="text-purple-400 text-[10px]" />
+                                                                <span>{rental.rent_start_date}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600">
+                                                                <div className="w-[10px] h-[1px] bg-gray-300 ml-[1px]"></div>
+                                                                <span>{rental.rent_end_date}</span>
+                                                            </div>
+                                                            <p className="text-[11px] font-black text-green-600 mt-1 uppercase tracking-tight">Rs. {rental.total_price}</p>
                                                         </div>
-                                                        <p className="text-xs font-bold text-green-600 mt-1">${rental.total_price} Total</p>
                                                     </td>
-                                                    <td className="px-6 py-6 text-center">
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider ${rental.payment_status === 'paid'
+
+                                                    {/* Payment Status Column */}
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="inline-flex flex-col items-center gap-1">
+                                                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border uppercase tracking-widest ${rental.payment_status === 'paid'
                                                                 ? 'bg-green-50 text-green-700 border-green-200'
-                                                                : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                                : 'bg-amber-50 text-amber-700 border-amber-200'
                                                                 }`}>
-                                                                {rental.payment_status?.toUpperCase() || 'PENDING'}
+                                                                {rental.payment_status || 'PENDING'}
                                                             </span>
                                                             {rental.payment_status === 'paid' && (
                                                                 <button
@@ -178,56 +204,60 @@ const RentManagement = () => {
                                                                         setSelectedRental(rental);
                                                                         setIsModalOpen(true);
                                                                     }}
-                                                                    className="text-purple-600 hover:text-purple-800 flex items-center gap-1 text-[10px] font-bold"
+                                                                    className="text-purple-500 hover:text-purple-700 font-bold text-[9px] uppercase tracking-tighter"
                                                                 >
-                                                                    <FaInfoCircle /> Details
+                                                                    Details
                                                                 </button>
                                                             )}
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-6 text-center">
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-extrabold border ${getStatusStyle(rental.status)}`}>
-                                                                {rental.status.replace('_', ' ').toUpperCase()}
+
+                                                    {/* Status Column */}
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="flex flex-col items-center gap-1.5">
+                                                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border uppercase tracking-widest ${getStatusStyle(rental.status)}`}>
+                                                                {rental.status.replace('_', ' ')}
                                                             </span>
                                                             {rental.has_damage_report && (
                                                                 <span
                                                                     onClick={() => navigate('/damaged-items')}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors uppercase tracking-wider"
+                                                                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-100 cursor-pointer hover:bg-red-100 transition-colors text-[8px] font-black uppercase tracking-tighter"
                                                                 >
-                                                                    <FaExclamationTriangle className="text-xs" />
-                                                                    Damage Reported
+                                                                    <FaExclamationTriangle />
+                                                                    Damaged
                                                                 </span>
                                                             )}
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-6 text-right">
+
+                                                    {/* Actions Column */}
+                                                    <td className="px-6 py-4 text-right">
                                                         {rental.status === 'pending' ? (
-                                                            <div className="flex justify-end gap-3">
+                                                            <div className="flex justify-end gap-2">
                                                                 <button
                                                                     onClick={() => handleAction(rental.id, 'approve')}
-                                                                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-bold text-xs flex items-center gap-2 shadow-sm"
+                                                                    className="h-8 w-8 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center justify-center shadow-sm"
+                                                                    title="Approve"
                                                                 >
-                                                                    <FaCheck /> Approve
+                                                                    <FaCheck />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleAction(rental.id, 'reject')}
-                                                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all font-bold text-xs flex items-center gap-2 shadow-sm"
+                                                                    className="h-8 w-8 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all flex items-center justify-center shadow-sm"
+                                                                    title="Reject"
                                                                 >
-                                                                    <FaTimes /> Reject
+                                                                    <FaTimes />
                                                                 </button>
                                                             </div>
                                                         ) : rental.status === 'returned_pending' ? (
-                                                            <div className="flex justify-end">
-                                                                <button
-                                                                    onClick={() => handleAction(rental.id, 'confirm-return')}
-                                                                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-bold text-xs flex items-center gap-2 shadow-sm"
-                                                                >
-                                                                    <FaCheck /> Confirm Return
-                                                                </button>
-                                                            </div>
+                                                            <button
+                                                                onClick={() => handleAction(rental.id, 'confirm-return')}
+                                                                className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-bold text-[10px] uppercase tracking-wider shadow-sm"
+                                                            >
+                                                                Confirm Return
+                                                            </button>
                                                         ) : (
-                                                            <span className="text-xs italic text-gray-400">No actions available</span>
+                                                            <span className="text-[10px] font-bold text-gray-300 uppercase italic">No Actions</span>
                                                         )}
                                                     </td>
                                                 </tr>
@@ -271,7 +301,6 @@ const RentManagement = () => {
                                     <div>
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Item Details</p>
                                         <p className="text-sm font-bold text-gray-800">{selectedRental.clothing_name}</p>
-                                        <p className="text-xs text-gray-500">Rental ID: #{selectedRental.id}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Rental Period</p>

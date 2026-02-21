@@ -35,7 +35,7 @@ const StoreSidebar = () => {
         { name: 'Damage Reports', icon: FaExclamationTriangle, path: '/damaged-items' },
         { name: 'Shop Locations', icon: FaMapMarkerAlt, path: '/storeProfile' },
         { name: 'User Support', icon: FaQuestionCircle, path: null },
-        { name: 'Reports', icon: FaFileAlt, path: null },
+        { name: 'Financial Reports', icon: FaFileAlt, path: '/reports' },
     ];
 
     useEffect(() => {

@@ -8,11 +8,8 @@ import StoreSidebar from "../Components/StoreSidebar";
 import {
   FaBell, FaHome, FaBox, FaHeart, FaMapMarkerAlt, FaQuestionCircle,
   FaFileAlt, FaChevronRight, FaCheckCircle, FaClock, FaExclamationCircle,
-  FaStore, FaTshirt, FaSignOutAlt, FaCog, FaDollarSign
+  FaStore, FaTshirt, FaSignOutAlt, FaCog, FaDollarSign, FaCalendarAlt, FaUser, FaTshirt as FaShirt, FaCheck, FaTimes, FaInfoCircle, FaExclamationTriangle
 } from 'react-icons/fa';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
 
 const InfoCard = ({ icon: Icon, label, value, color = "gray", trend }) => (
   <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -78,7 +75,6 @@ const StoreDashboard = () => {
   });
 
   const [recentTransactions, setRecentTransactions] = useState([]);
-  const [earningsHistory, setEarningsHistory] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -96,7 +92,6 @@ const StoreDashboard = () => {
         totalEarnings: data.total_earnings,
       }));
       setRecentTransactions(data.recent_transactions || []);
-      setEarningsHistory(data.earnings_history || []);
     } catch (error) {
       console.error("Error fetching earnings data:", error);
     }
@@ -310,86 +305,6 @@ const StoreDashboard = () => {
               </div>
             </div>
 
-            {/* Earnings Chart Section */}
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <FaDollarSign className="text-green-500" />
-                    Earnings Trend
-                  </h3>
-                  <p className="text-sm text-gray-500">Visualizing your verified revenue growth</p>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Current Period</span>
-                  <span className="text-lg font-black text-green-600">Rs. {stats.totalEarnings}</span>
-                </div>
-              </div>
-
-              <div className="h-[300px] w-full">
-                {earningsHistory && earningsHistory.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={earningsHistory}>
-                      <defs>
-                        <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                      <XAxis
-                        dataKey="date"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: '#9ca3af', fontWeight: 500 }}
-                        dy={10}
-                        tickFormatter={(str) => {
-                          try {
-                            const date = new Date(str);
-                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                          } catch (e) {
-                            return str;
-                          }
-                        }}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: '#9ca3af', fontWeight: 500 }}
-                        tickFormatter={(val) => `Rs.${val}`}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: '16px',
-                          border: 'none',
-                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                          padding: '12px'
-                        }}
-                        itemStyle={{ fontWeight: 'bold', color: '#10b981' }}
-                        labelStyle={{ marginBottom: '4px', fontWeight: 'bold', color: '#374151' }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="earnings"
-                        stroke="#10b981"
-                        strokeWidth={4}
-                        fillOpacity={1}
-                        fill="url(#colorEarnings)"
-                        animationDuration={1500}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-full flex flex-col items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-8">
-                    <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4">
-                      <FaDollarSign className="text-2xl text-gray-300" />
-                    </div>
-                    <p className="text-gray-500 font-bold text-lg">No earnings data available</p>
-                    <p className="text-gray-400 text-sm mt-1">Total verified revenue: Rs. {stats.totalEarnings}</p>
-                  </div>
-                )}
-              </div>
-            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
