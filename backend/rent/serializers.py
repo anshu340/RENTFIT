@@ -10,6 +10,7 @@ class RentalSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     clothing = ClothingListSerializer(read_only=True)
     clothing_name = serializers.CharField(source='clothing.item_name', read_only=True)
+    clothing_image = serializers.SerializerMethodField()
     has_review = serializers.SerializerMethodField()
     has_damage_report = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
@@ -19,11 +20,19 @@ class RentalSerializer(serializers.ModelSerializer):
         model = Rental
         fields = [
             'id', 'customer', 'customer_email', 'customer_name', 'store', 'store_name',
-            'clothing', 'clothing_name', 'selected_size', 'rent_start_date', 'rent_end_date',
+            'clothing', 'clothing_name', 'clothing_image', 'selected_size', 'rent_start_date', 'rent_end_date',
             'total_price', 'status', 'has_review', 'has_damage_report', 'payment_status', 
             'payment_details', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
+
+    def get_clothing_image(self, obj):
+        if obj.clothing and obj.clothing.images:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.clothing.images.url)
+            return obj.clothing.images.url
+        return None
 
     def get_has_review(self, obj):
         return hasattr(obj, 'review')
