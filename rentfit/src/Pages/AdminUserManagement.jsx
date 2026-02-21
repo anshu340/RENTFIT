@@ -127,8 +127,16 @@ const AdminUserManagement = () => {
                                             <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400 border border-slate-200 uppercase">
-                                                            {user.name.charAt(0)}
+                                                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400 border border-slate-200 uppercase overflow-hidden">
+                                                            {user.profile_image_url || user.store_logo_url ? (
+                                                                <img
+                                                                    src={user.profile_image_url || user.store_logo_url}
+                                                                    alt={user.name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                user.name.charAt(0)
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <div className="font-bold text-slate-900">{user.name}</div>

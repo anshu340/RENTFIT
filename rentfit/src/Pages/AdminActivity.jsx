@@ -91,8 +91,8 @@ const AdminActivity = () => {
                                                                 <span className="flex items-center gap-1"><FaClock size={10} /> {formatDate(rental.created_at)}</span>
                                                             </div>
                                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${rental.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                                    rental.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                                        'bg-slate-50 text-slate-600 border-slate-100'
+                                                                rental.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                                                    'bg-slate-50 text-slate-600 border-slate-100'
                                                                 }`}>
                                                                 {rental.status}
                                                             </span>
@@ -127,8 +127,16 @@ const AdminActivity = () => {
                                             {activity.recent_donations.map((donation) => (
                                                 <div key={donation.id} className="p-6 hover:bg-slate-50 transition-colors group">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-black uppercase">
-                                                            {donation.donor_name ? donation.donor_name.charAt(0) : 'D'}
+                                                        <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-black uppercase overflow-hidden border border-rose-100">
+                                                            {donation.image_url ? (
+                                                                <img
+                                                                    src={donation.image_url}
+                                                                    alt={donation.item_name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                donation.donor_name ? donation.donor_name.charAt(0) : 'D'
+                                                            )}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex justify-between items-start mb-1">
@@ -141,7 +149,7 @@ const AdminActivity = () => {
                                                                 <span className="flex items-center gap-1"><FaClock size={10} /> {formatDate(donation.created_at)}</span>
                                                             </div>
                                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${donation.donation_status === 'collected' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                                    'bg-amber-50 text-amber-600 border-amber-100'
+                                                                'bg-amber-50 text-amber-600 border-amber-100'
                                                                 }`}>
                                                                 {donation.donation_status}
                                                             </span>
