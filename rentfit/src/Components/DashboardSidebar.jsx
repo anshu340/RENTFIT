@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
     FaTachometerAlt,
     FaTshirt,
@@ -15,51 +15,60 @@ import {
 
 const DashboardSidebar = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const isActive = (path) => location.pathname === path;
+
+    const navItemClasses = (path) =>
+        `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${isActive(path)
+            ? 'text-purple-600 bg-purple-50 shadow-sm'
+            : 'text-gray-600 hover:bg-gray-50'
+        }`;
 
     return (
-        <aside className="w-64 bg-white border-r border-gray-200 p-6">
+        <aside className="w-60 bg-white border border-gray-100 rounded-3xl p-4 h-fit ml-4 mt-6 shadow-md">
             {/* Menu Items */}
             <nav className="space-y-2">
-                <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-purple-600 bg-purple-50 rounded-lg font-medium">
+                <Link to="/dashboard" className={navItemClasses('/dashboard')}>
                     <FaTachometerAlt className="text-lg" />
                     <span>Dashboard</span>
-                </a>
-                <a href="/browseClothes" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/browseClothes" className={navItemClasses('/browseClothes')}>
                     <FaTshirt className="text-lg" />
                     <span>Browse Clothes</span>
-                </a>
-                <a href="/myrentals" onClick={(e) => { e.preventDefault(); navigate('/myrentals'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/myrentals" className={navItemClasses('/myrentals')}>
                     <FaShoppingBag className="text-lg" />
                     <span>My Rentals</span>
-                </a>
-                <a href="/wishlist" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/wishlist" className={navItemClasses('/wishlist')}>
                     <FaHeart className="text-lg" />
                     <span>Wishlist</span>
-                </a>
-                <a href="/donate" onClick={(e) => { e.preventDefault(); navigate('/donate'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/donate" className={navItemClasses('/donate')}>
                     <FaHandHoldingHeart className="text-lg" />
                     <span>Donate Clothes</span>
-                </a>
-                <a href="/mydonations" onClick={(e) => { e.preventDefault(); navigate('/mydonations'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/mydonations" className={navItemClasses('/mydonations')}>
                     <FaBox className="text-lg" />
                     <span>My Donations</span>
-                </a>
-                <a href="/chat" onClick={(e) => { e.preventDefault(); navigate('/chat'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/chat" className={navItemClasses('/chat')}>
                     <FaComments className="text-lg" />
                     <span>Messages</span>
-                </a>
-                <a href="/nearbyStores" onClick={(e) => { e.preventDefault(); navigate('/nearbyStores'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/nearbyStores" className={navItemClasses('/nearbyStores')}>
                     <FaMapMarkerAlt className="text-lg" />
                     <span>Nearby Shops</span>
-                </a>
-                <a href="/myreviews" onClick={(e) => { e.preventDefault(); navigate('/myreviews'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/myreviews" className={navItemClasses('/myreviews')}>
                     <FaStar className="text-lg" />
                     <span>My Reviews</span>
-                </a>
-                <a href="/profile" onClick={(e) => { e.preventDefault(); navigate('/profile'); }} className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                </Link>
+                <Link to="/profile" className={navItemClasses('/profile')}>
                     <FaUser className="text-lg" />
                     <span>Profile</span>
-                </a>
+                </Link>
             </nav>
         </aside>
     );

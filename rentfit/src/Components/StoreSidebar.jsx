@@ -35,7 +35,7 @@ const StoreSidebar = () => {
         { name: 'Damage Reports', icon: FaExclamationTriangle, path: '/damaged-items' },
         { name: 'Shop Locations', icon: FaMapMarkerAlt, path: '/storeProfile' },
         { name: 'User Support', icon: FaQuestionCircle, path: null },
-        { name: 'Financial Reports', icon: FaFileAlt, path: '/reports' },
+        { name: 'Reports', icon: FaFileAlt, path: '/reports' },
     ];
 
     useEffect(() => {
@@ -65,7 +65,7 @@ const StoreSidebar = () => {
     };
 
     return (
-        <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
+        <div className="w-60 bg-white border border-gray-100 rounded-3xl flex flex-col h-fit m-6 shadow-md">
             <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">

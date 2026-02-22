@@ -3,7 +3,7 @@ import axiosInstance from '../services/axiosInstance';
 import AdminSidebar from '../Components/AdminSidebar';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
-import { FaHistory, FaTshirt, FaHandHoldingHeart, FaClock, FaChevronRight } from 'react-icons/fa';
+import { FaTshirt, FaHandHoldingHeart, FaClock, FaChevronRight } from 'react-icons/fa';
 
 const AdminActivity = () => {
     const [activity, setActivity] = useState({

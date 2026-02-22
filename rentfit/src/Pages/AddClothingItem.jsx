@@ -55,7 +55,7 @@ const AddClothingItem = () => {
           category: item.category || '',
           event_type: item.event_type || '',
           gender: item.gender || 'Female',
-          size: item.size || '', // Backend sends comma separated string
+          size: item.size || '',
           condition: item.condition || '',
           rental_price: item.rental_price || '',
           security_deposit: item.security_deposit || '',
@@ -64,8 +64,6 @@ const AddClothingItem = () => {
           clothing_status: item.clothing_status || 'Available'
         });
 
-        // Convert comma-separated size string from backend to array for local UI state if needed
-        // But we'll handle join/split logic in the render/submit
         if (item.images) {
           setExistingImage(item.images);
         }
@@ -116,10 +114,8 @@ const AddClothingItem = () => {
       Object.keys(formData).forEach(key => {
         let value = formData[key];
 
-        // Data Cleanup: Ensure numeric fields are correctly handled
         if (['rental_price', 'security_deposit', 'stock_quantity'].includes(key)) {
           if (value === "" || value === null || value === undefined) {
-            // Let backend handle defaults or required validation
             return;
           }
           value = Number(value);
@@ -130,9 +126,12 @@ const AddClothingItem = () => {
         }
       });
 
-      // Append image if exists
+      // Append image ONLY if a new one was selected
       if (imageFile) {
         formDataToSend.append('images', imageFile);
+      } else if (!isEditMode) {
+        // If adding new item, image is probably required by backend
+        // but it's already checked by required attribute in HTML
       }
 
       if (isEditMode) {
@@ -211,7 +210,7 @@ const AddClothingItem = () => {
       <Navbar />
       <div className="flex flex-1">
         <StoreSidebar />
-        
+
         <div className="flex-1 py-8 px-4 overflow-auto">
           {/* Header */}
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -411,21 +410,35 @@ const AddClothingItem = () => {
                     {/* Product Images */}
                     <div className="md:row-span-3">
                       <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Product Images *</label>
-                      <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer group relative">
+                      <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer group relative overflow-hidden">
                         {imagePreview || existingImage ? (
-                          <div className="relative inline-block w-full">
+                          <div className="relative inline-block w-full group">
                             <img
                               src={imagePreview || existingImage}
                               alt="Item Preview"
-                              className="w-full aspect-[4/5] object-cover rounded-2xl shadow-md"
+                              className="w-full aspect-[4/5] object-cover rounded-2xl shadow-md transition-all duration-300 group-hover:scale-[1.02]"
                             />
-                            <button
-                              type="button"
-                              onClick={removeImage}
-                              className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md text-red-500 rounded-full shadow-lg hover:bg-white hover:scale-110 transition-all"
-                            >
-                              <FaTimes size={14} />
-                            </button>
+
+                            {/* Hover Overlay */}
+                            <label htmlFor="image-upload" className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
+                              <FaUpload className="text-white mb-2" size={20} />
+                              <span className="text-white text-xs font-bold uppercase tracking-widest">Replace Image</span>
+                            </label>
+
+                            {/* Remove Preview Button (only for new uploads) */}
+                            {imagePreview && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  removeImage();
+                                }}
+                                className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md text-red-500 rounded-full shadow-lg hover:bg-white hover:scale-110 transition-all z-10"
+                                title="Remove new image and restore original"
+                              >
+                                <FaTimes size={14} />
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <label htmlFor="image-upload" className="block cursor-pointer py-10">

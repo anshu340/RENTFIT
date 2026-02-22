@@ -29,8 +29,8 @@ const BrowseClothes = () => {
 
   // Filter states
   const [filters, setFilters] = useState({
-    category: [],
-    size: [],
+    category: '',
+    size: '',
     priceRange: '',
     eventType: 'All Events',
     searchQuery: ''
@@ -118,16 +118,16 @@ const BrowseClothes = () => {
     }
 
     // Category
-    if (filters.category.length > 0) {
+    if (filters.category) {
       result = result.filter(item =>
-        filters.category.includes(item.category)
+        item.category === filters.category
       );
     }
 
     // Size
-    if (filters.size.length > 0) {
+    if (filters.size) {
       result = result.filter(item =>
-        filters.size.includes(item.size)
+        item.size === filters.size
       );
     }
 
@@ -193,23 +193,30 @@ const BrowseClothes = () => {
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => {
-      // For arrays (Category, Size)
-      if (Array.isArray(prev[key])) {
-        if (prev[key].includes(value)) {
-          return { ...prev, [key]: prev[key].filter(item => item !== value) };
-        } else {
-          return { ...prev, [key]: [...prev[key], value] };
-        }
+      // Handle 'All' for size
+      if (key === 'size' && value === 'All') {
+        return { ...prev, size: '' };
       }
+
+      const stateKey = key === 'search' ? 'searchQuery' : key;
+
+      // Toggle logic for Category and Size
+      if (stateKey === 'category' || stateKey === 'size') {
+        return {
+          ...prev,
+          [stateKey]: prev[stateKey] === value ? '' : value
+        };
+      }
+
       // For single values (Search, Price, Event)
-      return { ...prev, [key]: value };
+      return { ...prev, [stateKey]: value };
     });
   };
 
   const clearFilters = () => {
     setFilters({
-      category: [],
-      size: [],
+      category: '',
+      size: '',
       priceRange: '',
       eventType: 'All Events',
       searchQuery: ''
@@ -307,7 +314,7 @@ const BrowseClothes = () => {
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar Filters */}
                 <aside className={`lg:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sticky top-24">
+                  <div className="bg-white rounded-3xl shadow-md border border-gray-100 p-8 h-fit">
                     <div className="flex justify-between items-center mb-8">
                       <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Filters</h3>
                       <button
@@ -327,8 +334,8 @@ const BrowseClothes = () => {
                           <input
                             type="text"
                             placeholder="Search items..."
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            value={filters.searchQuery}
+                            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
                             className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium"
                           />
                         </div>
@@ -361,7 +368,7 @@ const BrowseClothes = () => {
                             <button
                               key={size}
                               onClick={() => handleFilterChange('size', size)}
-                              className={`w-12 h-10 flex items-center justify-center rounded-xl text-xs font-bold transition-all ${filters.size === size
+                              className={`w-12 h-10 flex items-center justify-center rounded-xl text-xs font-bold transition-all ${(size === 'All' && !filters.size) || filters.size === size
                                 ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-105'
                                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                 }`}
@@ -568,8 +575,8 @@ const BrowseClothes = () => {
                           key={i}
                           onClick={() => goToPage(i + 1)}
                           className={`px-4 py-2 rounded-lg transition-colors ${currentPage === i + 1
-                              ? 'bg-purple-600 text-white shadow-md'
-                              : 'border border-gray-300 hover:bg-gray-50'
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'border border-gray-300 hover:bg-gray-50'
                             }`}
                         >
                           {i + 1}
@@ -595,7 +602,7 @@ const BrowseClothes = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
             <aside className={`lg:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sticky top-24">
+              <div className="bg-white rounded-3xl shadow-md border border-gray-100 p-8 h-fit">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Filters</h3>
                   <button
@@ -615,8 +622,8 @@ const BrowseClothes = () => {
                       <input
                         type="text"
                         placeholder="Search items..."
-                        value={filters.search}
-                        onChange={(e) => handleFilterChange('search', e.target.value)}
+                        value={filters.searchQuery}
+                        onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
                         className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-sm font-medium"
                       />
                     </div>
@@ -649,7 +656,7 @@ const BrowseClothes = () => {
                         <button
                           key={size}
                           onClick={() => handleFilterChange('size', size)}
-                          className={`w-12 h-10 flex items-center justify-center rounded-xl text-xs font-bold transition-all ${filters.size === size
+                          className={`w-12 h-10 flex items-center justify-center rounded-xl text-xs font-bold transition-all ${(size === 'All' && !filters.size) || filters.size === size
                             ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-105'
                             : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
