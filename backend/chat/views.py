@@ -84,6 +84,12 @@ class MessageListView(APIView):
             )
             
         messages = conversation.messages.all()
+        
+        # Mark messages as read for the recipient
+        unread_messages = messages.filter(is_read=False).exclude(sender=request.user)
+        if unread_messages.exists():
+            unread_messages.update(is_read=True)
+            
         serializer = MessageSerializer(messages, many=True, context={'request': request})
         return Response(serializer.data)
 
