@@ -7,6 +7,8 @@ class Notification(models.Model):
         ('donation', 'Donation'),
         ('system', 'System'),
         ('chat', 'Chat'),
+        ('reminder', 'Reminder'),
+        ('overdue', 'Overdue'),
     )
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')

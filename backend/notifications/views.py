@@ -10,8 +10,7 @@ class NotificationListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Limit to 20 most recent notifications for performance
-        return Notification.objects.filter(user=self.request.user)[:20]
+        return Notification.objects.filter(user=self.request.user)
 
 class MarkAsReadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
