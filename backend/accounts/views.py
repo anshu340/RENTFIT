@@ -156,9 +156,9 @@ class CustomerDashboardStatsView(APIView):
         Rental = apps.get_model('rent', 'Rental')
         Donation = apps.get_model('donations', 'Donation')
         
-        # Statistics logic
-        active_status = ['pending', 'approved', 'rented', 'Pending', 'Approved', 'Rented']
-        spent_status = ['approved', 'rented', 'returned_confirmed', 'Approved', 'Rented', 'Returned Confirmed']
+        # Statistics logic: Only include items in possession as Active, and only paid items in Spent
+        active_status = ['rented', 'returned_pending', 'Rented', 'Returned Pending']
+        spent_status = ['rented', 'returned_confirmed', 'Rented', 'Returned Confirmed']
         
         active_rentals = Rental.objects.filter(
             customer=user,

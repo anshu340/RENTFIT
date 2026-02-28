@@ -10,6 +10,8 @@ from .views import (
     DamageReportSubmitView,
     DamageReportStoreView,
     DamageReportActionView,
+    RentalDeleteView,
+    RentalUpdateView,
 )
 
 urlpatterns = [
@@ -25,4 +27,6 @@ urlpatterns = [
     path('damage-report/submit/', DamageReportSubmitView.as_view(), name='damage-report-submit'),
     path('damage-report/store/', DamageReportStoreView.as_view(), name='damage-report-store'),
     path('damage-report/<int:pk>/action/', DamageReportActionView.as_view(), name='damage-report-action'),
+    path('<int:pk>/delete/', RentalDeleteView.as_view(), name='rental-delete'),
+    path('<int:pk>/update/', RentalUpdateView.as_view(), name='rental-update'),
 ]

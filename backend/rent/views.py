@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Rental, DamageReport
 from .serializers import RentalSerializer, RentalCreateSerializer, DamageReportSerializer
@@ -227,3 +228,49 @@ class DamageReportActionView(generics.UpdateAPIView):
         )
         
         return Response(DamageReportSerializer(report).data, status=status.HTTP_200_OK)
+
+class RentalDeleteView(generics.DestroyAPIView):
+    """
+    DELETE /api/rentals/<id>/delete/
+    Allows Customers to cancel pending or delete rejected rentals.
+    """
+    serializer_class = RentalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Customers can only delete their own rentals
+        return Rental.objects.filter(customer=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.status not in ["pending", "rejected"]:
+            raise PermissionDenied("You can only cancel pending or delete rejected rentals.")
+        instance.delete()
+
+class RentalUpdateView(generics.UpdateAPIView):
+    """
+    PATCH /api/rentals/<id>/update/
+    Allows Customers to update the end date for pending or rejected rentals.
+    Recalculates total_price based on new duration.
+    """
+    serializer_class = RentalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Rental.objects.filter(customer=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+
+        if instance.status not in ["pending", "rejected", "approved"]:
+            raise PermissionDenied("Only pending, rejected or approved rentals can be modified.")
+
+        new_end_date = serializer.validated_data.get("rent_end_date")
+
+        if new_end_date <= instance.rent_start_date:
+            raise PermissionDenied("End date must be after start date.")
+
+        # Recalculate price using clothing's rental_price
+        days = (new_end_date - instance.rent_start_date).days + 1
+        instance.total_price = days * instance.clothing.rental_price
+
+        serializer.save(total_price=instance.total_price)
