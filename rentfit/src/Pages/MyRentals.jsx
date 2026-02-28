@@ -6,7 +6,7 @@ import Footer from '../Components/Footer';
 import Alert from '../Components/Alert';
 import DashboardSidebar from '../Components/DashboardSidebar';
 import EsewaPayment from '../Components/EsewaPayment';
-import { FaCalendarAlt, FaStore, FaClock, FaCheckCircle, FaTimesCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt, FaMapMarkerAlt, FaPhoneAlt } from 'react-icons/fa';
 
 const MyRentals = () => {
     const [rentals, setRentals] = useState([]);
@@ -131,6 +131,47 @@ const MyRentals = () => {
         }
     };
 
+    const getReturnDateStyle = (dateStr, status) => {
+        if (!['rented', 'approved'].includes(status)) return 'text-gray-900';
+        if (!dateStr) return 'text-gray-900';
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endDate = new Date(dateStr);
+        endDate.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'text-red-600 font-bold'; // Overdue
+        if (diffDays === 0 || diffDays === 1) return 'text-orange-600 font-bold'; // Due Today or Tomorrow
+        return 'text-gray-900';
+    };
+
+    const getReturnStatusBadge = (dateStr, status) => {
+        if (status === 'returned_confirmed') return { label: 'Returned', style: 'bg-green-50 text-green-600 border-green-100' };
+        if (!['rented', 'approved'].includes(status)) return null;
+        if (!dateStr) return null;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endDate = new Date(dateStr);
+        endDate.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return { label: 'Overdue', style: 'bg-red-50 text-red-600 border-red-100' };
+        if (diffDays === 0) return { label: 'Due Today', style: 'bg-orange-50 text-orange-600 border-orange-100' };
+        if (diffDays === 1) return { label: 'Due Tomorrow', style: 'bg-orange-50 text-orange-600 border-orange-100' };
+
+        return { label: 'Active', style: 'bg-green-50 text-green-600 border-green-100' };
+    };
+
+    const getRentalDuration = (start, end) => {
+        if (!start || !end) return '';
+        const s = new Date(start);
+        const e = new Date(end);
+        const diff = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+        return `${diff} days`;
+    };
+
     // calculate stats
     const activeRentalsCount = rentals.filter(r => ['rented', 'approved'].includes(r.status)).length;
     const totalRentalsCount = rentals.length;
@@ -248,84 +289,129 @@ const MyRentals = () => {
                                 <p className="text-gray-500 mt-1">Try adjusting your filters.</p>
                             </div>
                         ) : (
-                            filteredRentals.map((rental) => (
-                                <div key={rental.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-6 hover:shadow-md transition-shadow duration-200">
-                                    {/* Image */}
-                                    <div className="w-full lg:w-48 h-48 lg:h-32 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden relative group">
-                                        {rental.clothing?.images ? (
-                                            <img
-                                                src={rental.clothing.images}
-                                                alt={rental.clothing_name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        ) : (
-                                            <div className="flex items-center justify-center h-full text-gray-400 bg-gray-50">
-                                                No Image
+                            filteredRentals.map((rental) => {
+                                const statusBadge = getReturnStatusBadge(rental.rent_end_date, rental.status);
+                                return (
+                                    <div key={rental.id} className="relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-6 hover:shadow-md transition-all duration-300">
+                                        {/* Urgency Badge in Top Right */}
+                                        {statusBadge && statusBadge.label !== 'Active' && statusBadge.label !== 'Returned' && (
+                                            <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm z-10 ${statusBadge.style}`}>
+                                                {statusBadge.label}
                                             </div>
                                         )}
-                                        <div className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border bg-white/90 ${getStatusStyle(rental.status).split(' ')[1]}`}>
-                                            {rental.status.replace('_', ' ')}
-                                        </div>
-                                    </div>
 
-                                    {/* Content (Simplified for brevity) */}
-                                    <div className="flex-1 flex flex-col justify-between py-1">
-                                        <div>
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-gray-900 leading-tight">{rental.clothing_name}</h3>
-                                                    <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                                                        <span>{rental.store_name}</span>
-                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                        <span className="font-bold text-gray-900">${rental.total_price}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-6 mt-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                                <div>
-                                                    <p className="mb-1">Start</p>
-                                                    <p className="text-gray-900">{rental.rent_start_date}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="mb-1">End</p>
-                                                    <p className="text-gray-900">{rental.rent_end_date}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Actions Footer */}
-                                        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                                            <div className="flex gap-4">
-                                                {rental.status === 'rented' && (
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => handleMarkReturned(rental.id)}
-                                                            className="px-5 py-2.5 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 transition shadow-lg shadow-purple-100 flex items-center gap-2"
-                                                        >
-                                                            <FaUndo /> Quick Return
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setDamageModal({ show: true, rentalId: rental.id })}
-                                                            className="px-5 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl font-bold text-sm hover:bg-amber-100 transition flex items-center gap-2"
-                                                        >
-                                                            <FaExclamationTriangle /> Report Damage
-                                                        </button>
+                                        {/* Main Content */}
+                                        <div className="flex flex-col lg:flex-row gap-6">
+                                            {/* Image */}
+                                            <div className="w-full lg:w-24 h-24 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+                                                {rental.clothing?.images ? (
+                                                    <img
+                                                        src={rental.clothing.images}
+                                                        alt={rental.clothing_name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full text-gray-400 bg-gray-50">
+                                                        No Image
                                                     </div>
                                                 )}
-                                                {rental.status === 'approved' && (
-                                                    <button onClick={() => handlePayment(rental.id)} className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition shadow-lg shadow-green-100 flex items-center gap-2">
-                                                        <FaCreditCard /> Complete Payment
+                                            </div>
+
+                                            {/* Details */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h3 className="text-xl font-bold text-gray-900 truncate pr-24">{rental.clothing_name}</h3>
+                                                        <div className="text-sm text-gray-500 mt-0.5 font-medium">
+                                                            Size: {rental.clothing?.size || 'M'} | Brand: {rental.clothing?.brand || 'Premium'}
+                                                        </div>
+                                                        {statusBadge && (statusBadge.label === 'Active' || statusBadge.label === 'Returned') && (
+                                                            <div className={`mt-3 inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusBadge.style}`}>
+                                                                {statusBadge.label}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-xl font-black text-gray-900">${rental.total_price}</div>
+                                                        <div className="text-xs font-bold text-gray-400 mt-1">{getRentalDuration(rental.rent_start_date, rental.rent_end_date)}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Start Date</p>
+                                                        <p className="text-sm font-bold text-gray-800">{rental.rent_start_date}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 uppercase">Due Date</p>
+                                                        <p className={`text-sm font-black ${getReturnDateStyle(rental.rent_end_date, rental.status)}`}>
+                                                            {rental.rent_end_date}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Store</p>
+                                                        <p className="text-sm font-bold text-gray-800">{rental.store_name}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Payment</p>
+                                                        <p className="text-sm font-bold text-green-600">Paid</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="border-t border-gray-100 pt-4">
+                                            <div className="flex flex-wrap items-center justify-between gap-4">
+                                                <div className="flex items-center gap-6">
+                                                    <button className="flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 transition">
+                                                        <FaMapMarkerAlt size={14} />
+                                                        View Store
                                                     </button>
-                                                )}
+                                                    <button className="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-700 transition">
+                                                        <FaPhoneAlt size={14} />
+                                                        Contact
+                                                    </button>
+                                                </div>
+
+                                                <div className="flex items-center gap-3">
+                                                    {rental.status === 'rented' && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => setDamageModal({ show: true, rentalId: rental.id })}
+                                                                className="text-gray-400 hover:text-amber-500 transition px-3 hover:scale-110"
+                                                                title="Report Damage"
+                                                            >
+                                                                <FaExclamationTriangle />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleMarkReturned(rental.id)}
+                                                                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-sm transition shadow-lg shadow-blue-100 hover:-translate-y-0.5"
+                                                            >
+                                                                Return Now
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {rental.status === 'approved' && (
+                                                        <button
+                                                            onClick={() => handlePayment(rental.id)}
+                                                            className="px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition shadow-lg shadow-green-100"
+                                                        >
+                                                            Pay Now
+                                                        </button>
+                                                    )}
+                                                    {rental.status === 'returned_pending' && (
+                                                        <div className="flex items-center gap-2 text-purple-600 bg-purple-50 px-4 py-2 rounded-xl border border-purple-100">
+                                                            <FaClock className="animate-pulse" />
+                                                            <span className="text-xs font-black uppercase tracking-wider">Awaiting Confirmation</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border ${getStatusStyle(rental.status)}`}>
-                                                {rental.status.replace('_', ' ')}
-                                            </span>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>

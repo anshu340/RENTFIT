@@ -13,7 +13,9 @@ import {
   FaDollarSign,
   FaShoppingBag,
   FaBox,
-  FaBell
+  FaBell,
+  FaClock,
+  FaUndo
 } from 'react-icons/fa';
 
 const Dashboard = () => {
@@ -40,7 +42,8 @@ const Dashboard = () => {
     totalSpent: 0,
     itemsDonated: 0,
     suggestedItems: [],
-    rentalHistory: []
+    rentalHistory: [],
+    upcomingRentals: []
   });
 
   useEffect(() => {
@@ -101,9 +104,17 @@ const Dashboard = () => {
             new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)
           ).slice(0, 5);
 
+
+          // Upcoming Returns: status 'rented' or 'approved', sort by rent_end_date ASC
+          const upcoming = [...allUserRentals]
+            .filter(r => ['rented', 'approved'].includes(r.status))
+            .sort((a, b) => new Date(a.rent_end_date) - new Date(b.rent_end_date))
+            .slice(0, 3);
+
           setDashboardData(prev => ({
             ...prev,
-            rentalHistory: history
+            rentalHistory: history,
+            upcomingRentals: upcoming
           }));
         }
       } catch (error) {
@@ -197,6 +208,20 @@ const Dashboard = () => {
       case 'returned_confirmed': return 'Returned';
       default: return status || 'Active';
     }
+  };
+
+  const getUpcomingStatus = (dateStr) => {
+    if (!dateStr) return { label: 'Active', style: 'bg-gray-100 text-gray-600' };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date(dateStr);
+    endDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return { label: 'Overdue', style: 'bg-red-50 text-red-600 border-red-100 shadow-sm shadow-red-50' };
+    if (diffDays === 0) return { label: 'Due Today', style: 'bg-blue-50 text-blue-600 border-blue-100' };
+    if (diffDays === 1) return { label: 'Due Tomorrow', style: 'bg-orange-50 text-orange-600 border-orange-100' };
+    return { label: 'Upcoming', style: 'bg-gray-50 text-gray-500 border-gray-100' };
   };
 
   if (isLoading) {
@@ -302,6 +327,55 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* Upcoming Returns Section */}
+            {dashboardData.upcomingRentals.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                    <FaClock className="text-orange-500" />
+                    Upcoming Returns
+                  </h2>
+                  <button onClick={() => navigate('/myrentals')} className="text-sm font-bold text-indigo-600 hover:underline">
+                    Manage All
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {dashboardData.upcomingRentals.map((rental) => {
+                    const status = getUpcomingStatus(rental.rent_end_date);
+                    const isOverdue = status.label === 'Overdue';
+                    return (
+                      <div
+                        key={rental.id}
+                        className={`bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 ${isOverdue ? 'bg-red-50/30 border-red-100 ring-1 ring-red-100' : ''
+                          }`}
+                      >
+                        <div className="w-16 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                          {rental.clothing?.images && (
+                            <img src={rental.clothing.images} alt="" className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-gray-900 truncate text-sm">{rental.clothing_name}</h3>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">
+                            Due: {formatDate(rental.rent_end_date)}
+                          </p>
+                          <div className={`mt-2 inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${status.style}`}>
+                            {status.label}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => navigate('/myrentals')}
+                          className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
+                        >
+                          <FaUndo className="text-xs" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

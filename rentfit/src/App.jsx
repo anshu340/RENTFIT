@@ -30,6 +30,7 @@ import AdminDashboard from './Pages/AdminDashboard.jsx';
 import AdminUserManagement from './Pages/AdminUserManagement.jsx';
 import AdminActivity from './Pages/AdminActivity.jsx';
 import StoreReports from './Pages/StoreReports.jsx';
+import NotificationsPage from './Pages/NotificationsPage.jsx';
 
 
 function App() {
@@ -67,6 +68,7 @@ function App() {
       <Route path="/adminUsers" element={<AdminUserManagement />} />
       <Route path="/adminActivity" element={<AdminActivity />} />
       <Route path="/reports" element={<StoreReports />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
     </Routes>
 
   );

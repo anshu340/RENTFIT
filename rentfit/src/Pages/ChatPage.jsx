@@ -6,7 +6,7 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import DashboardSidebar from '../Components/DashboardSidebar';
 import StoreSidebar from '../Components/StoreSidebar';
-import { FaPaperPlane, FaUserCircle, FaStore, FaClock, FaCheck, FaCheckDouble } from 'react-icons/fa';
+import { FaPaperPlane, FaUserCircle, FaStore, FaClock, FaCheck, FaCheckDouble, FaExclamationTriangle } from 'react-icons/fa';
 
 const ChatPage = () => {
     const { id } = useParams();
@@ -18,6 +18,7 @@ const ChatPage = () => {
     const [loading, setLoading] = useState(true);
     const containerRef = useRef(null);
     const [currentUser, setCurrentUser] = useState(null);
+    const [myRentals, setMyRentals] = useState([]);
 
     // 1. Fetch user info and conversations ONLY ONCE on mount
     useEffect(() => {
@@ -29,6 +30,12 @@ const ChatPage = () => {
 
                 const convRes = await chatAxiosInstance.get('my/');
                 setConversations(convRes.data);
+
+                // Fetch rentals to check for overdue items
+                if (localStorage.getItem('role') === 'Customer') {
+                    const rentalRes = await chatAxiosInstance.get('/api/rentals/my/');
+                    setMyRentals(Array.isArray(rentalRes.data) ? rentalRes.data : (rentalRes.data.results || []));
+                }
             } catch (error) {
                 console.error("Error fetching chat data", error);
             } finally {
@@ -115,6 +122,19 @@ const ChatPage = () => {
         };
     };
 
+    const isConversationOverdue = (conv) => {
+        if (!conv || localStorage.getItem('role') !== 'Customer') return false;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return myRentals.some(r =>
+            r.store === conv.store &&
+            ['rented', 'approved'].includes(r.status) &&
+            new Date(r.rent_end_date) < today
+        );
+    };
+
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading chats...</div>;
 
     return (
@@ -198,6 +218,24 @@ const ChatPage = () => {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Overdue Warning Banner */}
+                                        {isConversationOverdue(activeConversation) && (
+                                            <div className="bg-red-600 border-b border-red-700 p-3 flex flex-wrap items-center justify-center gap-4 shadow-lg sticky top-0 z-20">
+                                                <div className="flex items-center gap-2 text-white">
+                                                    <FaExclamationTriangle className="text-white animate-bounce" size={18} />
+                                                    <p className="text-sm font-black tracking-tight">
+                                                        THIS RENTAL IS OVERDUE! Please return the item immediately to avoid additional penalties.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => navigate('/myrentals')}
+                                                    className="bg-white text-red-600 px-4 py-1.5 rounded-lg font-black text-xs hover:bg-gray-50 transition shadow-md whitespace-nowrap"
+                                                >
+                                                    Return Now
+                                                </button>
+                                            </div>
+                                        )}
 
                                         {/* Messages List - Container Only Scrolling */}
                                         <div ref={containerRef} className="messages flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
