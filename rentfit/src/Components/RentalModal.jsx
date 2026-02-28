@@ -3,10 +3,10 @@ import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import paymentAxiosInstance from '../services/paymentAxiosInstance';
 import EsewaPayment from './EsewaPayment';
 
-const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
-    const [startDate, setStartDate] = useState('');
+const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStartDate, prefilledSize }) => {
+    const [startDate, setStartDate] = useState(prefilledStartDate || '');
     const [endDate, setEndDate] = useState('');
-    const [selectedSize, setSelectedSize] = useState('');
+    const [selectedSize, setSelectedSize] = useState(prefilledSize || '');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentData, setPaymentData] = useState(null);
@@ -14,10 +14,12 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated }) => {
     React.useEffect(() => {
         if (isOpen) {
             console.log('RentalModal opened for:', clothing.item_name, 'available sizes:', clothing.size);
-            setSelectedSize(''); // Reset size selection when opening
+            setSelectedSize(prefilledSize || ''); // Use prefilled if available
+            setStartDate(prefilledStartDate || ''); // Use prefilled if available
+            setEndDate('');
             setError('');
         }
-    }, [isOpen, clothing.id]);
+    }, [isOpen, clothing.id, prefilledStartDate, prefilledSize]);
 
     if (!isOpen) return null;
 

@@ -262,22 +262,46 @@ const ClothingDetail = () => {
                                         <FaMapMarkerAlt />
                                     </div>
                                     <div className="flex-1">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="font-bold text-gray-800">Store Location</h4>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="font-bold text-gray-800">Store Location</h4>
+                                                {hasValidCoords(clothing.store_latitude, clothing.store_longitude) && (
+                                                    <span className="bg-green-100 text-green-700 text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center gap-0.5">
+                                                        <FaCheckCircle size={8} /> Verified
+                                                    </span>
+                                                )}
+                                            </div>
                                             {hasValidCoords(clothing.store_latitude, clothing.store_longitude) ? (
                                                 <button
                                                     onClick={scrollToMap}
-                                                    className="text-xs text-purple-600 font-bold hover:underline"
+                                                    className="text-[10px] text-purple-600 font-bold hover:underline flex items-center gap-1"
                                                 >
-                                                    View on Map
+                                                    <FaMapMarkerAlt size={10} /> View on Map
                                                 </button>
+                                            ) : (clothing.store_address || clothing.store_city) ? (
+                                                <span className="text-[8px] text-gray-400 font-bold uppercase italic">Approx. Location</span>
                                             ) : null}
                                         </div>
-                                        <p className="text-gray-600">
-                                            {hasValidCoords(clothing.store_latitude, clothing.store_longitude)
-                                                ? `${clothing.store_city || ''} ${clothing.store_address || ''}`
-                                                : 'Location not provided by store'}
-                                        </p>
+                                        <div className="flex items-start justify-between gap-4">
+                                            <p className="text-gray-600 text-sm leading-tight">
+                                                {(clothing.store_address || clothing.store_city)
+                                                    ? `${clothing.store_city || ''} ${clothing.store_address || ''}`
+                                                    : 'Location not provided by store'}
+                                            </p>
+                                            {(clothing.store_address || clothing.store_city) && (
+                                                <a
+                                                    href={hasValidCoords(clothing.store_latitude, clothing.store_longitude)
+                                                        ? `https://www.google.com/maps/dir/?api=1&destination=${clothing.store_latitude},${clothing.store_longitude}`
+                                                        : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${clothing.store_address || ''} ${clothing.store_city || ''}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="shrink-0 bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 transition shadow-md shadow-purple-100 flex items-center gap-1.5 text-xs font-bold"
+                                                    title="Get Directions"
+                                                >
+                                                    <FaDirections size={14} /> get directions
+                                                </a>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">

@@ -105,9 +105,9 @@ const Dashboard = () => {
           ).slice(0, 5);
 
 
-          // Upcoming Returns: status 'rented' or 'approved', sort by rent_end_date ASC
+          // Upcoming Returns: status 'rented' ONLY, sort by rent_end_date ASC
           const upcoming = [...allUserRentals]
-            .filter(r => ['rented', 'approved'].includes(r.status))
+            .filter(r => r.status === 'rented')
             .sort((a, b) => new Date(a.rent_end_date) - new Date(b.rent_end_date))
             .slice(0, 3);
 

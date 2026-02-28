@@ -81,7 +81,7 @@ const StoreProfile = () => {
             }));
             setLocationChanged(true);
             setAlert({ message: "Location found and marked on map! Remember to Save Changes.", type: "success" });
-        });
+        }, setAlert);
     };
 
     const handleSave = async (e) => {
@@ -127,10 +127,10 @@ const StoreProfile = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navbar />
-            
+
             <div className="flex flex-1">
                 <StoreSidebar />
-                
+
                 <div className="flex-1 p-8 overflow-auto">
                     <div className="max-w-5xl mx-auto">
                         <div className="flex items-center justify-between mb-8">
@@ -280,9 +280,9 @@ const StoreProfile = () => {
                     </div>
                 </div>
             </div>
-            
+
             <Footer />
-            
+
             <Alert
                 message={alert.message}
                 type={alert.type}

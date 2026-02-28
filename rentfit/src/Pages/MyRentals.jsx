@@ -6,7 +6,8 @@ import Footer from '../Components/Footer';
 import Alert from '../Components/Alert';
 import DashboardSidebar from '../Components/DashboardSidebar';
 import EsewaPayment from '../Components/EsewaPayment';
-import { FaClock, FaCheckCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt, FaMapMarkerAlt, FaPhoneAlt } from 'react-icons/fa';
+import RentalModal from '../Components/RentalModal';
+import { FaClock, FaCheckCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt, FaMapMarkerAlt, FaPhoneAlt, FaCalendarAlt } from 'react-icons/fa';
 
 const MyRentals = () => {
     const [rentals, setRentals] = useState([]);
@@ -23,6 +24,13 @@ const MyRentals = () => {
     // Filters
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Extension States
+    const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
+    const [selectedClothing, setSelectedClothing] = useState(null);
+    const [prefilledStartDate, setPrefilledStartDate] = useState('');
+    const [prefilledSize, setPrefilledSize] = useState('');
+    const [extensionModal, setExtensionModal] = useState({ show: false, rental: null, newEndDate: '' });
 
     useEffect(() => {
         fetchRentals();
@@ -111,6 +119,72 @@ const MyRentals = () => {
         } catch (error) {
             console.error('Payment Error:', error);
             showAlert('Failed to initiate payment.', 'error');
+        }
+    };
+
+    const handleDeleteRental = async (rentalId) => {
+        if (!window.confirm("Are you sure you want to remove this rental record?")) return;
+
+        try {
+            await rentalAxiosInstance.delete(`${rentalId}/delete/`);
+            showAlert('Rental record removed successfully.', 'success');
+            fetchRentals(); // refresh list
+        } catch (error) {
+            console.error("Delete failed:", error);
+            showAlert(error.response?.data?.detail || "Failed to remove rental record.", "error");
+        }
+    };
+
+    const handleExtendRental = (rental) => {
+        if (['rented', 'returned_pending', 'returned_confirmed'].includes(rental.status)) {
+            // For active or already returned rentals, open RentalModal for a new request
+            let nextStartDate;
+            const currentEndDate = new Date(rental.rent_end_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (rental.status === 'rented') {
+                // Continuation: Start Date = End Date + 1
+                nextStartDate = new Date(currentEndDate);
+                nextStartDate.setDate(nextStartDate.getDate() + 1);
+            } else {
+                // Rent Again: Start Date = Today
+                nextStartDate = today;
+            }
+
+            const formattedNextDay = nextStartDate.toISOString().split('T')[0];
+
+            setSelectedClothing(rental.clothing);
+            setPrefilledStartDate(formattedNextDay);
+            setPrefilledSize(rental.selected_size);
+            setIsRentalModalOpen(true);
+        } else if (['pending', 'rejected', 'approved'].includes(rental.status)) {
+            // For pending/rejected/approved, open update modal to change existing end date
+            setExtensionModal({
+                show: true,
+                rental: rental,
+                newEndDate: rental.rent_end_date
+            });
+        }
+    };
+
+    const handleUpdateExtension = async () => {
+        const { rental, newEndDate } = extensionModal;
+        if (!newEndDate) return;
+
+        try {
+            setIsSubmitting(true);
+            await rentalAxiosInstance.patch(`${rental.id}/update/`, {
+                rent_end_date: newEndDate
+            });
+            showAlert('Rental duration updated successfully!', 'success');
+            setExtensionModal({ show: false, rental: null, newEndDate: '' });
+            fetchRentals();
+        } catch (error) {
+            console.error('Update failed:', error);
+            showAlert(error.response?.data?.detail || 'Failed to update rental duration.', 'error');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -339,22 +413,27 @@ const MyRentals = () => {
 
                                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Start Date</p>
-                                                        <p className="text-sm font-bold text-gray-800">{rental.rent_start_date}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 uppercase">Due Date</p>
-                                                        <p className={`text-sm font-black ${getReturnDateStyle(rental.rent_end_date, rental.status)}`}>
-                                                            {rental.rent_end_date}
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                                                            {['rented', 'returned_pending', 'returned_confirmed'].includes(rental.status) ? 'Rental Dates' : 'Requested Dates'}
+                                                        </p>
+                                                        <p className={`text-sm font-bold ${['rented', 'returned_pending', 'returned_confirmed'].includes(rental.status) ? 'text-gray-800' : 'text-purple-600 italic'}`}>
+                                                            {rental.rent_start_date} - {rental.rent_end_date}
                                                         </p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Store</p>
-                                                        <p className="text-sm font-bold text-gray-800">{rental.store_name}</p>
-                                                    </div>
-                                                    <div>
                                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Payment</p>
-                                                        <p className="text-sm font-bold text-green-600">Paid</p>
+                                                        <p className={`text-sm font-bold ${['rented', 'returned_pending', 'returned_confirmed'].includes(rental.status)
+                                                            ? 'text-green-600'
+                                                            : rental.status === 'approved'
+                                                                ? 'text-orange-500'
+                                                                : 'text-gray-400'
+                                                            }`}>
+                                                            {['rented', 'returned_pending', 'returned_confirmed'].includes(rental.status)
+                                                                ? 'Paid'
+                                                                : rental.status === 'approved'
+                                                                    ? 'Awaiting Payment'
+                                                                    : 'Not Paid'}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -395,9 +474,34 @@ const MyRentals = () => {
                                                     {rental.status === 'approved' && (
                                                         <button
                                                             onClick={() => handlePayment(rental.id)}
-                                                            className="px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition shadow-lg shadow-green-100"
+                                                            className="px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition shadow-lg shadow-green-100 hover:-translate-y-0.5"
                                                         >
                                                             Pay Now
+                                                        </button>
+                                                    )}
+                                                    {rental.status === 'pending' && (
+                                                        <button
+                                                            onClick={() => handleDeleteRental(rental.id)}
+                                                            className="px-6 py-2 border-2 border-red-100 text-red-500 rounded-xl font-bold text-xs hover:bg-red-50 hover:border-red-200 transition-all uppercase tracking-wider"
+                                                        >
+                                                            Cancel Request
+                                                        </button>
+                                                    )}
+                                                    {rental.status === 'rejected' && (
+                                                        <button
+                                                            onClick={() => handleDeleteRental(rental.id)}
+                                                            className="px-6 py-2 bg-gray-100 text-gray-500 rounded-xl font-bold text-xs hover:bg-gray-200 transition-all uppercase tracking-wider"
+                                                        >
+                                                            Delete Record
+                                                        </button>
+                                                    )}
+                                                    {['pending', 'rejected', 'rented', 'approved', 'returned_pending', 'returned_confirmed'].includes(rental.status) && (
+                                                        <button
+                                                            onClick={() => handleExtendRental(rental)}
+                                                            className="px-6 py-2 border-2 border-purple-100 text-purple-600 rounded-xl font-bold text-xs hover:bg-purple-50 hover:border-purple-200 transition-all uppercase tracking-wider flex items-center gap-2"
+                                                        >
+                                                            <FaCalendarAlt />
+                                                            {['returned_pending', 'returned_confirmed'].includes(rental.status) ? 'Rent Again' : 'Extend'}
                                                         </button>
                                                     )}
                                                     {rental.status === 'returned_pending' && (
@@ -484,6 +588,65 @@ const MyRentals = () => {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Extension Date Picker Modal (For Pending/Rejected) */}
+            {extensionModal.show && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all">
+                        <div className="bg-purple-600 p-6 text-white text-center">
+                            <h2 className="text-xl font-bold">Extend Duration</h2>
+                            <p className="text-purple-100 mt-1">Update your rental end date</p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700">New End Date</label>
+                                <input
+                                    type="date"
+                                    min={extensionModal.rental.rent_start_date}
+                                    value={extensionModal.newEndDate}
+                                    onChange={(e) => setExtensionModal(prev => ({ ...prev, newEndDate: e.target.value }))}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
+                                />
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setExtensionModal({ show: false, rental: null, newEndDate: '' })}
+                                    className="flex-1 py-3 border border-gray-300 rounded-xl text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdateExtension}
+                                    disabled={isSubmitting}
+                                    className="flex-1 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 shadow-lg transition-all"
+                                >
+                                    {isSubmitting ? 'Updating...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Active Extension Modal (Standard Rental Request) */}
+            {selectedClothing && (
+                <RentalModal
+                    isOpen={isRentalModalOpen}
+                    onClose={() => {
+                        setIsRentalModalOpen(false);
+                        setSelectedClothing(null);
+                        setPrefilledStartDate('');
+                        setPrefilledSize('');
+                    }}
+                    clothing={selectedClothing}
+                    prefilledStartDate={prefilledStartDate}
+                    prefilledSize={prefilledSize}
+                    onRentalCreated={(msg, type) => {
+                        showAlert(msg, type);
+                        fetchRentals();
+                    }}
+                />
             )}
 
             <Footer />
