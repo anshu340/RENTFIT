@@ -6,7 +6,8 @@ import {
     FaHistory,
     FaSignOutAlt,
     FaCog,
-    FaUserShield
+    FaUserShield,
+    FaTshirt
 } from 'react-icons/fa';
 
 const AdminSidebar = () => {
@@ -17,6 +18,7 @@ const AdminSidebar = () => {
         { name: 'Admin Dashboard', icon: FaHome, path: '/adminDashboard' },
         { name: 'User Management', icon: FaUsers, path: '/adminUsers' },
         { name: 'Global Activity', icon: FaHistory, path: '/adminActivity' },
+        { name: 'Clothing Approval', icon: FaTshirt, path: '/adminClothingApproval' },
     ];
 
     const handleLogout = () => {

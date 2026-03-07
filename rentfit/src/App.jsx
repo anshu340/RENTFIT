@@ -31,6 +31,7 @@ import AdminUserManagement from './Pages/AdminUserManagement.jsx';
 import AdminActivity from './Pages/AdminActivity.jsx';
 import StoreReports from './Pages/StoreReports.jsx';
 import NotificationsPage from './Pages/NotificationsPage.jsx';
+import AdminClothingApproval from './Pages/AdminClothingApproval.jsx';
 
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
       <Route path="/adminActivity" element={<AdminActivity />} />
       <Route path="/reports" element={<StoreReports />} />
       <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/adminClothingApproval" element={<AdminClothingApproval />} />
     </Routes>
 
   );

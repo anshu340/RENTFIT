@@ -101,6 +101,24 @@ const MyClothingItems = () => {
     );
   };
 
+  const getApprovalBadge = (status) => {
+    const statusConfig = {
+      pending: { color: "bg-yellow-100 text-yellow-800", icon: FaClock, label: "Pending" },
+      approved: { color: "bg-green-100 text-green-800", icon: FaCheckCircle, label: "Approved" },
+      rejected: { color: "bg-red-100 text-red-800", icon: FaTimesCircle, label: "Rejected" },
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+    const Icon = config.icon;
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${config.color}`}>
+        <Icon className="text-[10px]" />
+        {config.label}
+      </span>
+    );
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -129,10 +147,10 @@ const MyClothingItems = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      
+
       <div className="flex flex-1">
         <StoreSidebar />
-        
+
         <div className="flex-1 py-8 px-4 overflow-auto">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -193,7 +211,10 @@ const MyClothingItems = () => {
                         <h3 className="text-lg font-bold text-gray-800 truncate">
                           {item.item_name}
                         </h3>
-                        {getStatusBadge(item.clothing_status)}
+                        <div className="flex flex-col items-end gap-1">
+                          {getStatusBadge(item.clothing_status)}
+                          {getApprovalBadge(item.status)}
+                        </div>
                       </div>
 
                       <div className="space-y-2 mb-4">
@@ -297,8 +318,9 @@ const MyClothingItems = () => {
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
                     {selectedItem.item_name}
                   </h3>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     {getStatusBadge(selectedItem.clothing_status)}
+                    {getApprovalBadge(selectedItem.status)}
                     <span className="text-lg font-bold text-purple-600">
                       ₹{selectedItem.rental_price}/day
                     </span>

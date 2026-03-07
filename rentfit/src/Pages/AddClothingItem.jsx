@@ -235,7 +235,7 @@ const AddClothingItem = () => {
             {/* Success Message */}
             {success && (
               <div className="p-4 bg-green-50 border border-green-100 rounded-2xl text-green-700 font-medium animate-pulse">
-                {isEditMode ? 'Item updated successfully!' : 'Item added successfully to inventory!'}
+                {isEditMode ? 'Item updated successfully!' : 'Your item has been submitted and is pending admin approval.'}
               </div>
             )}
 
