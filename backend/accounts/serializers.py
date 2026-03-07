@@ -309,9 +309,9 @@ class ClothingCreateSerializer(serializers.ModelSerializer):
             'id', 'store_name',
             'item_name', 'category', 'event_type', 'gender', 'size', 'condition',
             'description', 'rental_price', 'security_deposit', 'stock_quantity',
-            'images', 'image_url', 'clothing_status', 'created_at', 'updated_at'
+            'images', 'image_url', 'clothing_status', 'status', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'clothing_status', 'created_at', 'updated_at', 'store_name']
+        read_only_fields = ['id', 'clothing_status', 'status', 'created_at', 'updated_at', 'store_name']
 
     def validate_rental_price(self, value):
         """Validate rental price is positive"""
@@ -361,7 +361,7 @@ class ClothingListSerializer(serializers.ModelSerializer):
             'rental_price', 'security_deposit', 'stock_quantity', 'clothing_status',
             'store_user_id', 'store_name', 'store_city',
             'store_latitude', 'store_longitude',
-            'images', 'image', 'image_url', 'average_rating', 'review_count', 'created_at', 'updated_at'
+            'images', 'image', 'image_url', 'status', 'average_rating', 'review_count', 'created_at', 'updated_at'
         ]
 
     def get_image(self, obj):
@@ -400,7 +400,7 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'item_name', 'name', 'category', 'event_type', 'gender', 'size', 'condition',
             'description', 'rental_price', 'security_deposit', 'stock_quantity', 'images', 'image', 'image_url',
-            'clothing_status', 'store_user_id', 'store_name', 'store_email', 'store_phone',
+            'clothing_status', 'status', 'store_user_id', 'store_name', 'store_email', 'store_phone',
             'store_address', 'store_city', 'store_latitude', 'store_longitude', 'average_rating', 'review_count',
             'created_at', 'updated_at'
         ]
@@ -446,6 +446,15 @@ class ClothingStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clothing
         fields = ['clothing_status']
+
+
+class AdminClothingApprovalSerializer(serializers.ModelSerializer):
+    """
+    Serializer for admin to approve/reject clothing items
+    """
+    class Meta:
+        model = Clothing
+        fields = ['status']
 
 
 # WISHLIST SERIALIZERS

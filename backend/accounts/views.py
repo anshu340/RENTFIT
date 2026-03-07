@@ -24,10 +24,11 @@ from .serializers import (
     ClothingDetailSerializer,
     ClothingUpdateSerializer,
     ClothingStatusUpdateSerializer,
+    AdminClothingApprovalSerializer,
     WishlistSerializer,
     WishlistDetailSerializer,
 )
-from .permissions import IsCustomer, IsStore
+from .permissions import IsCustomer, IsStore, IsAdmin
 from .otp import verify_otp
 
 
@@ -685,6 +686,43 @@ class ClothingStatusUpdateView(generics.UpdateAPIView):
             "data": detail_serializer.data
         }, status=status.HTTP_200_OK)
 
+
+class AdminPendingClothingListView(generics.ListAPIView):
+    """
+    List all pending clothing items for admin approval
+    GET /api/accounts/clothing/pending/
+    Auth: Admin
+    """
+    permission_classes = [IsAuthenticated, IsAdmin]
+    serializer_class = ClothingListSerializer
+
+    def get_queryset(self):
+        return Clothing.objects.filter(status='pending').order_by('-created_at')
+
+
+class AdminClothingApprovalView(generics.UpdateAPIView):
+    """
+    Approve or Reject clothing item
+    PATCH /api/accounts/clothing/<id>/approve/
+    Auth: Admin
+    """
+    permission_classes = [IsAuthenticated, IsAdmin]
+    serializer_class = AdminClothingApprovalSerializer
+    queryset = Clothing.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        """Update clothing approval status"""
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response({
+            "message": f"Clothing item {instance.item_name} is now {instance.status}",
+            "data": ClothingDetailSerializer(instance).data
+        }, status=status.HTTP_200_OK)
+
 # CUSTOMER CLOTHING VIEWS
 
 class AllClothingListView(generics.ListAPIView):
@@ -699,8 +737,7 @@ class AllClothingListView(generics.ListAPIView):
 
     def get_queryset(self):
         """Return all available clothing items"""
-        # queryset = Clothing.objects.filter(clothing_status=Clothing.Status.AVAILABLE)
-        queryset = Clothing.objects.all() # Temporarily broaden to see all
+        queryset = Clothing.objects.filter(status='approved')
         
         # Optional filters
         category = self.request.query_params.get('category', None)

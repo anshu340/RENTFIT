@@ -147,6 +147,12 @@ class Clothing(models.Model):
         default=Status.AVAILABLE
     )
 
+    status = models.CharField(
+        max_length=10,
+        choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
+        default='pending'
+    )
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
