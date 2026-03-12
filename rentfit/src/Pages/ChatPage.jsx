@@ -25,15 +25,15 @@ const ChatPage = () => {
         const fetchInitialData = async () => {
             try {
                 setLoading(true);
-                const profileRes = await axiosInstance.get('profile/');
-                setCurrentUser(profileRes.data);
+                const profileResponse = await axiosInstance.get('accounts/profile/');
+                setCurrentUser(profileResponse.data);
 
-                const convRes = await chatAxiosInstance.get('my/');
+                const convRes = await chatAxiosInstance.get('chat/my/');
                 setConversations(convRes.data);
 
                 // Fetch rentals to check for overdue items
                 if (localStorage.getItem('role') === 'Customer') {
-                    const rentalRes = await chatAxiosInstance.get('/api/rentals/my/');
+                    const rentalRes = await chatAxiosInstance.get('rentals/my/');
                     setMyRentals(Array.isArray(rentalRes.data) ? rentalRes.data : (rentalRes.data.results || []));
                 }
             } catch (error) {
@@ -62,7 +62,7 @@ const ChatPage = () => {
 
         const fetchMessages = async () => {
             try {
-                const res = await chatAxiosInstance.get(`${activeConversation.id}/`);
+                const res = await chatAxiosInstance.get(`chat/${activeConversation.id}/`);
                 setMessages(res.data);
             } catch (error) {
                 console.error("Error fetching messages", error);
@@ -89,11 +89,11 @@ const ChatPage = () => {
         if (!newMessage.trim() || !activeConversation) return;
 
         try {
-            await chatAxiosInstance.post(`${activeConversation.id}/send/`, {
+            await chatAxiosInstance.post(`chat/${activeConversation.id}/send/`, {
                 text: newMessage
             });
             setNewMessage("");
-            const res = await chatAxiosInstance.get(`${activeConversation.id}/`);
+            const res = await chatAxiosInstance.get(`chat/${activeConversation.id}/`);
             setMessages(res.data);
         } catch (error) {
             console.error("Error sending message", error);

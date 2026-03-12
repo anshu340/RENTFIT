@@ -85,7 +85,7 @@ const StoreDashboard = () => {
 
   const fetchEarningsData = async () => {
     try {
-      const response = await axiosInstance.get("dashboard/store/stats/");
+      const response = await axiosInstance.get("accounts/dashboard/store/stats/");
       const data = response.data.data;
       setStats(prev => ({
         ...prev,
@@ -107,7 +107,7 @@ const StoreDashboard = () => {
         return;
       }
 
-      const response = await axiosInstance.get("stores/profile/");
+      const response = await axiosInstance.get("accounts/stores/profile/");
       const profileData = response.data?.data || response.data;
 
       if (profileData) {
@@ -178,7 +178,7 @@ const StoreDashboard = () => {
 
   const fetchClothingItemsData = async () => {
     try {
-      const response = await axiosInstance.get("clothing/my/");
+      const response = await axiosInstance.get("accounts/clothing/my/");
       let items = [];
       if (Array.isArray(response.data)) {
         items = response.data;

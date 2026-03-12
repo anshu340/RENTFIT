@@ -30,9 +30,11 @@ import AdminDashboard from './Pages/AdminDashboard.jsx';
 import AdminUserManagement from './Pages/AdminUserManagement.jsx';
 import AdminActivity from './Pages/AdminActivity.jsx';
 import StoreReports from './Pages/StoreReports.jsx';
-import NotificationsPage from './Pages/NotificationsPage.jsx';
+
 import AdminClothingApproval from './Pages/AdminClothingApproval.jsx';
 
+
+import PrivacySecurity from "./Pages/PrivacySecurity";
 
 function App() {
   return (
@@ -60,7 +62,9 @@ function App() {
       <Route path="/chat/:id" element={<ChatPage />} />
       <Route path="/profile" element={<UserProfile />} />
       <Route path="/storeProfile" element={<StoreProfile />} />
+      <Route path="/storeLocation" element={<StoreProfile />} />
       <Route path="/nearbyStores" element={<NearbyStores />} />
+      <Route path="/privacy-security" element={<PrivacySecurity />} />
       <Route path="/myreviews" element={<MyReviews />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failure" element={<PaymentFailure />} />
@@ -69,7 +73,7 @@ function App() {
       <Route path="/adminUsers" element={<AdminUserManagement />} />
       <Route path="/adminActivity" element={<AdminActivity />} />
       <Route path="/reports" element={<StoreReports />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
+
       <Route path="/adminClothingApproval" element={<AdminClothingApproval />} />
     </Routes>
 

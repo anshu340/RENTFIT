@@ -43,7 +43,7 @@ const MyRentals = () => {
     const fetchRentals = async () => {
         try {
             setIsLoading(true);
-            const response = await rentalAxiosInstance.get('my/');
+            const response = await rentalAxiosInstance.get('rentals/my/');
             setRentals(response.data);
         } catch (error) {
             console.error('Error fetching rentals:', error);
@@ -73,7 +73,7 @@ const MyRentals = () => {
 
     const handleMarkReturned = async (id) => {
         try {
-            await rentalAxiosInstance.patch(`${id}/mark-return/`);
+            await rentalAxiosInstance.patch(`rentals/${id}/mark-return/`);
             showAlert('Item marked as returned. Waiting for store confirmation.', 'success');
             fetchRentals();
         } catch (error) {
@@ -111,7 +111,7 @@ const MyRentals = () => {
 
     const handlePayment = async (rentalId) => {
         try {
-            const paymentRes = await paymentAxiosInstance.post('initiate/', {
+            const paymentRes = await paymentAxiosInstance.post('payments/initiate/', {
                 rental_id: rentalId
             });
             setPaymentData(paymentRes.data);
@@ -126,7 +126,7 @@ const MyRentals = () => {
         if (!window.confirm("Are you sure you want to remove this rental record?")) return;
 
         try {
-            await rentalAxiosInstance.delete(`${rentalId}/delete/`);
+            await rentalAxiosInstance.delete(`rentals/${rentalId}/delete/`);
             showAlert('Rental record removed successfully.', 'success');
             fetchRentals(); // refresh list
         } catch (error) {
@@ -174,7 +174,7 @@ const MyRentals = () => {
 
         try {
             setIsSubmitting(true);
-            await rentalAxiosInstance.patch(`${rental.id}/update/`, {
+            await rentalAxiosInstance.patch(`rentals/${rental.id}/update/`, {
                 rent_end_date: newEndDate
             });
             showAlert('Rental duration updated successfully!', 'success');

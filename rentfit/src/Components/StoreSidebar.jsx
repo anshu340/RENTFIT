@@ -6,7 +6,6 @@ import {
     FaBox,
     FaHeart,
     FaMapMarkerAlt,
-    FaQuestionCircle,
     FaFileAlt,
     FaCheckCircle,
     FaTshirt,
@@ -33,15 +32,14 @@ const StoreSidebar = () => {
         { name: 'Messages', icon: FaComments, path: '/chat' },
         { name: 'Donations', icon: FaHeart, path: '/storedonations' },
         { name: 'Damage Reports', icon: FaExclamationTriangle, path: '/damaged-items' },
-        { name: 'Shop Locations', icon: FaMapMarkerAlt, path: '/storeProfile' },
-        { name: 'User Support', icon: FaQuestionCircle, path: null },
+        { name: 'Shop Locations', icon: FaMapMarkerAlt, path: '/storeLocation' },
         { name: 'Reports', icon: FaFileAlt, path: '/reports' },
     ];
 
     useEffect(() => {
         const fetchStoreProfile = async () => {
             try {
-                const response = await axiosInstance.get("stores/profile/");
+                const response = await axiosInstance.get("accounts/stores/profile/");
                 const data = response.data?.data || response.data;
                 setStoreInfo({
                     storeName: data.store_name || "My Store",

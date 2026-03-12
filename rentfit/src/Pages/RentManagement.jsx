@@ -30,7 +30,7 @@ const RentManagement = () => {
     const fetchRentals = async () => {
         try {
             setIsLoading(true);
-            const response = await rentalAxiosInstance.get('store/');
+            const response = await rentalAxiosInstance.get('rentals/store/');
             console.log('Rental Requests Response:', response.data);
             setRentals(response.data);
         } catch (error) {
@@ -43,7 +43,7 @@ const RentManagement = () => {
 
     const handleAction = async (id, action) => {
         try {
-            await rentalAxiosInstance.patch(`${id}/${action}/`);
+            await rentalAxiosInstance.patch(`rentals/${id}/${action}/`);
             showAlert(`Rental request ${action}ed successfully!`, 'success');
             fetchRentals();
         } catch (error) {

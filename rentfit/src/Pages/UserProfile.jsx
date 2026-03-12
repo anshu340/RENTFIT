@@ -32,7 +32,7 @@ const UserProfile = () => {
     const fetchProfile = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get("customers/profile/");
+            const response = await axiosInstance.get("accounts/customers/profile/");
             const data = response.data?.data || response.data;
             setFormData({
                 full_name: data.full_name || "",
@@ -80,7 +80,7 @@ const UserProfile = () => {
                 data.append('profile_image', formData.profile_image);
             }
 
-            await axiosInstance.patch("customers/profile/", data, {
+            await axiosInstance.patch("accounts/customers/profile/", data, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 

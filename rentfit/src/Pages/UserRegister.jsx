@@ -63,7 +63,7 @@ const UserRegister = () => {
         }
       });
 
-      const response = await axiosInstance.post("register/customer/", data, {
+      const response = await axiosInstance.post("accounts/register/customer/", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -112,7 +112,7 @@ const UserRegister = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post("verify-otp/", {
+      const response = await axiosInstance.post("accounts/verify-otp/", {
         email: formData.email,
         otp: otp,
       });

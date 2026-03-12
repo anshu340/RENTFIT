@@ -10,12 +10,13 @@ import {
     FaUser,
     FaShoppingBag,
     FaBox,
-    FaComments
+    FaComments,
+    FaShieldAlt
 } from 'react-icons/fa';
 
 const DashboardSidebar = () => {
-    const navigate = useNavigate();
     const location = useLocation();
+    const role = localStorage.getItem('role');
 
     const isActive = (path) => location.pathname === path;
 
@@ -57,10 +58,12 @@ const DashboardSidebar = () => {
                     <FaComments className="text-lg" />
                     <span>Messages</span>
                 </Link>
-                <Link to="/nearbyStores" className={navItemClasses('/nearbyStores')}>
-                    <FaMapMarkerAlt className="text-lg" />
-                    <span>Nearby Shops</span>
-                </Link>
+                {role === 'Customer' && (
+                    <Link to="/nearbyStores" className={navItemClasses('/nearbyStores')}>
+                        <FaMapMarkerAlt className="text-lg" />
+                        <span>Nearby Shops</span>
+                    </Link>
+                )}
                 <Link to="/myreviews" className={navItemClasses('/myreviews')}>
                     <FaStar className="text-lg" />
                     <span>My Reviews</span>
@@ -68,6 +71,10 @@ const DashboardSidebar = () => {
                 <Link to="/profile" className={navItemClasses('/profile')}>
                     <FaUser className="text-lg" />
                     <span>Profile</span>
+                </Link>
+                <Link to="/privacy-security" className={navItemClasses('/privacy-security')}>
+                    <FaShieldAlt className="text-lg text-blue-500" />
+                    <span>Privacy & Security</span>
                 </Link>
             </nav>
         </aside>

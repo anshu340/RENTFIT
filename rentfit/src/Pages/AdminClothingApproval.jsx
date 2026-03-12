@@ -19,7 +19,7 @@ const AdminClothingApproval = () => {
     const fetchPendingClothes = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get('admin/clothing/pending/');
+            const response = await axiosInstance.get('accounts/admin/clothing/pending/');
             setPendingClothes(response.data);
         } catch (error) {
             console.error("Error fetching pending clothes:", error);
@@ -31,7 +31,7 @@ const AdminClothingApproval = () => {
 
     const handleApproval = async (id, status) => {
         try {
-            await axiosInstance.patch(`admin/clothing/${id}/approve/`, { status });
+            await axiosInstance.patch(`accounts/admin/clothing/${id}/approve/`, { status });
             setMessage({
                 type: 'success',
                 text: `Item ${status === 'approved' ? 'approved' : 'rejected'} successfully.`

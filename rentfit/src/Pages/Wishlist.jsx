@@ -29,7 +29,7 @@ const Wishlist = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get('clothing/all/');
+      const response = await axiosInstance.get('accounts/clothing/all/');
       setAllItems(response.data);
       setLoading(false);
     } catch (err) {
@@ -42,7 +42,7 @@ const Wishlist = () => {
   // Fetch wishlist from API
   const fetchWishlist = async () => {
     try {
-      const response = await axiosInstance.get('wishlist/');
+      const response = await axiosInstance.get('accounts/wishlist/');
       // Extract clothing IDs from wishlist items
       const wishlistIds = response.data.data.map(item => item.clothing.id);
       setWishlist(wishlistIds);
@@ -55,7 +55,7 @@ const Wishlist = () => {
   // Add item to wishlist via API
   const addToWishlist = async (itemId) => {
     try {
-      await axiosInstance.post('wishlist/add/', { clothing_id: itemId });
+      await axiosInstance.post('accounts/wishlist/add/', { clothing_id: itemId });
       setWishlist(prev => [...prev, itemId]);
       console.log('Added to wishlist:', itemId);
     } catch (err) {
@@ -69,7 +69,7 @@ const Wishlist = () => {
   // Remove item from wishlist via API
   const removeFromWishlist = async (itemId) => {
     try {
-      await axiosInstance.delete(`wishlist/remove-by-clothing/${itemId}/`);
+      await axiosInstance.delete(`accounts/wishlist/remove-by-clothing/${itemId}/`);
       setWishlist(prev => prev.filter(id => id !== itemId));
       console.log('Removed from wishlist:', itemId);
     } catch (err) {
@@ -87,7 +87,7 @@ const Wishlist = () => {
     }
 
     try {
-      const response = await axiosInstance.delete('wishlist/clear/');
+      const response = await axiosInstance.delete('accounts/wishlist/clear/');
       setWishlist([]);
       alert(response.data.message || 'Wishlist cleared successfully!');
     } catch (err) {

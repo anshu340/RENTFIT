@@ -40,7 +40,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await axiosInstance.get('admin/stats/');
+                const response = await axiosInstance.get('accounts/admin/stats/');
                 setStats(response.data);
             } catch (error) {
                 console.error("Error fetching admin stats:", error);

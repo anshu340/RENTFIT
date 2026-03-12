@@ -47,7 +47,7 @@ const AddClothingItem = () => {
   const fetchClothingItem = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`clothing/${editId}/`);
+      const response = await axiosInstance.get(`accounts/clothing/${editId}/`);
       if (response.data) {
         const item = response.data;
         setFormData({
@@ -135,13 +135,13 @@ const AddClothingItem = () => {
       }
 
       if (isEditMode) {
-        await axiosInstance.put(`clothing/${editId}/update/`, formDataToSend, {
+        await axiosInstance.put(`accounts/clothing/${editId}/update/`, formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           }
         });
       } else {
-        await axiosInstance.post('clothing/create/', formDataToSend, {
+        await axiosInstance.post('accounts/clothing/create/', formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           }

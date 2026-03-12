@@ -15,7 +15,7 @@ const AdminActivity = () => {
     useEffect(() => {
         const fetchActivity = async () => {
             try {
-                const response = await axiosInstance.get('admin/activity/');
+                const response = await axiosInstance.get('accounts/admin/activity/');
                 setActivity(response.data);
             } catch (error) {
                 console.error("Error fetching admin activity:", error);

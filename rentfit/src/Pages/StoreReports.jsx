@@ -59,8 +59,8 @@ const StoreReports = () => {
         try {
             setIsLoading(true);
             const [statsRes, rentalsRes] = await Promise.all([
-                axiosInstance.get("dashboard/store/stats/"),
-                rentalAxiosInstance.get("store/")
+                axiosInstance.get("accounts/dashboard/store/stats/"),
+                rentalAxiosInstance.get("rentals/store/")
             ]);
 
             const statsData = statsRes.data.data;

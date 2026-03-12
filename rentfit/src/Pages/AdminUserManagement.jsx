@@ -24,7 +24,7 @@ const AdminUserManagement = () => {
     const fetchUsers = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get('admin/users/');
+            const response = await axiosInstance.get('accounts/admin/users/');
             setUsers(response.data);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -40,7 +40,7 @@ const AdminUserManagement = () => {
 
     const handleDeactivate = async (userId) => {
         try {
-            const response = await axiosInstance.patch(`admin/users/${userId}/deactivate/`);
+            const response = await axiosInstance.patch(`accounts/admin/users/${userId}/deactivate/`);
             setAlert({ message: response.data.message, type: "success" });
             fetchUsers(); // Refresh list
         } catch (error) {

@@ -32,7 +32,7 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStar
 
         try {
             // Step 1: Create Rental
-            await rentalAxiosInstance.post('create/', {
+            await rentalAxiosInstance.post('rentals/create/', {
                 clothing: clothing.id,
                 selected_size: selectedSize,
                 rent_start_date: startDate,

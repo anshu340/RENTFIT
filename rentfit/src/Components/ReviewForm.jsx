@@ -21,7 +21,7 @@ const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
         setError('');
 
         try {
-            await reviewAxiosInstance.post('create/', {
+            await reviewAxiosInstance.post('reviews/create/', {
                 rental: rental.id,
                 rating,
                 comment,

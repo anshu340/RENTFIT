@@ -37,10 +37,10 @@ const ClothingDetail = () => {
     const fetchClothingData = async () => {
         try {
             setIsLoading(true);
-            const detailRes = await axiosInstance.get(`clothing/${id}/`);
+            const detailRes = await axiosInstance.get(`accounts/clothing/${id}/`);
             setClothing(detailRes.data);
 
-            const reviewsRes = await reviewAxiosInstance.get(`clothing/${id}/`);
+            const reviewsRes = await reviewAxiosInstance.get(`reviews/clothing/${id}/`);
             setReviews(reviewsRes.data.results);
             setStats({
                 average_rating: reviewsRes.data.average_rating,
@@ -59,7 +59,7 @@ const ClothingDetail = () => {
         if (!token || role !== 'Customer') return;
 
         try {
-            const response = await rentalAxiosInstance.get('my/');
+            const response = await rentalAxiosInstance.get('rentals/my/');
             const userRentals = response.data.results || response.data;
             const eligible = userRentals.find(r => {
                 const rentalClothingId = typeof r.clothing === 'object' ? r.clothing.id : r.clothing;
@@ -104,7 +104,7 @@ const ClothingDetail = () => {
             }
 
             console.log('Starting chat with store user ID:', storeUserId);
-            const response = await chatAxiosInstance.post(`start/${storeUserId}/`);
+            const response = await chatAxiosInstance.post(`chat/start/${storeUserId}/`);
 
             if (response.data && response.data.id) {
                 navigate(`/chat/${response.data.id}`);

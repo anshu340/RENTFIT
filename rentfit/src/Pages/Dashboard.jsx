@@ -59,7 +59,7 @@ const Dashboard = () => {
       }
 
       // Fetch user profile
-      const profileResponse = await axiosInstance.get("customers/profile/");
+      const profileResponse = await axiosInstance.get("accounts/customers/profile/");
       const profileData = profileResponse.data?.data || profileResponse.data;
       if (profileData) {
         const name = profileData.full_name || profileData.name || "User";
@@ -75,7 +75,7 @@ const Dashboard = () => {
 
       // Fetch dashboard statistics
       try {
-        const statsResponse = await axiosInstance.get("dashboard/stats/");
+        const statsResponse = await axiosInstance.get("accounts/dashboard/stats/");
         console.log("RAW STATS RESPONSE:", statsResponse.data); // debug - remove after fix confirmed
         const stats = statsResponse.data?.data || statsResponse.data;
         if (stats) {
@@ -94,7 +94,7 @@ const Dashboard = () => {
       // Fetch current rentals & recent activity
       let allUserRentals = [];
       try {
-        const rentalsResponse = await rentalAxiosInstance.get("my/");
+        const rentalsResponse = await rentalAxiosInstance.get("rentals/my/");
         const rentalsData = rentalsResponse.data?.data || rentalsResponse.data;
         if (rentalsData) {
           allUserRentals = Array.isArray(rentalsData) ? rentalsData : (rentalsData.results || []);
@@ -123,7 +123,7 @@ const Dashboard = () => {
 
       // Fetch suggested clothes
       try {
-        const clothesResponse = await axiosInstance.get("clothing/all/");
+        const clothesResponse = await axiosInstance.get("accounts/clothing/all/");
         const clothesData = clothesResponse.data?.data || clothesResponse.data;
         if (clothesData) {
           const clothes = Array.isArray(clothesData) ? clothesData : (clothesData.results || []);

@@ -21,7 +21,7 @@ const MyClothingItems = () => {
   const fetchClothingItems = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get("clothing/my/");
+      const response = await axiosInstance.get("accounts/clothing/my/");
       if (response.data) {
         setClothingItems(response.data);
       }
@@ -35,7 +35,7 @@ const MyClothingItems = () => {
 
   const handleViewDetail = async (id) => {
     try {
-      const response = await axiosInstance.get(`clothing/${id}/`);
+      const response = await axiosInstance.get(`accounts/clothing/${id}/`);
       if (response.data) {
         setSelectedItem(response.data);
         setShowDetailModal(true);
@@ -52,7 +52,7 @@ const MyClothingItems = () => {
     }
 
     try {
-      await axiosInstance.delete(`clothing/${id}/delete/`);
+      await axiosInstance.delete(`accounts/clothing/${id}/delete/`);
       setMessage({ type: "success", text: "Clothing item deleted successfully" });
       fetchClothingItems(); // Refresh list
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
@@ -70,7 +70,7 @@ const MyClothingItems = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await axiosInstance.patch(`clothing/${id}/status/`, { clothing_status: newStatus });
+      await axiosInstance.patch(`accounts/clothing/${id}/status/`, { clothing_status: newStatus });
       setMessage({ type: "success", text: "Status updated successfully" });
       fetchClothingItems(); // Refresh list
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);

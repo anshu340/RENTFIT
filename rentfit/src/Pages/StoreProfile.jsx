@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import StoreSidebar from "../Components/StoreSidebar";
 import StoreLocationMap, { searchAddressAndCenter } from "../Components/StoreLocationMap";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import Alert from "../Components/Alert";
-import { FaStore, FaMapMarkerAlt, FaSave, FaCamera } from "react-icons/fa";
+import { FaStore, FaMapMarkerAlt, FaSave, FaCamera, FaClock, FaBuilding } from "react-icons/fa";
 
 const StoreProfile = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const isLocationMode = location.pathname === "/storeLocation";
+
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [alert, setAlert] = useState({ message: "", type: "" });
@@ -24,6 +27,8 @@ const StoreProfile = () => {
         store_description: "",
         latitude: null,
         longitude: null,
+        open_time: "",
+        close_time: "",
         store_logo: null,
         store_logo_url: ""
     });
@@ -35,7 +40,7 @@ const StoreProfile = () => {
     const fetchProfile = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get("stores/profile/");
+            const response = await axiosInstance.get("accounts/stores/profile/");
             const data = response.data?.data || response.data;
             setFormData({
                 store_name: data.store_name || "",
@@ -46,6 +51,8 @@ const StoreProfile = () => {
                 store_description: data.store_description || "",
                 latitude: data.latitude,
                 longitude: data.longitude,
+                open_time: data.open_time || "",
+                close_time: data.close_time || "",
                 store_logo_url: data.store_logo_url || data.store_logo || "",
                 store_logo: null
             });
@@ -97,7 +104,7 @@ const StoreProfile = () => {
                 }
             });
 
-            await axiosInstance.patch("stores/profile/", data, {
+            await axiosInstance.patch("accounts/stores/profile/", data, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 
@@ -135,8 +142,12 @@ const StoreProfile = () => {
                     <div className="max-w-5xl mx-auto">
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h1 className="text-3xl font-bold text-gray-800">Store Settings</h1>
-                                <p className="text-gray-500 mt-1">Manage your shop brand and location</p>
+                                <h1 className="text-3xl font-bold text-gray-800">
+                                    {isLocationMode ? "Shop Location" : "Store Settings"}
+                                </h1>
+                                <p className="text-gray-500 mt-1">
+                                    {isLocationMode ? "Manage your shop's physical location on the map" : "Manage your shop brand and location"}
+                                </p>
                             </div>
                             <button
                                 onClick={handleSave}
@@ -160,60 +171,93 @@ const StoreProfile = () => {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Left Column: Profile Info */}
-                            <div className="lg:col-span-1 space-y-6">
-                                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-center">
-                                    <div className="relative w-32 h-32 mx-auto mb-4 group">
-                                        <div className="w-full h-full rounded-2xl bg-gray-100 overflow-hidden border-2 border-white shadow-md">
-                                            {formData.store_logo_url || formData.store_logo ? (
-                                                <img
-                                                    src={formData.store_logo ? URL.createObjectURL(formData.store_logo) : formData.store_logo_url}
-                                                    alt="Store Logo"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <FaStore size={40} />
-                                                </div>
-                                            )}
+                        <div className={`grid grid-cols-1 ${isLocationMode ? 'lg:grid-cols-1' : 'lg:grid-cols-3'} gap-8`}>
+                            {/* Left Column: Profile Info (Hidden in Location Mode) */}
+                            {!isLocationMode && (
+                                <div className="lg:col-span-1 space-y-6">
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-center">
+                                        <div className="relative w-32 h-32 mx-auto mb-4 group">
+                                            <div className="w-full h-full rounded-2xl bg-gray-100 overflow-hidden border-2 border-white shadow-md">
+                                                {formData.store_logo_url || formData.store_logo ? (
+                                                    <img
+                                                        src={formData.store_logo ? URL.createObjectURL(formData.store_logo) : formData.store_logo_url}
+                                                        alt="Store Logo"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <FaStore size={40} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <label className="absolute bottom-2 right-2 p-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 shadow-lg transition-transform hover:scale-110">
+                                                <FaCamera size={14} />
+                                                <input type="file" name="store_logo" className="hidden" onChange={handleChange} accept="image/*" />
+                                            </label>
                                         </div>
-                                        <label className="absolute bottom-2 right-2 p-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 shadow-lg transition-transform hover:scale-110">
-                                            <FaCamera size={14} />
-                                            <input type="file" name="store_logo" className="hidden" onChange={handleChange} accept="image/*" />
-                                        </label>
+                                        <h2 className="font-bold text-gray-800 text-lg">{formData.store_name || "My Store"}</h2>
+                                        <p className="text-xs text-gray-500 uppercase font-black tracking-widest mt-1">Shop Admin</p>
                                     </div>
-                                    <h2 className="font-bold text-gray-800 text-lg">{formData.store_name || "My Store"}</h2>
-                                    <p className="text-xs text-gray-500 uppercase font-black tracking-widest mt-1">Shop Admin</p>
-                                </div>
 
-                                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                                    <h3 className="font-bold text-gray-800 border-b border-gray-50 pb-2">Business Details</h3>
-                                    <div>
-                                        <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Store Name</label>
-                                        <input
-                                            type="text"
-                                            name="store_name"
-                                            value={formData.store_name}
-                                            onChange={handleChange}
-                                            className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-                                        />
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                                        <h3 className="font-bold text-gray-800 border-b border-gray-50 pb-2 flex items-center gap-2">
+                                            <FaBuilding className="text-purple-500" /> Business Details
+                                        </h3>
+                                        <div>
+                                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Store Name</label>
+                                            <input
+                                                type="text"
+                                                name="store_name"
+                                                value={formData.store_name}
+                                                onChange={handleChange}
+                                                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Store Description</label>
+                                            <textarea
+                                                name="store_description"
+                                                value={formData.store_description}
+                                                onChange={handleChange}
+                                                rows="4"
+                                                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Store Description</label>
-                                        <textarea
-                                            name="store_description"
-                                            value={formData.store_description}
-                                            onChange={handleChange}
-                                            rows="4"
-                                            className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-                                        />
+
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                                        <h3 className="font-bold text-gray-800 border-b border-gray-50 pb-2 flex items-center gap-2">
+                                            <FaClock className="text-purple-500" /> Operating Hours
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Opening Time</label>
+                                                <input
+                                                    type="time"
+                                                    name="open_time"
+                                                    value={formData.open_time}
+                                                    onChange={handleChange}
+                                                    className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Closing Time</label>
+                                                <input
+                                                    type="time"
+                                                    name="close_time"
+                                                    value={formData.close_time}
+                                                    onChange={handleChange}
+                                                    className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 italic">Customers will see your store as "Open" or "Closed" based on these hours.</p>
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Right Column: Location & Contact */}
-                            <div className="lg:col-span-2 space-y-6">
+                            <div className={`${isLocationMode ? 'lg:col-span-3 max-w-4xl mx-auto w-full' : 'lg:col-span-2'} space-y-6`}>
                                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                                     <h3 className="font-bold text-gray-800 border-b border-gray-50 pb-4 mb-6 flex items-center gap-2">
                                         <FaMapMarkerAlt className="text-purple-500" /> Shop Location

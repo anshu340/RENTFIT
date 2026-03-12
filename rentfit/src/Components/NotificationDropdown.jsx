@@ -19,7 +19,7 @@ const NotificationDropdown = ({ onClose }) => {
 
     const fetchNotifications = async () => {
         try {
-            const response = await notificationAxiosInstance.get('');
+            const response = await notificationAxiosInstance.get('notifications/');
             setNotifications(response.data);
         } catch (error) {
             console.error("Error fetching notifications:", error);
@@ -34,7 +34,7 @@ const NotificationDropdown = ({ onClose }) => {
 
     const markAsRead = async (id) => {
         try {
-            await notificationAxiosInstance.patch(`${id}/read/`);
+            await notificationAxiosInstance.patch(`notifications/${id}/read/`);
             setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n));
         } catch (error) {
             console.error("Error marking notification as read:", error);
@@ -43,7 +43,7 @@ const NotificationDropdown = ({ onClose }) => {
 
     const markAllAsRead = async () => {
         try {
-            await notificationAxiosInstance.patch('read-all/');
+            await notificationAxiosInstance.patch('notifications/read-all/');
             setNotifications(notifications.map(n => ({ ...n, is_read: true })));
         } catch (error) {
             console.error("Error marking all notifications as read:", error);

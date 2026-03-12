@@ -1,24 +1,2 @@
-import axios from "axios";
-
-const paymentAxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL + "/api/payments/",
-    headers: {
-        "Content-Type": "application/json",
-    },
-});
-
-// Add interceptor to automatically include JWT token
-paymentAxiosInstance.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("access_token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
-export default paymentAxiosInstance;
+import axiosInstance from "./axiosInstance";
+export default axiosInstance;

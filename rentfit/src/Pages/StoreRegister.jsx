@@ -82,12 +82,12 @@ const StoreRegister = () => {
         formDataToSend.append("store_logo", formData.store_logo);
       }
 
-      const response = await axiosInstance.post("register/store/", formDataToSend, {
+      const response = await axiosInstance.post("accounts/register/store/", formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      
+
       const successMsg = "Store registered! Please verify OTP.";
       setMessage(successMsg);
       setStep(3); // Move to OTP verification step
@@ -95,7 +95,7 @@ const StoreRegister = () => {
       console.error("Network Error:", error);
       let errorMsg = "Registration failed. Please try again.";
       const errorData = error.response?.data;
-      
+
       if (errorData) {
         if (errorData.email) {
           errorMsg = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
@@ -113,7 +113,7 @@ const StoreRegister = () => {
           errorMsg = errorData;
         }
       }
-      
+
       setError(errorMsg);
     } finally {
       setIsLoading(false);
@@ -132,18 +132,18 @@ const StoreRegister = () => {
     setMessage("");
 
     try {
-      const response = await axiosInstance.post("verify-otp/", {
+      const response = await axiosInstance.post("accounts/verify-otp/", {
         email: formData.email,
         otp: otp,
       });
-      
+
       // Add authentication for navbar
       if (response.data.access_token) {
         localStorage.setItem("authToken", response.data.access_token);
         localStorage.setItem("userType", "store");
         window.dispatchEvent(new Event('authChange'));
       }
-      
+
       setMessage("Account verified successfully! Redirecting to login...");
       // Redirect to login page
       setTimeout(() => {
@@ -182,13 +182,13 @@ const StoreRegister = () => {
         <div className="flex items-center justify-center bg-gray-50 px-6 py-8">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-10">
             <h2 className="text-2xl font-bold mb-4 text-center">Register as Store</h2>
-            
+
             {message && (
               <p className="text-green-600 text-center mb-4 bg-green-50 p-3 rounded-lg">
                 {message}
               </p>
             )}
-            
+
             {error && (
               <p className="text-red-500 text-center mb-4 bg-red-50 p-3 rounded-lg">
                 {error}

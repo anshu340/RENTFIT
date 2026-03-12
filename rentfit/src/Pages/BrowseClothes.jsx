@@ -55,7 +55,7 @@ const BrowseClothes = () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
 
-      const response = await axiosInstance.get("wishlist/");
+      const response = await axiosInstance.get("accounts/wishlist/");
 
       let wishlistData = [];
       if (Array.isArray(response.data)) {
@@ -80,7 +80,7 @@ const BrowseClothes = () => {
   const fetchClothes = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get("clothing/all/");
+      const response = await axiosInstance.get("accounts/clothing/all/");
 
       let clothingData = [];
       if (Array.isArray(response.data)) {
@@ -239,10 +239,10 @@ const BrowseClothes = () => {
 
     try {
       if (isAdding) {
-        await axiosInstance.post("wishlist/add/", { clothing_id: id });
+        await axiosInstance.post("accounts/wishlist/add/", { clothing_id: id });
         showAlert("Added to wishlist", "success");
       } else {
-        await axiosInstance.delete(`wishlist/remove-by-clothing/${id}/`);
+        await axiosInstance.delete(`accounts/wishlist/remove-by-clothing/${id}/`);
         showAlert("Removed from wishlist", "success");
       }
     } catch (error) {
