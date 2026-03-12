@@ -54,6 +54,15 @@ class User(AbstractUser):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
+    # Store Hours
+    open_time = models.TimeField(null=True, blank=True)
+    close_time = models.TimeField(null=True, blank=True)
+
+    # Privacy Settings
+    profile_visibility = models.BooleanField(default=True)
+    location_sharing = models.BooleanField(default=True)
+    recommendations_enabled = models.BooleanField(default=True)
+
     date_joined = models.DateTimeField(auto_now_add=True)
     objects = CustomUserManager()
 

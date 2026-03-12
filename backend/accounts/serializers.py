@@ -4,6 +4,27 @@ from .models import User, Clothing, Wishlist
 from .otp import create_and_send_otp
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if data["new_password"] != data["confirm_password"]:
+            raise serializers.ValidationError("New passwords do not match")
+        return data
+
+
+class PrivacySettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "profile_visibility",
+            "location_sharing",
+            "recommendations_enabled"
+        ]
+
+
 # Store registration serializer (Create)
 class StoreRegisterSerializer(serializers.ModelSerializer):
     """
@@ -63,13 +84,17 @@ class StoreReadSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='name', read_only=True)
     phone_number = serializers.CharField(source='phone', read_only=True)
     store_logo_url = serializers.SerializerMethodField()
+    open_time = serializers.TimeField(required=False, allow_null=True)
+    close_time = serializers.TimeField(required=False, allow_null=True)
 
     class Meta:
         model = User
         fields = [
             'id', 'store_name', 'owner_name', 'email', 'phone_number',
             'store_address', 'city', 'store_description', 'store_logo',
-            'store_logo_url', 'latitude', 'longitude', 'is_verified', 'date_joined', 'role'
+            'store_logo_url', 'latitude', 'longitude', 'open_time', 'close_time',
+            'profile_visibility', 'location_sharing', 'recommendations_enabled',
+            'is_verified', 'date_joined', 'role'
         ]
         read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role']
 
@@ -91,12 +116,15 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='name', max_length=255, required=False)
     phone_number = serializers.CharField(source='phone', max_length=20, required=False, allow_blank=True)
     store_logo = serializers.ImageField(required=False, allow_null=True)
+    open_time = serializers.TimeField(required=False, allow_null=True, format='%H:%M')
+    close_time = serializers.TimeField(required=False, allow_null=True, format='%H:%M')
 
     class Meta:
         model = User
         fields = [
             'store_name', 'owner_name', 'phone_number', 'store_address',
-            'city', 'store_description', 'store_logo', 'latitude', 'longitude'
+            'city', 'store_description', 'store_logo', 'latitude', 'longitude',
+            'open_time', 'close_time'
         ]
 
     def validate(self, data):
@@ -194,6 +222,7 @@ class CustomerReadSerializer(serializers.ModelSerializer):
             'id', 'full_name', 'email', 'phone_number',
             'address', 'city', 'gender', 'preferred_clothing_size',
             'profile_image', 'profile_image_url',
+            'profile_visibility', 'location_sharing', 'recommendations_enabled',
             'is_verified', 'date_joined', 'role'
         ]
         read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role']
@@ -272,6 +301,8 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'email', 'name', 'phone', 'role', 
             'store_name', 'store_address', 'city', 'store_description', 
             'store_logo', 'store_logo_url', 'latitude', 'longitude',
+            'open_time', 'close_time',
+            'profile_visibility', 'location_sharing', 'recommendations_enabled',
             'profile_image', 'profile_image_url',
             'is_verified', 'date_joined'
         ]

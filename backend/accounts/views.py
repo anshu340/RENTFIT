@@ -27,9 +27,53 @@ from .serializers import (
     AdminClothingApprovalSerializer,
     WishlistSerializer,
     WishlistDetailSerializer,
+    ChangePasswordSerializer,
+    PrivacySettingsSerializer,
 )
 from .permissions import IsCustomer, IsStore, IsAdmin
 from .otp import verify_otp
+
+
+# SECURITY & PRIVACY VIEWS
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            if not user.check_password(serializer.validated_data["old_password"]):
+                return Response({"error": "Wrong current password"}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.set_password(serializer.validated_data["new_password"])
+            user.save()
+            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdatePrivacyView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = PrivacySettingsSerializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response({"message": "Account deleted successfully"}, status=status.HTTP_200_OK)
 
 
 # Customer Register 
@@ -65,7 +109,7 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
 
         user = authenticate(
-            email=serializer.validated_data['email'],
+            username=serializer.validated_data['email'],
             password=serializer.validated_data['password']
         )
 

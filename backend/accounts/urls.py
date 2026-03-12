@@ -26,7 +26,11 @@ from .views import (
     NearbyStoresView,
     AdminPendingClothingListView,
     AdminClothingApprovalView,
+    ChangePasswordView,
+    UpdatePrivacyView,
+    DeleteAccountView,
 )
+from rest_framework_simplejwt.views import TokenRefreshView
 from .admin_views import (
     AdminStatsView,
     AdminUserListView,
@@ -49,6 +53,7 @@ urlpatterns = [
     path("register/store/", StoreRegisterView.as_view(), name="register-store"),
     path("verify-otp/", VerifyOTPView.as_view(), name="verify-otp"),
     path("login/", LoginView.as_view(), name="login"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     
     # Location Endpoints
     path("stores/nearby/", NearbyStoresView.as_view(), name="nearby-stores"),
@@ -64,6 +69,11 @@ urlpatterns = [
     
     # Store CRUD Endpoints
     path("stores/profile/", StoreProfileView.as_view(), name="store-profile"),
+
+    # Security & Privacy Endpoints
+    path("user/change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("user/privacy/", UpdatePrivacyView.as_view(), name="update-privacy"),
+    path("user/delete-account/", DeleteAccountView.as_view(), name="delete-account"),
 
     # CLOTHING - STORE
     path("clothing/create/", ClothingCreateView.as_view(), name="clothing-create"),
