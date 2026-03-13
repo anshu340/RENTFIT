@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStoreDamageReports, takeActionOnDamageReport } from '../services/rentalAxiosInstance';
+import axiosInstance from '../services/axiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Alert from '../Components/Alert';
@@ -18,7 +18,7 @@ const DamageReports = () => {
     const fetchReports = async () => {
         try {
             setIsLoading(true);
-            const response = await getStoreDamageReports();
+            const response = await axiosInstance.get("rentals/damage-report/store/");
             setReports(response.data);
         } catch (error) {
             console.error('Error fetching damage reports:', error);
@@ -30,7 +30,7 @@ const DamageReports = () => {
 
     const handleAction = async () => {
         try {
-            await takeActionOnDamageReport(actionModal.reportId, {
+            await axiosInstance.post(`rentals/damage-report/${actionModal.reportId}/action/`, {
                 status: actionModal.status,
                 extra_charge: actionModal.extraCharge
             });

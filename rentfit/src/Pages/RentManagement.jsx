@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
-import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import StoreSidebar from '../Components/StoreSidebar';
@@ -30,7 +29,7 @@ const RentManagement = () => {
     const fetchRentals = async () => {
         try {
             setIsLoading(true);
-            const response = await rentalAxiosInstance.get('rentals/store/');
+            const response = await axiosInstance.get('rentals/store/');
             console.log('Rental Requests Response:', response.data);
             setRentals(response.data);
         } catch (error) {
@@ -43,7 +42,7 @@ const RentManagement = () => {
 
     const handleAction = async (id, action) => {
         try {
-            await rentalAxiosInstance.patch(`rentals/${id}/${action}/`);
+            await axiosInstance.patch(`rentals/${id}/${action}/`);
             showAlert(`Rental request ${action}ed successfully!`, 'success');
             fetchRentals();
         } catch (error) {

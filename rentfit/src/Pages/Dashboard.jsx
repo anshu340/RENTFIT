@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
-import donationAxios from '../services/donationAxios';
-import rentalAxiosInstance from '../services/rentalAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
-import DashboardSidebar from '../Components/DashboardSidebar';
+import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import {
   FaHeart,
   FaHandHoldingHeart,
@@ -76,7 +74,6 @@ const Dashboard = () => {
       // Fetch dashboard statistics
       try {
         const statsResponse = await axiosInstance.get("accounts/dashboard/stats/");
-        console.log("RAW STATS RESPONSE:", statsResponse.data); // debug - remove after fix confirmed
         const stats = statsResponse.data?.data || statsResponse.data;
         if (stats) {
           setDashboardData(prev => ({
@@ -94,7 +91,7 @@ const Dashboard = () => {
       // Fetch current rentals & recent activity
       let allUserRentals = [];
       try {
-        const rentalsResponse = await rentalAxiosInstance.get("rentals/my/");
+        const rentalsResponse = await axiosInstance.get("rentals/my/");
         const rentalsData = rentalsResponse.data?.data || rentalsResponse.data;
         if (rentalsData) {
           allUserRentals = Array.isArray(rentalsData) ? rentalsData : (rentalsData.results || []);

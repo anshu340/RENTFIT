@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
-import DashboardSidebar from "../Components/DashboardSidebar";
+import DashboardSidebar from "../Components/DashboardSidebar.jsx";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import Alert from "../Components/Alert";

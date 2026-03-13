@@ -5,7 +5,7 @@ const hasValidCoords = (lat, lng) =>
     lat !== null && lat !== undefined && lat !== "" &&
     lng !== null && lng !== undefined && lng !== "";
 
-const StoreLocationMap = ({ onLocationSelect, initialLocation, city, readonly = false }) => {
+const StoreLocationMap = ({ onLocationSelect, initialLocation, readonly = false }) => {
     const [marker, setMarker] = useState(null);
 
     // Initialize marker from initialLocation
@@ -16,7 +16,7 @@ const StoreLocationMap = ({ onLocationSelect, initialLocation, city, readonly = 
                 lng: parseFloat(initialLocation.lng),
             });
         }
-    }, [initialLocation]);
+    }, [initialLocation?.lat, initialLocation?.lng]);
 
     const onMapClick = useCallback(
         (e) => {

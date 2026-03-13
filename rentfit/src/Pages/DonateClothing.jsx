@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import donationAxios from "../services/donationAxios";
+import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import DashboardSidebar from '../Components/DashboardSidebar';
+import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import DonationSteps from "../Components/DonationSteps";
 import { FaTshirt, FaStore, FaImage, FaLock, FaUserPlus, FaSignInAlt } from "react-icons/fa";
 
@@ -44,7 +44,7 @@ const DonateClothing = () => {
   const fetchStores = async () => {
     try {
       setIsLoadingStores(true);
-      const response = await donationAxios.get("donations/stores/");
+      const response = await axiosInstance.get("donations/stores/");
       if (response.data && response.data.stores) {
         setStores(response.data.stores);
       }
@@ -120,7 +120,7 @@ const DonateClothing = () => {
       if (formData.description) formDataToSend.append("description", formData.description);
       if (formData.images) formDataToSend.append("images", formData.images);
 
-      const response = await donationAxios.post("donations/create/", formDataToSend, {
+      const response = await axiosInstance.post("donations/create/", formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

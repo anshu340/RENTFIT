@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/Rentfit Logo.png";
 import { IoMdNotifications } from "react-icons/io";
-import notificationAxiosInstance from "../services/notificationAxiosInstance";
+import axiosInstance from "../services/axiosInstance";
 import NotificationDropdown from "./NotificationDropdown.jsx";
 
 const Navbar = () => {
@@ -12,22 +12,22 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("access_token") || localStorage.getItem("authToken");
-      const role = localStorage.getItem("role") || localStorage.getItem("userType");
-      setIsLoggedIn(!!token);
-      // Normalize role names
-      if (role === 'Store' || role === 'store') setUserRole('Store');
-      else if (role === 'Customer' || role === 'user') setUserRole('Customer');
-      else if (role === 'Admin' || role === 'admin') setUserRole('Admin');
-      else setUserRole('');
-    };
+  const checkAuth = React.useCallback(() => {
+    const token = localStorage.getItem("access_token") || localStorage.getItem("authToken");
+    const role = localStorage.getItem("role") || localStorage.getItem("userType");
+    setIsLoggedIn(!!token);
+    // Normalize role names
+    if (role === 'Store' || role === 'store') setUserRole('Store');
+    else if (role === 'Customer' || role === 'user') setUserRole('Customer');
+    else if (role === 'Admin' || role === 'admin') setUserRole('Admin');
+    else setUserRole('');
+  }, []);
 
+  useEffect(() => {
     checkAuth();
     window.addEventListener("authChange", checkAuth);
     return () => window.removeEventListener("authChange", checkAuth);
-  }, []);
+  }, [checkAuth]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -37,7 +37,7 @@ const Navbar = () => {
 
     const fetchUnreadCount = async () => {
       try {
-        const response = await notificationAxiosInstance.get('notifications/unread-count/');
+        const response = await axiosInstance.get('notifications/unread-count/');
         setUnreadCount(response.data.unread_count);
       } catch (error) {
         console.error("Error fetching unread count:", error);

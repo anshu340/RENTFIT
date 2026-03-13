@@ -144,237 +144,218 @@ const UserRegister = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-        {/* Left Section */}
-        <div className="hidden lg:flex flex-col justify-center px-20 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 text-white">
-          <h1 className="text-4xl font-bold mb-4">Join RentFit Today</h1>
-          <p className="text-purple-100 mb-8 max-w-md">
-            {step === 1
-              ? "Register as a customer to explore online clothes rental, browse outfits, and rent your favorite fashion easily."
-              : "We've sent a verification code to your email. Please enter it below to complete your registration."}
-          </p>
+      <div className="min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-2 relative bg-[#fdfcfb] overflow-hidden">
+        
+        {/* Left Section: Aesthetic Branding */}
+        <div className="hidden lg:flex flex-col justify-center px-16 xl:px-24 bg-white/30 backdrop-blur-md text-slate-800 relative h-full border-r border-slate-100">
+           {/* Aesthetic Blobs */}
+          <div className="absolute top-0 -left-10 w-96 h-96 bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+          <div className="absolute top-1/2 -right-10 w-96 h-96 bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+          
+          <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
+          
+          <div className="relative z-10">
+            <span className="inline-block px-3 py-1 bg-white/80 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-slate-100 text-slate-400">Step {step} of 2</span>
+            <h1 className="text-5xl font-black mb-8 leading-tight tracking-tight text-slate-900 italic">
+              {step === 1 ? "The Beginnings of Style." : "Finalize your Presence."}
+            </h1>
+            <p className="text-xl text-slate-500 mb-12 font-medium max-w-md leading-relaxed">
+              {step === 1
+                ? "Join our curated collective where fashion meets sustainability in every thread."
+                : "A secure verification step to ensure your style journey remains personal and protected."}
+            </p>
+            
+            <div className="space-y-6">
+               {[
+                 { title: "Personalized Feed", color: "rose-400" },
+                 { title: "Secure Rentals", color: "teal-400" },
+                 { title: "Impact Tracking", color: "amber-400" }
+               ].map((item, i) => (
+                 <div key={i} className="flex items-center gap-4">
+                    <div className={`w-2 h-2 rounded-full bg-${item.color}`}></div>
+                    <h3 className="font-black text-[11px] uppercase tracking-widest text-slate-400">{item.title}</h3>
+                 </div>
+               ))}
+            </div>
+          </div>
+
+          <div className="absolute bottom-12 left-16 xl:left-24 text-slate-300 text-[10px] font-black tracking-[0.3em] uppercase">
+            RentFit / Aesthetic Collective
+          </div>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center justify-center bg-gray-50 px-6 py-8">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-10">
+        {/* Right Section: Form */}
+        <div className="flex items-center justify-center bg-white/50 backdrop-blur-sm px-6 py-12 lg:py-20 overflow-y-auto">
+          <div className="w-full max-w-lg animate-fade-in">
             {step === 1 ? (
-              <>
-                <h2 className="text-2xl font-bold mb-4 text-center">
-                  Register as Customer
-                </h2>
+              <div>
+                <div className="mb-10">
+                  <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter italic">Create Identity</h2>
+                  <p className="text-slate-500 font-medium uppercase text-[11px] tracking-widest">Customer Registration</p>
+                </div>
 
                 {serverError && (
-                  <p className="text-red-500 text-center mb-4 bg-red-50 p-3 rounded-lg">{serverError}</p>
+                  <div className="flex items-center gap-3 text-rose-600 text-[11px] font-black uppercase tracking-widest mb-8 bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                    <p>{serverError}</p>
+                  </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="relative">
-                    <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      name="full_name"
-                      placeholder="Full Name"
-                      value={formData.full_name}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    {errors.full_name && (
-                      <p className="text-red-500 text-xs mt-1">{errors.full_name}</p>
-                    )}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
+                      <input
+                        type="text"
+                        name="full_name"
+                        placeholder="ALEX DOE"
+                        value={formData.full_name}
+                        onChange={handleChange}
+                        className={`w-full bg-slate-50 border-2 ${errors.full_name ? 'border-rose-100' : 'border-slate-50'} p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider`}
+                      />
+                      {errors.full_name && <p className="text-rose-400 text-[9px] font-black mt-2 ml-1 uppercase tracking-widest">{errors.full_name}</p>}
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Contact</label>
+                      <input
+                        type="tel"
+                        name="phone_number"
+                        placeholder="MOBILE"
+                        value={formData.phone_number}
+                        onChange={handleChange}
+                        className={`w-full bg-slate-50 border-2 ${errors.phone_number ? 'border-rose-100' : 'border-slate-50'} p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider`}
+                      />
+                      {errors.phone_number && <p className="text-rose-400 text-[9px] font-black mt-2 ml-1 uppercase tracking-widest">{errors.phone_number}</p>}
+                    </div>
                   </div>
 
-                  <div className="relative">
-                    <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Work Email</label>
                     <input
                       type="email"
                       name="email"
-                      placeholder="Email"
+                      placeholder="EMAIL@EXAMPLE.COM"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      autoComplete="email"
+                      className={`w-full bg-slate-50 border-2 ${errors.email ? 'border-rose-100' : 'border-slate-50'} p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider`}
                     />
-                    {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                    )}
+                    {errors.email && <p className="text-rose-400 text-[9px] font-black mt-2 ml-1 uppercase tracking-widest">{errors.email}</p>}
                   </div>
 
-                  <div className="relative">
-                    <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      name="phone_number"
-                      placeholder="Phone Number"
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      autoComplete="tel"
-                    />
-                    {errors.phone_number && (
-                      <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>
-                    )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Location</label>
+                      <input
+                        type="text"
+                        name="city"
+                        placeholder="CITY"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className={`w-full bg-slate-50 border-2 ${errors.city ? 'border-rose-100' : 'border-slate-50'} p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider`}
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Gender</label>
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-xs uppercase tracking-widest appearance-none cursor-pointer"
+                      >
+                        <option value="">SELECT</option>
+                        <option value="Male">MALE</option>
+                        <option value="Female">FEMALE</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="relative">
-                    <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Address Detail</label>
+                    <textarea
                       name="address"
-                      placeholder="Address"
+                      placeholder="DETAILED ADDRESS"
+                      rows="2"
                       value={formData.address}
                       onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    {errors.address && (
-                      <p className="text-red-500 text-xs mt-1">{errors.address}</p>
-                    )}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                    ></textarea>
                   </div>
 
-                  <div className="relative">
-                    <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      name="city"
-                      placeholder="City"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    {errors.city && (
-                      <p className="text-red-500 text-xs mt-1">{errors.city}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                    {errors.gender && (
-                      <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <select
-                      name="preferred_clothing_size"
-                      value={formData.preferred_clothing_size}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="">Select Preferred Clothing Size</option>
-                      <option value="XS">XS</option>
-                      <option value="S">S</option>
-                      <option value="M">M</option>
-                      <option value="L">L</option>
-                      <option value="XL">XL</option>
-                      <option value="XXL">XXL</option>
-                    </select>
-                    {errors.preferred_clothing_size && (
-                      <p className="text-red-500 text-xs mt-1">{errors.preferred_clothing_size}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 ml-1">Profile Image</label>
-                    <div className="relative">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Security</label>
                       <input
-                        type="file"
-                        name="profile_image"
-                        accept="image/*"
+                        type="password"
+                        name="password"
+                        placeholder="PASSWORD"
+                        value={formData.password}
                         onChange={handleChange}
-                        className="w-full p-2.5 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 transition"
+                        className={`w-full bg-slate-50 border-2 ${errors.password ? 'border-rose-100' : 'border-slate-50'} p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider`}
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        placeholder="REPEAT"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className={`w-full bg-slate-50 border-2 ${errors.confirmPassword ? 'border-rose-100' : 'border-slate-50'} p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider`}
                       />
                     </div>
                   </div>
 
-                  <div className="relative">
-                    <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="Password (min. 8 characters)"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      autoComplete="new-password"
-                    />
-                    {errors.password && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.password}
-                      </p>
-                    )}
+                  <div className="flex flex-col gap-6 pt-4 border-t border-slate-100">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-100 group relative overflow-hidden"
+                    >
+                      <span className="relative z-10">{isLoading ? "Processing..." : "Continue to Shop"}</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-rose-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
+                    
+                    <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Already registered?{" "}
+                      <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="text-slate-900 hover:text-rose-400 transition-colors underline underline-offset-4"
+                      >
+                        Sign In Here
+                      </button>
+                    </p>
                   </div>
-
-                  <div className="relative">
-                    <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="Confirm Password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      autoComplete="new-password"
-                    />
-                    {errors.confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.confirmPassword}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? "Registering..." : "Register"}
-                  </button>
                 </form>
-
-                <p className="text-sm text-center text-gray-600 mt-4">
-                  Already have an account?{" "}
-                  <span
-                    onClick={() => navigate("/login")}
-                    className="text-purple-600 font-semibold cursor-pointer hover:underline"
-                  >
-                    Login here
-                  </span>
-                </p>
-              </>
+              </div>
             ) : (
-              <>
-                <h2 className="text-2xl font-bold mb-4 text-center">
-                  Verify Your Email
-                </h2>
-                <p className="text-sm text-gray-600 text-center mb-6">
-                  Enter the 6-digit code sent to{" "}
-                  <span className="font-semibold">{formData.email}</span>
+              <div className="text-center max-w-sm mx-auto">
+                <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-10 border border-teal-100">
+                   <FaEnvelope className="text-teal-400 text-2xl" />
+                </div>
+                <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter italic">Confirm Identity</h2>
+                <p className="text-slate-500 font-medium mb-12 leading-relaxed text-sm">
+                  We've shared a unique 6-digit code to <span className="text-slate-900 font-black">{formData.email}</span>.
                 </p>
 
                 {serverError && (
-                  <p className="text-red-500 text-center mb-4 bg-red-50 p-3 rounded-lg">{serverError}</p>
+                   <div className="text-rose-400 text-[10px] font-black uppercase tracking-widest mb-8 animate-shake">
+                    {serverError}
+                  </div>
                 )}
 
-                <form onSubmit={handleOtpSubmit} className="space-y-4">
-                  <div className="relative">
+                <form onSubmit={handleOtpSubmit} className="space-y-10">
+                  <div className="flex justify-center">
                     <input
                       type="text"
                       name="otp"
-                      placeholder="Enter 6-digit OTP"
+                      placeholder="0 0 0 0 0 0"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="w-full p-3 border rounded-lg text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-6 rounded-3xl text-center text-4xl font-black tracking-[0.6em] focus:outline-none focus:border-teal-100 focus:bg-white transition-all shadow-inner text-slate-900 placeholder:text-slate-200"
                       maxLength={6}
                     />
                   </div>
@@ -382,32 +363,32 @@ const UserRegister = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
                   >
-                    {isLoading ? "Verifying..." : "Verify OTP"}
+                    {isLoading ? "Verifying..." : "Verify & Enter"}
                   </button>
                 </form>
 
-                <div className="text-center mt-4">
-                  <p className="text-sm text-gray-600">
-                    Didn't receive the code?{" "}
+                <div className="mt-12 flex flex-col gap-8">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                    Code not received?{" "}
                     <button
                       onClick={handleResendOtp}
                       disabled={isLoading}
-                      className="text-purple-600 font-semibold hover:underline disabled:opacity-50"
+                      className="text-slate-900 hover:text-rose-400 transition-colors"
                     >
-                      Resend OTP
+                      Resend Now
                     </button>
                   </p>
+                  
+                  <button
+                    onClick={() => setStep(1)}
+                    className="text-slate-300 text-[9px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 hover:text-slate-600 transition-colors"
+                  >
+                    <span>←</span> Edit Identity
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setStep(1)}
-                  className="w-full mt-4 text-gray-600 text-sm hover:underline"
-                >
-                  ← Back to Registration
-                </button>
-              </>
+              </div>
             )}
           </div>
         </div>

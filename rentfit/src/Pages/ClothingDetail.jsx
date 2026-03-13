@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
-import chatAxiosInstance from '../services/chatAxiosInstance';
-import rentalAxiosInstance from '../services/rentalAxiosInstance';
-import reviewAxiosInstance from '../services/reviewAxiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import ReviewSection from '../Components/ReviewSection';
@@ -40,7 +37,7 @@ const ClothingDetail = () => {
             const detailRes = await axiosInstance.get(`accounts/clothing/${id}/`);
             setClothing(detailRes.data);
 
-            const reviewsRes = await reviewAxiosInstance.get(`reviews/clothing/${id}/`);
+            const reviewsRes = await axiosInstance.get(`reviews/clothing/${id}/`);
             setReviews(reviewsRes.data.results);
             setStats({
                 average_rating: reviewsRes.data.average_rating,
@@ -59,7 +56,7 @@ const ClothingDetail = () => {
         if (!token || role !== 'Customer') return;
 
         try {
-            const response = await rentalAxiosInstance.get('rentals/my/');
+            const response = await axiosInstance.get('rentals/my/');
             const userRentals = response.data.results || response.data;
             const eligible = userRentals.find(r => {
                 const rentalClothingId = typeof r.clothing === 'object' ? r.clothing.id : r.clothing;
@@ -104,7 +101,7 @@ const ClothingDetail = () => {
             }
 
             console.log('Starting chat with store user ID:', storeUserId);
-            const response = await chatAxiosInstance.post(`chat/start/${storeUserId}/`);
+            const response = await axiosInstance.post(`chat/start/${storeUserId}/`);
 
             if (response.data && response.data.id) {
                 navigate(`/chat/${response.data.id}`);

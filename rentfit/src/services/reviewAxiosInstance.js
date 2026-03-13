@@ -10,5 +10,3 @@ export const reviewService = {
         return response.data;
     }
 };
-
-export default axiosInstance;

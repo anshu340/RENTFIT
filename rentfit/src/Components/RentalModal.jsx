@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import rentalAxiosInstance from '../services/rentalAxiosInstance';
-import paymentAxiosInstance from '../services/paymentAxiosInstance';
+import axiosInstance from '../services/axiosInstance';
 import EsewaPayment from './EsewaPayment';
 
 const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStartDate, prefilledSize }) => {
@@ -9,7 +8,6 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStar
     const [selectedSize, setSelectedSize] = useState(prefilledSize || '');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [paymentData, setPaymentData] = useState(null);
 
     React.useEffect(() => {
         if (isOpen) {
@@ -32,7 +30,7 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStar
 
         try {
             // Step 1: Create Rental
-            await rentalAxiosInstance.post('rentals/create/', {
+            await axiosInstance.post('rentals/create/', {
                 clothing: clothing.id,
                 selected_size: selectedSize,
                 rent_start_date: startDate,
@@ -65,8 +63,6 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStar
 
     return (
         <>
-            {paymentData && <EsewaPayment data={paymentData} />}
-
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                 <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
                     <div className="bg-purple-600 p-6 text-white text-center">

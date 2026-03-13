@@ -8,4 +8,3 @@ const chatService = {
 };
 
 export { chatService };
-export default axiosInstance;

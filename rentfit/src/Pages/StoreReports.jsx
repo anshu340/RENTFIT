@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
-import rentalAxiosInstance from "../services/rentalAxiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import StoreSidebar from "../Components/StoreSidebar";
@@ -60,7 +59,7 @@ const StoreReports = () => {
             setIsLoading(true);
             const [statsRes, rentalsRes] = await Promise.all([
                 axiosInstance.get("accounts/dashboard/store/stats/"),
-                rentalAxiosInstance.get("rentals/store/")
+                axiosInstance.get("rentals/store/")
             ]);
 
             const statsData = statsRes.data.data;

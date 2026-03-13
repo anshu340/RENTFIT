@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaStar } from 'react-icons/fa';
-import reviewAxiosInstance from '../services/reviewAxiosInstance';
+import axiosInstance from '../services/axiosInstance';
 
 const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
     const [rating, setRating] = useState(0); // Start at 0, not 5
@@ -21,7 +21,7 @@ const ReviewForm = ({ rental, onReviewSubmitted, onCancel }) => {
         setError('');
 
         try {
-            await reviewAxiosInstance.post('reviews/create/', {
+            await axiosInstance.post('reviews/create/', {
                 rental: rental.id,
                 rating,
                 comment,

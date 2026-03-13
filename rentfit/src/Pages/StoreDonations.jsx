@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import donationAxios from "../services/donationAxios";
+import axiosInstance from "../services/axiosInstance";
 import { FaTshirt, FaCheckCircle, FaTimesCircle, FaBox, FaEye, FaBoxOpen } from "react-icons/fa";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
@@ -20,7 +20,7 @@ const StoreDonations = () => {
   const fetchDonations = async () => {
     try {
       setIsLoading(true);
-      const response = await donationAxios.get("donations/store/");
+      const response = await axiosInstance.get("donations/store/");
       if (response.data) {
         setDonations(response.data);
       }
@@ -34,7 +34,7 @@ const StoreDonations = () => {
 
   const handleViewDetail = async (id) => {
     try {
-      const response = await donationAxios.get(`donations/${id}/`);
+      const response = await axiosInstance.get(`donations/${id}/`);
       if (response.data) {
         setSelectedDonation(response.data);
         setShowDetailModal(true);
@@ -47,7 +47,7 @@ const StoreDonations = () => {
 
   const handleApprove = async (id) => {
     try {
-      const response = await donationAxios.patch(`donations/store/${id}/status/`, {
+      const response = await axiosInstance.patch(`donations/store/${id}/status/`, {
         donation_status: "Approved",
       });
       setMessage({ type: "success", text: "Donation approved successfully!" });
@@ -70,7 +70,7 @@ const StoreDonations = () => {
     }
 
     try {
-      const response = await donationAxios.patch(`donations/store/${id}/status/`, {
+      const response = await axiosInstance.patch(`donations/store/${id}/status/`, {
         donation_status: "Rejected",
       });
       setMessage({ type: "success", text: "Donation rejected." });
@@ -93,7 +93,7 @@ const StoreDonations = () => {
     }
 
     try {
-      const response = await donationAxios.patch(`donations/store/${id}/collect/`);
+      const response = await axiosInstance.patch(`donations/store/${id}/collect/`);
       setMessage({ type: "success", text: "Donation marked as collected!" });
       fetchDonations(); // Refresh list
       if (showDetailModal && selectedDonation?.id === id) {

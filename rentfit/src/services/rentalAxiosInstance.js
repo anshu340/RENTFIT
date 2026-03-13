@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosInstance";
+export default axiosInstance;
 
 export const submitDamageReport = (formData) => {
   return axiosInstance.post("rentals/damage-report/submit/", formData, {
@@ -15,5 +16,3 @@ export const getStoreDamageReports = () => {
 export const takeActionOnDamageReport = (id, data) => {
   return axiosInstance.post(`rentals/damage-report/${id}/action/`, data);
 };
-
-export default axiosInstance;

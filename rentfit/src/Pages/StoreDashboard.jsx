@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
-import donationAxios from "../services/donationAxios";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import StoreSidebar from "../Components/StoreSidebar";
@@ -142,7 +141,7 @@ const StoreDashboard = () => {
 
   const fetchDonationsData = async () => {
     try {
-      const response = await donationAxios.get("donations/store/");
+      const response = await axiosInstance.get("donations/store/");
       const donations = response.data || [];
 
       const approved = donations.filter(d => d.donation_status === 'Approved').length;

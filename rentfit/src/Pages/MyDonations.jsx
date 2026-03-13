@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import donationAxios from "../services/donationAxios";
+import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import DashboardSidebar from '../Components/DashboardSidebar';
+import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import { FaTshirt, FaStore, FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaBox } from "react-icons/fa";
 
 const MyDonations = () => {
@@ -21,7 +21,7 @@ const MyDonations = () => {
   const fetchDonations = async () => {
     try {
       setIsLoading(true);
-      const response = await donationAxios.get("donations/my/");
+      const response = await axiosInstance.get("donations/my/");
       if (response.data) {
         setDonations(response.data);
       }
@@ -35,7 +35,7 @@ const MyDonations = () => {
 
   const handleViewDetail = async (id) => {
     try {
-      const response = await donationAxios.get(`donations/${id}/`);
+      const response = await axiosInstance.get(`donations/${id}/`);
       if (response.data) {
         setSelectedDonation(response.data);
         setShowDetailModal(true);
@@ -52,7 +52,7 @@ const MyDonations = () => {
     }
 
     try {
-      const response = await donationAxios.delete(`donations/${id}/delete/`);
+      const response = await axiosInstance.delete(`donations/${id}/delete/`);
       setMessage({ type: "success", text: "Donation deleted successfully" });
       fetchDonations(); // Refresh list
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);

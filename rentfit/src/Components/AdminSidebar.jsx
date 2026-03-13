@@ -26,26 +26,19 @@ const AdminSidebar = () => {
         navigate('/login');
     };
 
-    const isActive = (path) => {
-        return location.pathname === path;
-    };
+    const isActive = (path) => location.pathname === path;
 
     return (
-        <div className="w-64 bg-slate-900 text-white flex flex-col h-screen sticky top-0 shadow-xl">
-            <div className="p-6 border-b border-slate-800">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FaUserShield className="text-white text-xl" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-lg font-bold truncate">Admin Central</h1>
-                        <p className="text-xs text-slate-400 capitalize">{localStorage.getItem('role')}</p>
-                    </div>
+        <aside className="w-64 bg-white border border-gray-100 rounded-3xl flex flex-col h-fit m-6 shadow-md sticky top-6">
+            <div className="p-6 border-b border-gray-100 text-center">
+                <div className="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-100">
+                    <FaUserShield className="text-white text-3xl" />
                 </div>
+                <h1 className="text-lg font-bold text-gray-800">Admin Central</h1>
+                <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-1">Super User</p>
             </div>
 
-            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-                <p className="px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Main Overview</p>
+            <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -54,37 +47,37 @@ const AdminSidebar = () => {
                             key={item.name}
                             onClick={() => navigate(item.path)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm ${active
-                                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-900/50 transform scale-[1.02]'
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-indigo-50 text-indigo-600 font-bold shadow-sm'
+                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
                                 }`}
                         >
-                            <Icon className={`text-base ${active ? 'text-white' : 'text-slate-500'}`} />
+                            <Icon className={`text-lg ${active ? 'text-indigo-600' : 'text-gray-400'}`} />
                             <span>{item.name}</span>
                         </button>
                     );
                 })}
             </nav>
 
-            <div className="p-3 border-t border-slate-800 space-y-1">
+            <div className="p-4 border-t border-gray-100 space-y-1.5">
                 <Link
                     to="/adminDashboard"
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm ${location.pathname === '/adminSettings'
-                        ? 'bg-slate-800 text-white font-bold'
-                        : 'text-slate-400 hover:bg-slate-800'
+                        ? 'bg-indigo-50 text-indigo-600 font-bold'
+                        : 'text-gray-500 hover:bg-gray-50'
                         }`}
                 >
-                    <FaCog className="text-base text-slate-500" />
+                    <FaCog className={`text-lg ${location.pathname === '/adminSettings' ? 'text-indigo-600' : 'text-gray-400'}`} />
                     <span>Settings</span>
                 </Link>
                 <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors text-sm font-bold"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-sm font-bold"
                 >
-                    <FaSignOutAlt className="text-base" />
+                    <FaSignOutAlt className="text-lg" />
                     <span>Logout</span>
                 </button>
             </div>
-        </div>
+        </aside>
     );
 };
 

@@ -167,260 +167,291 @@ const StoreRegister = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-        {/* Left Section */}
-        <div className="hidden lg:flex flex-col justify-center px-20 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 text-white">
-          <h1 className="text-4xl font-bold mb-4">Join the Fashion Revolution</h1>
-          <p className="text-purple-100 mb-8 max-w-md">
-            {step === 1 || step === 2
-              ? "Create your store account, list outfits, and reach customers nearby."
-              : "We've sent a verification code to your email. Please enter it below to complete your registration."}
-          </p>
+      <div className="min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-2 relative bg-[#fdfcfb] overflow-hidden">
+        
+        {/* Left Section: Aesthetic Branding & Progress */}
+        <div className="hidden lg:flex flex-col justify-center px-16 xl:px-24 bg-white/30 backdrop-blur-md text-slate-800 relative h-full border-r border-slate-100">
+           {/* Aesthetic Blobs */}
+          <div className="absolute top-0 -left-10 w-96 h-96 bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+          <div className="absolute bottom-0 -right-10 w-96 h-96 bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+          
+          <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
+          
+          <div className="relative z-10">
+            <span className="inline-block px-3 py-1 bg-white/80 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-slate-100 text-slate-400">Merchant Portal</span>
+            <h1 className="text-5xl font-black mb-8 leading-tight tracking-tight text-slate-900 italic">
+              Empower your<br />Inventory.
+            </h1>
+            <p className="text-xl text-slate-500 mb-12 font-medium max-w-md leading-relaxed">
+              Join the future of circular fashion as a premium partner store.
+            </p>
+            
+            {/* Progress Indicator */}
+            <div className="space-y-10">
+               {[
+                 { s: 1, title: "Store Identity", desc: "Basic details & location" },
+                 { s: 2, title: "Security", desc: "Access credentials" },
+                 { s: 3, title: "Verification", desc: "OTP authentication" }
+               ].map((item) => (
+                 <div key={item.s} className={`flex items-start gap-4 transition-all duration-500 ${step >= item.s ? 'opacity-100 translate-x-2' : 'opacity-30'}`}>
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm border-2 ${step >= item.s ? 'bg-slate-900 border-slate-900 text-white' : 'border-slate-200 text-slate-400'}`}>
+                       {step > item.s ? '✓' : `0${item.s}`}
+                    </div>
+                    <div>
+                       <h3 className="font-black text-[11px] uppercase tracking-widest text-slate-900">{item.title}</h3>
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{item.desc}</p>
+                    </div>
+                 </div>
+               ))}
+            </div>
+          </div>
+
+          <div className="absolute bottom-12 left-16 xl:left-24 text-slate-300 text-[10px] font-black tracking-[0.3em] uppercase">
+            RentFit / Partner Network
+          </div>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center justify-center bg-gray-50 px-6 py-8">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-10">
-            <h2 className="text-2xl font-bold mb-4 text-center">Register as Store</h2>
-
+        {/* Right Section: Form */}
+        <div className="flex items-center justify-center bg-white/50 backdrop-blur-sm px-6 py-12 lg:py-20 overflow-y-auto">
+          <div className="w-full max-w-lg animate-fade-in">
+            
             {message && (
-              <p className="text-green-600 text-center mb-4 bg-green-50 p-3 rounded-lg">
-                {message}
-              </p>
+              <div className="flex items-center gap-3 text-emerald-600 text-[11px] font-black uppercase tracking-widest mb-8 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                <p>{message}</p>
+              </div>
             )}
 
             {error && (
-              <p className="text-red-500 text-center mb-4 bg-red-50 p-3 rounded-lg">
-                {error}
-              </p>
+              <div className="flex items-center gap-3 text-rose-600 text-[11px] font-black uppercase tracking-widest mb-8 bg-rose-50 p-4 rounded-2xl border border-rose-100 animate-shake">
+                <p>{error}</p>
+              </div>
             )}
 
-            {/* Step 1: Basic Info */}
             {step === 1 && (
-              <div className="space-y-4">
-                <div className="relative">
-                  <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    name="owner_name"
-                    placeholder="Owner Name"
-                    value={formData.owner_name}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
+              <div>
+                <div className="mb-10">
+                  <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter italic">Store Persona</h2>
+                  <p className="text-slate-500 font-medium uppercase text-[11px] tracking-widest">Partner Registration</p>
                 </div>
 
-                <div className="relative">
-                  <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
-                </div>
+                <form className="space-y-5">
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Founder Name</label>
+                    <input
+                      type="text"
+                      name="owner_name"
+                      placeholder="NAME"
+                      value={formData.owner_name}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                    />
+                  </div>
 
-                <div className="relative">
-                  <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="tel"
-                    name="phone_number"
-                    placeholder="Phone Number"
-                    value={formData.phone_number}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Store Name</label>
+                    <input
+                      type="text"
+                      name="store_name"
+                      placeholder="LUXE RENTALS"
+                      value={formData.store_name}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                    />
+                  </div>
 
-                <input
-                  type="text"
-                  name="store_name"
-                  placeholder="Store Name"
-                  value={formData.store_name}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  required
-                />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Official Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="STORE@EXAMPLE.COM"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                      />
+                    </div>
 
-                <input
-                  type="text"
-                  name="store_address"
-                  placeholder="Store Address"
-                  value={formData.store_address}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  required
-                />
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Business Line</label>
+                      <input
+                        type="tel"
+                        name="phone_number"
+                        placeholder="OFFICE"
+                        value={formData.phone_number}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                      />
+                    </div>
+                  </div>
 
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  required
-                />
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">HQ Location / City</label>
+                    <input
+                      type="text"
+                      name="city"
+                      placeholder="CITY"
+                      value={formData.city}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                    />
+                  </div>
 
-                <textarea
-                  name="store_description"
-                  placeholder="Store Description"
-                  value={formData.store_description}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  rows="3"
-                />
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Store Address Detail</label>
+                    <textarea
+                      name="store_address"
+                      placeholder="HQ STREET ADDRESS"
+                      rows="2"
+                      value={formData.store_address}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                    ></textarea>
+                  </div>
 
-                <input
-                  type="text"
-                  name="business_registration_number"
-                  placeholder="Business Registration Number (Optional)"
-                  value={formData.business_registration_number}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <p className="text-xs text-gray-500">Note: This field is for reference only and is not stored in the backend yet.</p>
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Brand Narrative</label>
+                    <textarea
+                      name="store_description"
+                      placeholder="A SHORT STORY OF YOUR COLLECTION..."
+                      rows="2"
+                      value={formData.store_description}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                    ></textarea>
+                  </div>
 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 transition">
-                  <input
-                    type="file"
-                    name="store_logo"
-                    accept="image/*"
-                    onChange={handleChange}
-                    className="w-full"
-                    id="store_logo"
-                  />
-                  <label htmlFor="store_logo" className="text-sm text-gray-500 cursor-pointer">
-                    Upload Store Logo (Optional)
-                  </label>
-                </div>
-
-                <button
-                  onClick={() => setStep(2)}
-                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition"
-                >
-                  Continue
-                </button>
-
-                <p className="text-sm text-center text-gray-600 mt-4">
-                  Already have an account?{" "}
-                  <span
-                    onClick={() => navigate("/login")}
-                    className="text-purple-600 font-semibold cursor-pointer hover:underline"
-                  >
-                    Login here
-                  </span>
-                </p>
+                  <div className="pt-6 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-100 group relative overflow-hidden"
+                    >
+                      <span className="relative z-10 flex items-center justify-center gap-2">Next Step <span className="text-lg">→</span></span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-rose-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/login")}
+                      className="w-full mt-4 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-slate-600 transition-colors"
+                    >
+                      Cancel / Sign In
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
 
-            {/* Step 2: Password */}
             {step === 2 && (
-              <div className="space-y-4">
-                <div className="relative">
-                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
+              <div className="animate-fade-in">
+                <div className="mb-10">
+                  <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter italic">Vault Access</h2>
+                  <p className="text-slate-500 font-medium uppercase text-[11px] tracking-widest">Establish Security</p>
                 </div>
 
-                <div className="relative">
-                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
-                </div>
+                <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }} className="space-y-8">
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-4 rounded-2xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-sm"
+                    />
+                  </div>
 
-                <button
-                  onClick={handleRegister}
-                  disabled={isLoading}
-                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Creating Account..." : "Create Account"}
-                </button>
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Identity</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-4 rounded-2xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-sm"
+                    />
+                  </div>
 
-                <button
-                  onClick={() => setStep(1)}
-                  disabled={isLoading}
-                  className="w-full bg-gray-200 text-gray-700 p-3 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50"
-                >
-                  Back
-                </button>
+                  <div className="flex flex-col gap-4 pt-8">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 group relative overflow-hidden"
+                    >
+                      <span className="relative z-10">{isLoading ? "Deploying..." : "Finalize Infrastructure"}</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-teal-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mt-4 flex items-center justify-center gap-2 hover:text-slate-600 transition-colors"
+                    >
+                      <span>←</span> Return to Details
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
 
-            {/* Step 3: OTP Verification */}
             {step === 3 && (
-              <div className="space-y-4">
-                <div className="text-center mb-4">
-                  <h3 className="text-xl font-semibold mb-2">Verify Your Email</h3>
-                  <p className="text-sm text-gray-600">
-                    Enter the 6-digit code sent to{" "}
-                    <span className="font-semibold">{formData.email}</span>
-                  </p>
+              <div className="text-center max-w-sm mx-auto animate-fade-in">
+                <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-10 border border-teal-100">
+                   <FaEnvelope className="text-teal-400 text-2xl" />
                 </div>
+                <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter italic">Verify Partner</h2>
+                <p className="text-slate-500 font-medium mb-12 leading-relaxed text-sm">
+                  Identity link shared to <span className="text-slate-900 font-black">{formData.email}</span>.
+                </p>
 
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="otp"
-                    placeholder="Enter 6-digit OTP"
-                    value={otp}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-                      setOtp(value);
-                      setError("");
-                    }}
-                    maxLength="6"
-                    className="w-full p-3 border rounded-lg text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
-                </div>
+                {error && (
+                  <div className="text-rose-400 text-[10px] font-black uppercase tracking-widest mb-8 animate-shake">
+                    {error}
+                  </div>
+                )}
 
-                <button
-                  onClick={handleVerifyOTP}
-                  disabled={isLoading}
-                  className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Verifying..." : "Verify OTP"}
-                </button>
+                <form onSubmit={(e) => { e.preventDefault(); handleVerifyOTP(); }} className="space-y-10">
+                  <div className="flex justify-center">
+                    <input
+                      type="text"
+                      name="otp"
+                      placeholder="0 0 0 0 0 0"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-6 rounded-3xl text-center text-4xl font-black tracking-[0.6em] focus:outline-none focus:border-teal-100 focus:bg-white transition-all shadow-inner text-slate-900 placeholder:text-slate-200"
+                      maxLength={6}
+                    />
+                  </div>
 
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    Didn't receive the code?{" "}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
+                  >
+                    {isLoading ? "Validating..." : "Synchronize & Launch"}
+                  </button>
+                </form>
+
+                <div className="mt-12 flex flex-col gap-8">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                    Link expired?{" "}
                     <button
                       onClick={handleResendOtp}
                       disabled={isLoading}
-                      className="text-purple-600 font-semibold hover:underline disabled:opacity-50"
+                      className="text-slate-900 hover:text-rose-400 transition-colors"
                     >
-                      Resend OTP
+                      Refresh Link
                     </button>
                   </p>
+                  
+                  <button
+                    onClick={() => setStep(2)}
+                    className="text-slate-300 text-[9px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 hover:text-slate-600 transition-colors"
+                  >
+                    <span>←</span> Edit Security Settings
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setStep(2)}
-                  disabled={isLoading}
-                  className="w-full bg-gray-200 text-gray-700 p-3 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50"
-                >
-                  Back
-                </button>
               </div>
             )}
           </div>

@@ -7,7 +7,7 @@ import {
 } from 'react-icons/ai';
 import Navbar from '../Components/Navbar';
 import Footer from "../Components/Footer";
-import DashboardSidebar from '../Components/DashboardSidebar';
+import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import { BsGrid3X3Gap, BsList } from 'react-icons/bs';
 import axiosInstance from "../services/axiosInstance";
 

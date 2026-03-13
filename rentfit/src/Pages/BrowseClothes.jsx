@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import DashboardSidebar from '../Components/DashboardSidebar';
+import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import Alert from "../Components/Alert";
 import RentalModal from "../Components/RentalModal";
 import { FaHeart, FaRegHeart, FaTh, FaList, FaStar, FaFilter, FaSearch, FaChevronDown, FaChevronRight } from "react-icons/fa";
@@ -16,7 +16,7 @@ const BrowseClothes = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [sortBy, setSortBy] = useState('popular');
   const [favorites, setFavorites] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters] = useState(false);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,7 +37,7 @@ const BrowseClothes = () => {
   });
 
   const categories = ['Formal Wear', 'Casual', 'Party Wear', 'Traditional', 'Sports Wear'];
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  // const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const priceRanges = [
     { label: 'Under $20', value: '0-20' },
     { label: '$20 - $50', value: '20-50' },
@@ -255,22 +255,22 @@ const BrowseClothes = () => {
     }
   };
 
-  const handleRentNow = (item) => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      navigate("/login", { state: { message: "Please login to continue renting" } });
-      return;
-    }
-
-    // If not a customer, you might want to redirect or show alert
-    const userRole = localStorage.getItem('role');
-    if (userRole !== 'Customer') {
-      showAlert('Only customers can rent items.', 'error');
-      return;
-    }
-    setSelectedClothing(item);
-    setIsRentalModalOpen(true);
-  };
+//   const handleRentNow = (item) => {
+//     const token = localStorage.getItem("access_token");
+//     if (!token) {
+//       navigate("/login", { state: { message: "Please login to continue renting" } });
+//       return;
+//     }
+// 
+//     // If not a customer, you might want to redirect or show alert
+//     const userRole = localStorage.getItem('role');
+//     if (userRole !== 'Customer') {
+//       showAlert('Only customers can rent items.', 'error');
+//       return;
+//     }
+//     setSelectedClothing(item);
+//     setIsRentalModalOpen(true);
+//   };
 
   const showAlert = (message, type) => {
     setAlert({ message, type });

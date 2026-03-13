@@ -3,7 +3,7 @@ import { reviewService } from "../services/reviewAxiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import Alert from "../Components/Alert";
-import DashboardSidebar from "../Components/DashboardSidebar";
+import DashboardSidebar from "../Components/DashboardSidebar.jsx";
 import { FaStar, FaStore, FaTshirt, FaCalendarAlt, FaTrash, FaEdit, FaQuoteLeft } from "react-icons/fa";
 
 const MyReviews = () => {

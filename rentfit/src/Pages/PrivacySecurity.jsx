@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import DashboardSidebar from '../Components/DashboardSidebar';
+import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import { FaLock, FaUserShield, FaMapMarkerAlt, FaBell, FaSignOutAlt, FaTrashAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
