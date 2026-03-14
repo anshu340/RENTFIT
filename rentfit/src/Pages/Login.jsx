@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
@@ -99,7 +99,7 @@ const Login = () => {
         <div className="absolute -bottom-10 left-40 w-80 h-80 bg-amber-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
 
         <div className="relative w-full max-w-5xl flex flex-col md:flex-row bg-white/40 backdrop-blur-xl rounded-[3rem] border border-white/60 shadow-xl overflow-hidden animate-fade-in">
-          
+
           {/* Left Side: Aesthetic Branding */}
           <div className="md:w-5/12 hidden md:flex flex-col justify-center p-12 bg-gradient-to-br from-[#f8edeb] via-[#fae1dd] to-[#f8edeb] text-slate-800 relative">
             <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
@@ -107,7 +107,7 @@ const Login = () => {
               <span className="inline-block px-3 py-1 bg-white/50 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 border border-white/80">Sustainable Choice</span>
               <h1 className="text-4xl font-black mb-6 leading-tight tracking-tight text-slate-900 italic">Style meeting<br />Responsibility.</h1>
               <p className="text-lg text-slate-600 mb-8 font-medium leading-relaxed">Curated premium outfits for those who value elegance and the planet.</p>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center border border-slate-200">
@@ -163,7 +163,7 @@ const Login = () => {
                 <div className="group">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Password</label>
-                    <a href="#" className="text-[10px] font-black text-rose-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Forgot?</a>
+                    <Link to="/forgot-password" className="text-[10px] font-black text-rose-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Forgot?</Link>
                   </div>
                   <div className="relative">
                     <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-rose-400 transition-colors" />
@@ -189,7 +189,7 @@ const Login = () => {
                   className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-100 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    {isLoading ? "Authenticating..." : "Enter Shop"}
+                    {isLoading ? "Authenticating..." : "Enter"}
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-rose-400 to-amber-300 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>

@@ -282,6 +282,17 @@ const UserRegister = () => {
                     ></textarea>
                   </div>
 
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Profile Picture (Optional)</label>
+                    <input
+                      type="file"
+                      name="profile_image"
+                      accept="image/*"
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-2 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-[11px] uppercase tracking-wider file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer"
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
                     <div className="group">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Security</label>
@@ -314,7 +325,7 @@ const UserRegister = () => {
                       disabled={isLoading}
                       className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-100 group relative overflow-hidden"
                     >
-                      <span className="relative z-10">{isLoading ? "Processing..." : "Continue to Shop"}</span>
+                      <span className="relative z-10">{isLoading ? "Processing..." : "Continue"}</span>
                       <div className="absolute inset-0 bg-gradient-to-r from-rose-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </button>
                     

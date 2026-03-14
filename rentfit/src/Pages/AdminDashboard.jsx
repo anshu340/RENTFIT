@@ -115,50 +115,52 @@ const AdminDashboard = () => {
                                         <FaChartLine className="text-indigo-500" /> Revenue Growth
                                     </h2>
                                     <div className="text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                        Last 30 Days
+                                        All Time
                                     </div>
                                 </div>
-                                <div className="flex-1 w-full h-full">
+                                <div className="relative w-full h-80 min-h-[320px]">
                                     {isLoading ? (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">Loading chart...</div>
+                                        <div className="absolute inset-0 flex items-center justify-center text-slate-400 font-bold">Loading chart...</div>
                                     ) : (
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={stats.revenue_history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                                <defs>
-                                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis
-                                                    dataKey="date"
-                                                    axisLine={false}
-                                                    tickLine={false}
-                                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-                                                    minTickGap={30}
-                                                    tickFormatter={(str) => {
-                                                        const date = new Date(str);
-                                                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                    }}
-                                                />
-                                                <YAxis
-                                                    axisLine={false}
-                                                    tickLine={false}
-                                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-                                                    tickFormatter={(val) => `$${val}`}
-                                                />
-                                                <Tooltip content={<CustomTooltip />} />
-                                                <Area
-                                                    type="monotone"
-                                                    dataKey="revenue"
-                                                    stroke="#6366f1"
-                                                    strokeWidth={4}
-                                                    fillOpacity={1}
-                                                    fill="url(#colorRevenue)"
-                                                />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
+                                        <div className="absolute inset-0">
+                                            <ResponsiveContainer width="99%" height="100%">
+                                                <AreaChart data={stats.revenue_history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                                    <defs>
+                                                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                    <XAxis
+                                                        dataKey="date"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                                        minTickGap={30}
+                                                        tickFormatter={(str) => {
+                                                            const date = new Date(str);
+                                                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                                        }}
+                                                    />
+                                                    <YAxis
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                                        tickFormatter={(val) => `$${val}`}
+                                                    />
+                                                    <Tooltip content={<CustomTooltip />} />
+                                                    <Area
+                                                        type="monotone"
+                                                        dataKey="revenue"
+                                                        stroke="#6366f1"
+                                                        strokeWidth={4}
+                                                        fillOpacity={1}
+                                                        fill="url(#colorRevenue)"
+                                                    />
+                                                </AreaChart>
+                                            </ResponsiveContainer>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -170,26 +172,28 @@ const AdminDashboard = () => {
                                         <div className="flex-1 flex items-center justify-center text-slate-400 font-bold">Loading...</div>
                                     ) : (
                                         <>
-                                            <div className="flex-1">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <PieChart>
-                                                        <Pie
-                                                            data={stats.user_distribution}
-                                                            innerRadius={60}
-                                                            outerRadius={100}
-                                                            paddingAngle={8}
-                                                            dataKey="value"
-                                                        >
-                                                            {stats.user_distribution.map((entry, index) => (
-                                                                <Cell key={`cell-${index}`} fill={entry.color} cornerRadius={10} />
-                                                            ))}
-                                                        </Pie>
-                                                        <Tooltip
-                                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                                                            itemStyle={{ fontWeight: 900, fontSize: '12px' }}
-                                                        />
-                                                    </PieChart>
-                                                </ResponsiveContainer>
+                                            <div className="flex-1 relative min-h-[250px]">
+                                                <div className="absolute inset-0">
+                                                    <ResponsiveContainer width="99%" height="100%">
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={stats.user_distribution}
+                                                                innerRadius={60}
+                                                                outerRadius={100}
+                                                                paddingAngle={8}
+                                                                dataKey="value"
+                                                            >
+                                                                {stats.user_distribution.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={entry.color} cornerRadius={10} />
+                                                                ))}
+                                                            </Pie>
+                                                            <Tooltip
+                                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                                                itemStyle={{ fontWeight: 900, fontSize: '12px' }}
+                                                            />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </div>
                                             </div>
                                             <div className="mt-4 space-y-3">
                                                 {stats.user_distribution.map((item, idx) => (

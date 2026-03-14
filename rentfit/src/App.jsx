@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import Landing from './Pages/Landing.jsx';
 import CreateAccount from './Pages/CreateAccount.jsx';
 import Login from './Pages/Login.jsx';
+import ForgotPassword from './Pages/ForgotPassword.jsx';
+import ResetPassword from './Pages/ResetPassword.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
 import StoreRegister from './Pages/StoreRegister.jsx';
 import UserRegister from './Pages/UserRegister.jsx';
@@ -34,7 +36,7 @@ import StoreReports from './Pages/StoreReports.jsx';
 import AdminClothingApproval from './Pages/AdminClothingApproval.jsx';
 
 
-import PrivacySecurity from "./Pages/PrivacySecurity";
+import PrivacySecurity from "./Pages/PrivacySecurity.jsx";
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/createAccount" element={<CreateAccount />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/storeRegister" element={<StoreRegister />} />
       <Route path="/userRegister" element={<UserRegister />} />
