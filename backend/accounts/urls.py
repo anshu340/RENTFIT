@@ -29,6 +29,8 @@ from .views import (
     ChangePasswordView,
     UpdatePrivacyView,
     DeleteAccountView,
+    ForgotPasswordView,
+    ResetPasswordView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from .admin_views import (
@@ -54,6 +56,8 @@ urlpatterns = [
     path("verify-otp/", VerifyOTPView.as_view(), name="verify-otp"),
     path("login/", LoginView.as_view(), name="login"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
+    path("password/forgot/", ForgotPasswordView.as_view(), name="forgot-password"),
+    path("password/reset/", ResetPasswordView.as_view(), name="reset-password"),
     
     # Location Endpoints
     path("stores/nearby/", NearbyStoresView.as_view(), name="nearby-stores"),

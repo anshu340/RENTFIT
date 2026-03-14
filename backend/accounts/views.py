@@ -31,10 +31,53 @@ from .serializers import (
     PrivacySettingsSerializer,
 )
 from .permissions import IsCustomer, IsStore, IsAdmin
-from .otp import verify_otp
+from .otp import verify_otp, create_and_send_otp
 
 
 # SECURITY & PRIVACY VIEWS
+
+class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user = User.objects.filter(email=email).first()
+        if not user:
+            # Return success even if not found to prevent email enumeration
+            return Response({"message": "If the email is registered, an OTP will be sent."}, status=status.HTTP_200_OK)
+            
+        create_and_send_otp(email)
+        return Response({"message": "If the email is registered, an OTP will be sent."}, status=status.HTTP_200_OK)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        otp = request.data.get("otp")
+        new_password = request.data.get("new_password")
+        
+        if not all([email, otp, new_password]):
+            return Response({"error": "Email, OTP and new password are required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        success, message = verify_otp(email, otp)
+        
+        if not success:
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
+
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]

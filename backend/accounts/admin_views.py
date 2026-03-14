@@ -31,32 +31,45 @@ class AdminStatsView(APIView):
         total_donations = Donation.objects.count()
         collected_donations = Donation.objects.filter(donation_status='collected').count()
 
-        # Revenue History (Last 30 days)
+        # Revenue History (All Time)
         from django.utils import timezone
         from datetime import timedelta
         from django.db.models.functions import TruncDate
 
-        thirty_days_ago = timezone.now() - timedelta(days=30)
+        # Get all approved/rented/returned rentals
         revenue_history_qs = Rental.objects.filter(
-            status__in=['approved', 'rented', 'returned_confirmed'],
-            created_at__gte=thirty_days_ago
+            status__in=['approved', 'rented', 'returned_confirmed']
         ).annotate(date=TruncDate('created_at')).values('date').annotate(
             daily_total=Sum('total_price')
         ).order_by('date')
 
         revenue_history = []
-        # Fill gaps with zero revenue
-        current_date = thirty_days_ago.date()
-        end_date = timezone.now().date()
         
-        history_dict = {item['date']: float(item['daily_total']) for item in revenue_history_qs}
-        
-        while current_date <= end_date:
-            revenue_history.append({
-                "date": current_date.strftime('%Y-%m-%d'),
-                "revenue": history_dict.get(current_date, 0.0)
-            })
-            current_date += timedelta(days=1)
+        # If there are no rentals, just return empty list or a default flatline
+        if revenue_history_qs.exists():
+            first_rental_date = revenue_history_qs.first()['date']
+            end_date = timezone.now().date()
+            
+            history_dict = {item['date']: float(item['daily_total']) for item in revenue_history_qs}
+            
+            current_date = first_rental_date
+            while current_date <= end_date:
+                revenue_history.append({
+                    "date": current_date.strftime('%Y-%m-%d'),
+                    "revenue": history_dict.get(current_date, 0.0)
+                })
+                current_date += timedelta(days=1)
+        else:
+            # Fallback if no data exists at all
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            current_date = thirty_days_ago.date()
+            end_date = timezone.now().date()
+            while current_date <= end_date:
+                revenue_history.append({
+                    "date": current_date.strftime('%Y-%m-%d'),
+                    "revenue": 0.0
+                })
+                current_date += timedelta(days=1)
 
         # User distribution for Pie Chart
         user_distribution = [

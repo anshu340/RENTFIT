@@ -170,11 +170,33 @@ class DonationStatusUpdateView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         """Update donation status"""
-        partial = kwargs.pop('partial', True)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        new_status = request.data.get('donation_status')
+        
+        if not new_status:
+            return Response(
+                {"error": "donation_status is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate status transitions manually
+        current_status = instance.donation_status
+        valid_transitions = {
+            'Pending': ['Approved', 'Rejected'],
+            'Approved': ['Collected'],
+            'Rejected': [],
+            'Collected': []
+        }
+        
+        if new_status not in valid_transitions.get(current_status, []):
+             return Response(
+                {"error": f"Cannot change status from {current_status} to {new_status}."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Apply update
+        instance.donation_status = new_status
+        instance.save()
 
         Notification.objects.create(
             user=instance.customer,
