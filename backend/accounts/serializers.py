@@ -332,17 +332,18 @@ class ClothingCreateSerializer(serializers.ModelSerializer):
     - Sets clothing_status = Available by default
     """
     store_name = serializers.CharField(source='store.store_name', read_only=True)
+    donor_name = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Clothing
         fields = [
-            'id', 'store_name',
+            'id', 'store_name', 'donor_name',
             'item_name', 'category', 'event_type', 'gender', 'size', 'condition',
             'description', 'rental_price', 'security_deposit', 'stock_quantity',
-            'images', 'image_url', 'clothing_status', 'status', 'created_at', 'updated_at'
+            'images', 'image_url', 'availability', 'status', 'donation', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'clothing_status', 'status', 'created_at', 'updated_at', 'store_name']
+        read_only_fields = ['id', 'availability', 'status', 'created_at', 'updated_at', 'store_name', 'donation', 'donor_name']
 
     def validate_rental_price(self, value):
         """Validate rental price is positive"""
@@ -355,7 +356,7 @@ class ClothingCreateSerializer(serializers.ModelSerializer):
         store = self.context['request'].user
         clothing = Clothing.objects.create(
             store=store,
-            clothing_status=Clothing.Status.AVAILABLE,
+            availability=Clothing.ClothingAvailability.AVAILABLE,
             **validated_data
         )
         return clothing
@@ -367,6 +368,12 @@ class ClothingCreateSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.images.url)
             return obj.images.url
+        return None
+
+    def get_donor_name(self, obj):
+        """Return name of the donor if this item came from a donation"""
+        if obj.donation and obj.donation.customer:
+            return obj.donation.customer.name or "Anonymous"
         return None
 
 
@@ -384,15 +391,16 @@ class ClothingListSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     name = serializers.CharField(source='item_name', read_only=True)
     image_url = serializers.SerializerMethodField()
+    donor_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Clothing
         fields = [
             'id', 'item_name', 'name', 'category', 'event_type', 'gender', 'size', 'condition',
-            'rental_price', 'security_deposit', 'stock_quantity', 'clothing_status',
+            'rental_price', 'security_deposit', 'stock_quantity', 'availability',
             'store_user_id', 'store_name', 'store_city',
             'store_latitude', 'store_longitude',
-            'images', 'image', 'image_url', 'status', 'average_rating', 'review_count', 'created_at', 'updated_at'
+            'images', 'image', 'image_url', 'status', 'donor_name', 'average_rating', 'review_count', 'created_at', 'updated_at'
         ]
 
     def get_image(self, obj):
@@ -406,6 +414,12 @@ class ClothingListSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.images.url)
             return obj.images.url
+        return None
+
+    def get_donor_name(self, obj):
+        """Return name of the donor if this item came from a donation"""
+        if obj.donation and obj.donation.customer:
+            return obj.donation.customer.name or "Anonymous"
         return None
 
 
@@ -425,13 +439,14 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     name = serializers.CharField(source='item_name', read_only=True)
     image_url = serializers.SerializerMethodField()
+    donor_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Clothing
         fields = [
             'id', 'item_name', 'name', 'category', 'event_type', 'gender', 'size', 'condition',
             'description', 'rental_price', 'security_deposit', 'stock_quantity', 'images', 'image', 'image_url',
-            'clothing_status', 'status', 'store_user_id', 'store_name', 'store_email', 'store_phone',
+            'availability', 'status', 'donor_name', 'donation', 'store_user_id', 'store_name', 'store_email', 'store_phone',
             'store_address', 'store_city', 'store_latitude', 'store_longitude', 'average_rating', 'review_count',
             'created_at', 'updated_at'
         ]
@@ -449,6 +464,12 @@ class ClothingDetailSerializer(serializers.ModelSerializer):
             return obj.images.url
         return None
 
+    def get_donor_name(self, obj):
+        """Return name of the donor if this item came from a donation"""
+        if obj.donation and obj.donation.customer:
+            return obj.donation.customer.name or "Anonymous"
+        return None
+
 
 class ClothingUpdateSerializer(serializers.ModelSerializer):
     """
@@ -459,7 +480,7 @@ class ClothingUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'item_name', 'category', 'event_type', 'gender', 'size', 'condition',
             'description', 'rental_price', 'security_deposit', 'stock_quantity',
-            'images', 'clothing_status'
+            'images', 'availability'
         ]
 
     def validate_rental_price(self, value):
@@ -476,7 +497,7 @@ class ClothingStatusUpdateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Clothing
-        fields = ['clothing_status']
+        fields = ['availability']
 
 
 class AdminClothingApprovalSerializer(serializers.ModelSerializer):

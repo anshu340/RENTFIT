@@ -6,6 +6,7 @@ from .views import (
     DonationUpdateView,
     DonationDeleteView,
     StoreDonationListView,
+    StoreDonationDeleteView,
     DonationStatusUpdateView,
     DonationCollectView,
     StoreListForDonationView,
@@ -24,4 +25,5 @@ urlpatterns = [
     path('store/', StoreDonationListView.as_view(), name='store-donations'),
     path('store/<int:pk>/status/', DonationStatusUpdateView.as_view(), name='donation-status-update'),
     path('store/<int:pk>/collect/', DonationCollectView.as_view(), name='donation-collect'),
+    path('store/<int:pk>/delete/', StoreDonationDeleteView.as_view(), name='store-donation-delete'),
 ]

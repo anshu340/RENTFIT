@@ -1,0 +1,7 @@
+ID: 8, Name: Dress, Status: APPROVED
+ID: 7, Name: Women Sport wear, Status: approved
+ID: 6, Name: elegant lavender/lilac evening gown, Status: approved
+ID: 5, Name: Top, Status: approved
+ID: 4, Name: long white dress, Status: approved
+ID: 3, Name: long dress, Status: approved
+ID: 1, Name: Traditional, Status: approved

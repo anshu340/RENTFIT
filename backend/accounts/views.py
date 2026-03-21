@@ -9,6 +9,7 @@ from django.db.models import Sum
 from django.apps import apps
 
 from .models import User, Clothing, Wishlist
+from donations.models import Donation
 from .serializers import (
     CustomerRegisterSerializer, 
     CustomerReadSerializer,
@@ -719,8 +720,8 @@ class ClothingUpdateView(generics.UpdateAPIView):
             return Response({"error": "Internal Server Error", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def perform_update(self, serializer):
-        """Return only clothing items belonging to the authenticated store"""
-        serializer.save()
+        """Reset status to PENDING on update"""
+        serializer.save(status=Clothing.ClothingApproval.PENDING)
 
 
 class ClothingDeleteView(generics.DestroyAPIView):
@@ -769,7 +770,7 @@ class ClothingStatusUpdateView(generics.UpdateAPIView):
         # Return updated clothing details
         detail_serializer = ClothingDetailSerializer(instance, context={'request': request})
         return Response({
-            "message": f"Clothing status updated to {instance.clothing_status}",
+            "message": f"Clothing status updated to {instance.availability}",
             "data": detail_serializer.data
         }, status=status.HTTP_200_OK)
 
@@ -784,31 +785,87 @@ class AdminPendingClothingListView(generics.ListAPIView):
     serializer_class = ClothingListSerializer
 
     def get_queryset(self):
-        return Clothing.objects.filter(status='pending').order_by('-created_at')
+        return Clothing.objects.filter(status=Clothing.ClothingApproval.PENDING).order_by('-created_at')
 
 
-class AdminClothingApprovalView(generics.UpdateAPIView):
+class AdminClothingApprovalView(APIView):
     """
     Approve or Reject clothing item
-    PATCH /api/accounts/clothing/<id>/approve/
+    POST /api/accounts/admin/clothing/<int:pk>/<str:action>/
     Auth: Admin
     """
     permission_classes = [IsAuthenticated, IsAdmin]
-    serializer_class = AdminClothingApprovalSerializer
-    queryset = Clothing.objects.all()
 
-    def update(self, request, *args, **kwargs):
-        """Update clothing approval status"""
-        partial = kwargs.pop('partial', True)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+    def post(self, request, pk, action):
+        try:
+            clothing = Clothing.objects.get(pk=pk)
+        except Clothing.DoesNotExist:
+            return Response({"error": "Clothing item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == "approve":
+            clothing.status = Clothing.ClothingApproval.APPROVED
+            message = f"Clothing item {clothing.item_name} approved successfully"
+        elif action == "reject":
+            clothing.status = Clothing.ClothingApproval.REJECTED
+            message = f"Clothing item {clothing.item_name} rejected"
+        else:
+            return Response({"error": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
+
+        clothing.save()
+        
+        return Response({
+            "message": message,
+            "status": clothing.status,
+            "data": ClothingDetailSerializer(clothing, context={'request': request}).data
+        }, status=status.HTTP_200_OK)
+
+
+class AddToBrowseView(APIView):
+    """
+    Convert Donation to Clothing Item
+    POST /api/accounts/clothing/add-to-browse/<donation_id>/
+    Auth: Store
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+
+    def post(self, request, donation_id):
+        try:
+            donation = Donation.objects.get(id=donation_id)
+        except Donation.DoesNotExist:
+            return Response({"error": "Donation not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ownership validation
+        if donation.store != request.user:
+            return Response({"error": "You are not authorized to convert this donation"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Status validation (only collected donations can be added to browse)
+        if donation.donation_status != Donation.DonationStatus.COLLECTED:
+            return Response({"error": "Only collected donations can be added to browse"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Duplicate prevention
+        if Clothing.objects.filter(donation=donation).exists():
+            return Response({"error": "This donation has already been added to browse"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create Clothing item
+        clothing = Clothing.objects.create(
+            store=request.user,
+            item_name=donation.item_name,
+            category=donation.category,
+            gender=donation.gender,
+            size=donation.size,
+            condition=donation.condition,
+            description=donation.description,
+            images=donation.images,
+            status=Clothing.ClothingApproval.PENDING,
+            donation=donation,
+            rental_price=0.00,
+            security_deposit=0.00
+        )
 
         return Response({
-            "message": f"Clothing item {instance.item_name} is now {instance.status}",
-            "data": ClothingDetailSerializer(instance).data
-        }, status=status.HTTP_200_OK)
+            "message": "Item sent for admin approval",
+            "clothing_id": clothing.id
+        }, status=status.HTTP_201_CREATED)
 
 # CUSTOMER CLOTHING VIEWS
 
@@ -824,7 +881,7 @@ class AllClothingListView(generics.ListAPIView):
 
     def get_queryset(self):
         """Return all available clothing items"""
-        queryset = Clothing.objects.filter(status='approved')
+        queryset = Clothing.objects.filter(status=Clothing.ClothingApproval.APPROVED)
         
         # Optional filters
         category = self.request.query_params.get('category', None)

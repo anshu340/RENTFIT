@@ -212,6 +212,28 @@ class DonationStatusUpdateView(generics.UpdateAPIView):
         }, status=status.HTTP_200_OK)
 
 
+class StoreDonationDeleteView(generics.DestroyAPIView):
+    """
+    Delete Donation (Store)
+    DELETE /api/donations/store/<id>/delete/
+    Auth: Store
+    """
+    permission_classes = [IsAuthenticated, IsStore]
+
+    def get_queryset(self):
+        """Return only donations belonging to the authenticated store"""
+        return Donation.objects.filter(store=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete donation and return success message"""
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Donation record removed successfully"},
+            status=status.HTTP_200_OK
+        )
+
+
 class DonationCollectView(APIView):
     """
     Mark Donation as Collected

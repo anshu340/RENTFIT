@@ -31,6 +31,7 @@ from .views import (
     DeleteAccountView,
     ForgotPasswordView,
     ResetPasswordView,
+    AddToBrowseView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from .admin_views import (
@@ -49,7 +50,7 @@ urlpatterns = [
     path("admin/users/<int:pk>/deactivate/", AdminUserDeactivateView.as_view(), name="admin-user-deactivate"),
     path("admin/activity/", AdminGlobalActivityView.as_view(), name="admin-activity"),
     path("admin/clothing/pending/", AdminPendingClothingListView.as_view(), name="admin-clothing-pending"),
-    path("admin/clothing/<int:pk>/approve/", AdminClothingApprovalView.as_view(), name="admin-clothing-approve"),
+    path("admin/clothing/<int:pk>/<str:action>/", AdminClothingApprovalView.as_view(), name="admin-clothing-approval"),
     # Authentication Endpoints
     path("register/customer/", CustomerRegisterView.as_view(), name="register-customer"),
     path("register/store/", StoreRegisterView.as_view(), name="register-store"),
@@ -86,6 +87,7 @@ urlpatterns = [
     path("clothing/<int:pk>/update/", ClothingUpdateView.as_view(), name="clothing-update"),
     path("clothing/<int:pk>/delete/", ClothingDeleteView.as_view(), name="clothing-delete"),
     path("clothing/<int:pk>/status/", ClothingStatusUpdateView.as_view(), name="clothing-status-update"),
+    path("clothing/add-to-browse/<int:donation_id>/", AddToBrowseView.as_view(), name="add-to-browse"),
     
     # CLOTHING - CUSTOMER
     path("clothing/all/", AllClothingListView.as_view(), name="all-clothing"),

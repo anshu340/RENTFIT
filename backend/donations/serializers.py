@@ -65,6 +65,7 @@ class DonationListSerializer(serializers.ModelSerializer):
     """
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     customer_name = serializers.CharField(source='customer.name', read_only=True)
+    is_converted = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -72,8 +73,12 @@ class DonationListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'donation_status', 'store_name', 'customer_name',
-            'images', 'image_url', 'created_at', 'updated_at'
+            'images', 'image_url', 'is_converted', 'created_at', 'updated_at'
         ]
+
+    def get_is_converted(self, obj):
+        """Check if donation has already been added to browse"""
+        return obj.converted_clothing.exists()
 
     def get_image_url(self, obj):
         """Return absolute URL for donation image"""
@@ -94,6 +99,7 @@ class DonationDetailSerializer(serializers.ModelSerializer):
     store_phone = serializers.CharField(source='store.phone', read_only=True)
     customer_name = serializers.CharField(source='customer.name', read_only=True)
     customer_email = serializers.EmailField(source='customer.email', read_only=True)
+    is_converted = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -101,10 +107,14 @@ class DonationDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'item_name', 'category', 'gender', 'size', 'condition',
             'description', 'images', 'image_url',
-            'donation_status', 'store_name', 'store_email', 'store_phone',
+            'donation_status', 'is_converted', 'store_name', 'store_email', 'store_phone',
             'customer_name', 'customer_email',
             'created_at', 'updated_at'
         ]
+
+    def get_is_converted(self, obj):
+        """Check if donation has already been added to browse"""
+        return obj.converted_clothing.exists()
 
     def get_image_url(self, obj):
         """Return absolute URL for donation image"""

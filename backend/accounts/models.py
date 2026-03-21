@@ -116,10 +116,10 @@ class Clothing(models.Model):
         GOOD = "Good", "Good"
         USED = "Used", "Used"
 
-    class Status(models.TextChoices):
-        AVAILABLE = "Available", "Available"
-        RENTED = "Rented", "Rented"
-        UNAVAILABLE = "Unavailable", "Unavailable"
+    class ClothingAvailability(models.TextChoices):
+        AVAILABLE = 'AVAILABLE', 'Available'
+        RENTED = 'RENTED', 'Rented'
+        UNAVAILABLE = 'UNAVAILABLE', 'Unavailable'
 
     # Relationships
     store = models.ForeignKey(
@@ -150,16 +150,31 @@ class Clothing(models.Model):
     images = models.ImageField(upload_to='clothing_images/', blank=True, null=True)
     
     # Status tracking
-    clothing_status = models.CharField(
+    availability = models.CharField(
         max_length=20,
-        choices=Status.choices,
-        default=Status.AVAILABLE
+        choices=ClothingAvailability.choices,
+        default=ClothingAvailability.AVAILABLE
     )
 
+    class ClothingApproval(models.TextChoices):
+        PENDING = 'PENDING_APPROVAL', 'Pending Approval'
+        APPROVED = 'APPROVED', 'Approved'
+        REJECTED = 'REJECTED', 'Rejected'
+
+    # Status tracking (Internal/Approval)
     status = models.CharField(
-        max_length=10,
-        choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
-        default='pending'
+        max_length=20,
+        choices=ClothingApproval.choices,
+        default=ClothingApproval.PENDING
+    )
+
+    # Link to donation
+    donation = models.ForeignKey(
+        'donations.Donation',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='converted_clothing'
     )
 
     # Timestamps
@@ -167,12 +182,12 @@ class Clothing(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # Automatically update status based on stock
+        # Automatically update availability based on stock
         if self.stock_quantity is not None and self.stock_quantity > 0:
-            if self.clothing_status == 'Unavailable':
-                self.clothing_status = 'Available'
+            if self.availability == self.ClothingAvailability.UNAVAILABLE:
+                self.availability = self.ClothingAvailability.AVAILABLE
         else:
-            self.clothing_status = 'Unavailable'
+            self.availability = self.ClothingAvailability.UNAVAILABLE
         super().save(*args, **kwargs)
 
     class Meta:
@@ -181,7 +196,7 @@ class Clothing(models.Model):
         verbose_name_plural = 'Clothing Items'
 
     def __str__(self):
-        return f"{self.item_name} - {self.store.store_name} ({self.clothing_status})"
+        return f"{self.item_name} - {self.store.store_name} ({self.availability})"
 
     @property
     def average_rating(self):
