@@ -28,7 +28,7 @@ const AddClothingItem = () => {
     security_deposit: '',
     stock_quantity: '1',
     description: '',
-    clothing_status: 'Available'
+    availability: 'AVAILABLE'
   });
 
   const [imageFile, setImageFile] = useState(null);
@@ -61,7 +61,7 @@ const AddClothingItem = () => {
           security_deposit: item.security_deposit || '',
           stock_quantity: item.stock_quantity || '1',
           description: item.description || '',
-          clothing_status: item.clothing_status || 'Available'
+          availability: item.availability || 'AVAILABLE'
         });
 
         if (item.images) {
@@ -235,7 +235,7 @@ const AddClothingItem = () => {
             {/* Success Message */}
             {success && (
               <div className="p-4 bg-green-50 border border-green-100 rounded-2xl text-green-700 font-medium animate-pulse">
-                {isEditMode ? 'Item updated successfully!' : 'Your item has been submitted and is pending admin approval.'}
+                {isEditMode ? 'Item updated and is pending admin re-approval.' : 'Your item has been submitted and is pending admin approval.'}
               </div>
             )}
 

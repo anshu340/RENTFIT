@@ -29,12 +29,14 @@ const AdminClothingApproval = () => {
         }
     };
 
-    const handleApproval = async (id, status) => {
+    const handleApproval = async (id, statusAction) => {
         try {
-            await axiosInstance.patch(`accounts/admin/clothing/${id}/approve/`, { status });
+            const apiStatus = statusAction === 'approved' ? 'APPROVED' : 'REJECTED';
+            const endpoint = statusAction === 'approved' ? 'approve' : 'reject';
+            await axiosInstance.post(`accounts/admin/clothing/${id}/${endpoint}/`);
             setMessage({
                 type: 'success',
-                text: `Item ${status === 'approved' ? 'approved' : 'rejected'} successfully.`
+                text: `Item ${statusAction === 'approved' ? 'approved' : 'rejected'} successfully.`
             });
             fetchPendingClothes();
             if (showDetailModal) setShowDetailModal(false);
@@ -102,7 +104,7 @@ const AdminClothingApproval = () => {
                                             </div>
                                             <div className="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2">
                                                 <FaClock className="text-xs" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">Pending</span>
+                                                <span className="text-[10px] font-black uppercase tracking-widest">{item.status === 'PENDING_APPROVAL' ? 'Pending' : item.status}</span>
                                             </div>
                                         </div>
 

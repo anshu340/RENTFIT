@@ -278,9 +278,9 @@ const BrowseClothes = () => {
 
   const getStatusBadge = (status) => {
     const statusColors = {
-      Available: 'bg-green-500',
-      Rented: 'bg-blue-500',
-      Unavailable: 'bg-red-500'
+      AVAILABLE: 'bg-green-500',
+      RENTED: 'bg-blue-500',
+      UNAVAILABLE: 'bg-red-500'
     };
     return statusColors[status] || 'bg-gray-500';
   };
@@ -500,8 +500,8 @@ const BrowseClothes = () => {
                               />
                             )}
                             <div className="absolute top-4 left-4">
-                              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${getStatusBadge(item.clothing_status)}`}>
-                                {item.clothing_status}
+                              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${getStatusBadge(item.availability)}`}>
+                                {item.availability}
                               </span>
                             </div>
                             <button
@@ -519,12 +519,26 @@ const BrowseClothes = () => {
                           <div className="p-6 flex flex-col justify-between flex-1">
                             <div>
                               <div className="flex justify-between items-start mb-2">
-                                <h3
-                                  className="text-xl font-bold text-gray-900 leading-tight cursor-pointer hover:text-purple-600 transition-colors"
-                                  onClick={() => navigate(`/clothing/${item.id}`)}
-                                >
-                                  {item.item_name}
-                                </h3>
+                                <div className="flex-1 min-w-0">
+                                  <h3
+                                    className="text-xl font-bold text-gray-900 leading-tight cursor-pointer hover:text-purple-600 transition-colors truncate"
+                                    onClick={() => navigate(`/clothing/${item.id}`)}
+                                    title={item.item_name}
+                                  >
+                                    {item.item_name}
+                                  </h3>
+                                  <div className="mt-1 space-y-1">
+                                    <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1">
+                                      <FaStore size={10} /> {item.store_name}
+                                    </p>
+                                    {item.donor_name && (
+                                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                        <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
+                                        Donated by: {item.donor_name}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
                                 <div className="text-right">
                                   <p className="text-2xl font-black text-gray-900 leading-none">${item.rental_price}</p>
                                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">per day</p>
@@ -788,8 +802,8 @@ const BrowseClothes = () => {
                           />
                         )}
                         <div className="absolute top-4 left-4">
-                          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${getStatusBadge(item.clothing_status)}`}>
-                            {item.clothing_status}
+                          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${getStatusBadge(item.availability)}`}>
+                            {item.availability}
                           </span>
                         </div>
                         <button

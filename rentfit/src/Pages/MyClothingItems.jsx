@@ -70,7 +70,7 @@ const MyClothingItems = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await axiosInstance.patch(`accounts/clothing/${id}/status/`, { clothing_status: newStatus });
+      await axiosInstance.patch(`accounts/clothing/${id}/status/`, { availability: newStatus });
       setMessage({ type: "success", text: "Status updated successfully" });
       fetchClothingItems(); // Refresh list
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
@@ -84,14 +84,14 @@ const MyClothingItems = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      Available: { color: "bg-green-100 text-green-800", icon: FaCheckCircle },
-      Rented: { color: "bg-blue-100 text-blue-800", icon: FaClock },
-      Unavailable: { color: "bg-red-100 text-red-800", icon: FaTimesCircle },
+      AVAILABLE: { color: "bg-green-100 text-green-800", icon: FaCheckCircle },
+      RENTED: { color: "bg-blue-100 text-blue-800", icon: FaClock },
+      UNAVAILABLE: { color: "bg-red-100 text-red-800", icon: FaTimesCircle },
     };
 
-    const config = statusConfig[status] || statusConfig.Available;
+    const config = statusConfig[status] || statusConfig.AVAILABLE;
     const Icon = config.icon;
-    const label = status === 'Unavailable' ? 'Stock Over' : status;
+    const label = status === 'UNAVAILABLE' ? 'Stock Over' : status.charAt(0) + status.slice(1).toLowerCase();
 
     return (
       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
@@ -103,12 +103,12 @@ const MyClothingItems = () => {
 
   const getApprovalBadge = (status) => {
     const statusConfig = {
-      pending: { color: "bg-yellow-100 text-yellow-800", icon: FaClock, label: "Pending" },
-      approved: { color: "bg-green-100 text-green-800", icon: FaCheckCircle, label: "Approved" },
-      rejected: { color: "bg-red-100 text-red-800", icon: FaTimesCircle, label: "Rejected" },
+      PENDING_APPROVAL: { color: "bg-yellow-100 text-yellow-800", icon: FaClock, label: "Pending" },
+      APPROVED: { color: "bg-green-100 text-green-800", icon: FaCheckCircle, label: "Approved" },
+      REJECTED: { color: "bg-red-100 text-red-800", icon: FaTimesCircle, label: "Rejected" },
     };
 
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status] || statusConfig.PENDING_APPROVAL;
     const Icon = config.icon;
 
     return (
@@ -212,7 +212,7 @@ const MyClothingItems = () => {
                           {item.item_name}
                         </h3>
                         <div className="flex flex-col items-end gap-1">
-                          {getStatusBadge(item.clothing_status)}
+                          {getStatusBadge(item.availability)}
                           {getApprovalBadge(item.status)}
                         </div>
                       </div>
@@ -258,21 +258,21 @@ const MyClothingItems = () => {
                       </div>
 
                       {/* Status Update Buttons */}
-                      {item.clothing_status !== 'Rented' && (
+                      {item.availability !== 'RENTED' && (
                         <div className="mt-3 pt-3 border-t">
                           <p className="text-xs text-gray-600 mb-2">Change Status:</p>
                           <div className="flex gap-2">
-                            {item.clothing_status !== 'Available' && (
+                            {item.availability !== 'AVAILABLE' && (
                               <button
-                                onClick={() => handleStatusUpdate(item.id, 'Available')}
+                                onClick={() => handleStatusUpdate(item.id, 'AVAILABLE')}
                                 className="flex-1 text-xs bg-green-50 text-green-600 px-2 py-1 rounded hover:bg-green-100 transition"
                               >
                                 Available
                               </button>
                             )}
-                            {item.clothing_status !== 'Unavailable' && (
+                            {item.availability !== 'UNAVAILABLE' && (
                               <button
-                                onClick={() => handleStatusUpdate(item.id, 'Unavailable')}
+                                onClick={() => handleStatusUpdate(item.id, 'UNAVAILABLE')}
                                 className="flex-1 text-xs bg-red-50 text-red-600 px-2 py-1 rounded hover:bg-red-100 transition"
                               >
                                 Unavailable
@@ -319,7 +319,7 @@ const MyClothingItems = () => {
                     {selectedItem.item_name}
                   </h3>
                   <div className="flex flex-wrap items-center gap-3">
-                    {getStatusBadge(selectedItem.clothing_status)}
+                    {getStatusBadge(selectedItem.availability)}
                     {getApprovalBadge(selectedItem.status)}
                     <span className="text-lg font-bold text-purple-600">
                       ₹{selectedItem.rental_price}/day

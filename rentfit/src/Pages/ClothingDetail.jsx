@@ -251,9 +251,25 @@ const ClothingDetail = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-gray-800">Store Partner</h4>
-                                        <p className="text-gray-600">{clothing.store_name || 'RentFit Certified Store'}</p>
+                                        <p className="text-gray-600 font-medium">{clothing.store_name || 'RentFit Certified Store'}</p>
                                     </div>
                                 </div>
+                                {clothing.donor_name && (
+                                    <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border-l-4 border-green-500 bg-green-50/30">
+                                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                                            <FaCheckCircle />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-green-800 flex items-center gap-2">
+                                                Donor Contribution
+                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                            </h4>
+                                            <p className="text-green-700 text-sm mt-1 leading-tight">
+                                                This item was generously donated by <span className="font-black tracking-tight">{clothing.donor_name}</span> to support sustainable fashion.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">
                                     <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600">
                                         <FaMapMarkerAlt />

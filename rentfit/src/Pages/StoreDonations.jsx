@@ -12,6 +12,7 @@ const StoreDonations = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState("All");
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     fetchDonations();
@@ -105,6 +106,50 @@ const StoreDonations = () => {
       const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to mark as collected";
       setMessage({ type: "error", text: errorMessage });
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    }
+  };
+
+  const handleAddToBrowse = async (id) => {
+    try {
+      setIsProcessing(true);
+      const response = await axiosInstance.post(`accounts/clothing/add-to-browse/${id}/`);
+      setMessage({ type: "success", text: "Item sent for admin approval!" });
+      fetchDonations(); // Refresh list
+      if (showDetailModal && selectedDonation?.id === id) {
+        setShowDetailModal(false);
+      }
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } catch (error) {
+      console.error("Error adding to browse:", error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to add to browse";
+      setMessage({ type: "error", text: errorMessage });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRemove = async (id) => {
+    if (!window.confirm("Are you sure you want to remove this donation record? This will not affect the converted clothing item.")) {
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await axiosInstance.delete(`donations/store/${id}/delete/`);
+      setMessage({ type: "success", text: "Donation record removed successfully." });
+      fetchDonations(); // Refresh list
+      if (showDetailModal && selectedDonation?.id === id) {
+        setShowDetailModal(false);
+      }
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } catch (error) {
+      console.error("Error removing donation:", error);
+      const errorMessage = error.response?.data?.message || "Failed to remove donation record";
+      setMessage({ type: "error", text: errorMessage });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -294,6 +339,30 @@ const StoreDonations = () => {
                               <FaBoxOpen />
                             </button>
                           )}
+                          {donation.donation_status === "Collected" && (
+                            <>
+                              {!donation.is_converted ? (
+                                <button
+                                  onClick={() => handleAddToBrowse(donation.id)}
+                                  disabled={isProcessing}
+                                  className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-2 rounded-lg hover:bg-indigo-100 transition text-sm font-medium disabled:opacity-50"
+                                  title="Add to Browse"
+                                >
+                                  <FaBox />
+                                  {isProcessing ? "Processing..." : "Add to Browse"}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleRemove(donation.id)}
+                                  className="flex items-center justify-center gap-2 bg-gray-50 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+                                  title="Remove"
+                                >
+                                  <FaTimesCircle />
+                                  Remove
+                                </button>
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -435,6 +504,32 @@ const StoreDonations = () => {
                       <FaBoxOpen />
                       Mark as Collected
                     </button>
+                  </div>
+                )}
+                {selectedDonation.donation_status === "Collected" && (
+                  <div className="border-t pt-4 flex gap-3">
+                    {!selectedDonation.is_converted ? (
+                      <button
+                        onClick={() => {
+                          handleAddToBrowse(selectedDonation.id);
+                        }}
+                        disabled={isProcessing}
+                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium disabled:opacity-50"
+                      >
+                        <FaBox />
+                        {isProcessing ? "Processing..." : "Add to Browse"}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handleRemove(selectedDonation.id);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition font-medium"
+                      >
+                        <FaTimesCircle />
+                        Remove
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

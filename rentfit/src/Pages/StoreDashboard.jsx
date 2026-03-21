@@ -188,10 +188,10 @@ const StoreDashboard = () => {
       }
 
       const available = items.filter(item =>
-        item.clothing_status?.toLowerCase() === 'available'
+        item.availability === 'AVAILABLE'
       ).length;
       const unavailable = items.filter(item =>
-        item.clothing_status?.toLowerCase() === 'unavailable'
+        item.availability === 'UNAVAILABLE'
       ).length;
 
       setStats(prev => ({
@@ -206,7 +206,7 @@ const StoreDashboard = () => {
         .map(item => ({
           icon: FaTshirt,
           color: 'bg-purple-100 text-purple-600',
-          title: `${item.item_name || 'Item'} - ${item.clothing_status || 'Listed'}`,
+          title: `${item.item_name || 'Item'} - ${item.availability || 'Listed'}`,
           desc: `${item.category || 'Category'} - Size ${item.size || 'N/A'}`,
           time: formatTime(item.created_at),
           type: 'rental'

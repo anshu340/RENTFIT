@@ -137,14 +137,14 @@ const Wishlist = () => {
           alt={item.item_name}
           className={`w-full object-cover ${compact ? 'h-48' : 'h-64'}`}
         />
-        {item.clothing_status === 'Available' && (
+        {item.availability === 'AVAILABLE' && (
           <span className="absolute top-3 left-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium">
             Available
           </span>
         )}
-        {item.clothing_status !== 'Available' && (
+        {item.availability !== 'AVAILABLE' && (
           <span className="absolute top-3 left-3 bg-yellow-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-            {item.clothing_status}
+            {item.availability}
           </span>
         )}
         <button
@@ -182,9 +182,9 @@ const Wishlist = () => {
           <button
             onClick={() => createRental(item.id)}
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={item.clothing_status !== 'Available'}
+            disabled={item.availability !== 'AVAILABLE'}
           >
-            {item.clothing_status === 'Available' ? 'Rent Now' : 'Unavailable'}
+            {item.availability === 'AVAILABLE' ? 'Rent Now' : 'Unavailable'}
           </button>
         </div>
       </div>
