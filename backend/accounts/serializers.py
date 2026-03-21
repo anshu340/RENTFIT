@@ -323,6 +323,44 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.store_logo.url
         return None
 
+
+class AdminUserDetailSerializer(UserSerializer):
+    """
+    Serializer for detailed user information, including activity stats.
+    Used by admins in the User Management dashboard.
+    """
+    total_rentals = serializers.SerializerMethodField()
+    total_donations = serializers.SerializerMethodField()
+    total_listings = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'name', 'phone', 'role', 
+            'store_name', 'store_address', 'city', 'store_description', 
+            'store_logo', 'store_logo_url', 'latitude', 'longitude',
+            'open_time', 'close_time',
+            'profile_visibility', 'location_sharing', 'recommendations_enabled',
+            'profile_image', 'profile_image_url',
+            'is_verified', 'date_joined',
+            'total_rentals', 'total_donations', 'total_listings',
+        ]
+
+    def get_total_rentals(self, obj):
+        if obj.role == 'Store':
+            return obj.store_rentals.count()
+        return obj.rentals.count()
+
+    def get_total_donations(self, obj):
+        if obj.role == 'Store':
+            return obj.store_donations.count()
+        return obj.donations.count()
+
+    def get_total_listings(self, obj):
+        if obj.role == 'Store':
+            return obj.clothing_items.count()
+        return 0
+
 # CLOTHING SERIALIZERS
 
 class ClothingCreateSerializer(serializers.ModelSerializer):

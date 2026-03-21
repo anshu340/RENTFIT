@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from django.db.models import Sum, Count
 from django.apps import apps
 from .models import User
-from .serializers import UserSerializer, StoreReadSerializer, CustomerReadSerializer
+from .serializers import UserSerializer, StoreReadSerializer, CustomerReadSerializer, AdminUserDetailSerializer
 from .permissions import IsAdmin
 
 class AdminStatsView(APIView):
@@ -97,6 +97,22 @@ class AdminUserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
     serializer_class = UserSerializer
     queryset = User.objects.all().order_by('-date_joined')
+
+
+class AdminUserDetailView(generics.RetrieveAPIView):
+    """
+    GET /api/accounts/admin/users/<id>/
+    Retrieves detailed information for a specific user, including activity stats.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    serializer_class = AdminUserDetailSerializer
+    
+    def get_queryset(self):
+        return User.objects.all().prefetch_related(
+            'rentals', 'store_rentals',
+            'donations', 'store_donations',
+            'clothing_items'
+        )
 
 class AdminUserDeactivateView(APIView):
     """
