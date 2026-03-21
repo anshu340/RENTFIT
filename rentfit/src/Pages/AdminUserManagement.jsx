@@ -11,7 +11,13 @@ import {
     FaFilter,
     FaStore,
     FaUserGraduate,
-    FaUserShield
+    FaUserShield,
+    FaTimes,
+    FaCalendarAlt,
+    FaPhone,
+    FaMapMarkerAlt,
+    FaEnvelope,
+    FaInfoCircle
 } from 'react-icons/fa';
 
 const AdminUserManagement = () => {
@@ -20,6 +26,9 @@ const AdminUserManagement = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('All');
     const [alert, setAlert] = useState({ message: '', type: '' });
+    const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loadingDetail, setLoadingDetail] = useState(false);
 
     const fetchUsers = async () => {
         try {
@@ -31,6 +40,20 @@ const AdminUserManagement = () => {
             setAlert({ message: "Failed to fetch users list.", type: "error" });
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchUserDetail = async (userId) => {
+        try {
+            setLoadingDetail(true);
+            const response = await axiosInstance.get(`accounts/admin/users/${userId}/`);
+            setSelectedUserDetail(response.data);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching user detail:", error);
+            setAlert({ message: "Failed to fetch user details.", type: "error" });
+        } finally {
+            setLoadingDetail(false);
         }
     };
 
@@ -124,7 +147,11 @@ const AdminUserManagement = () => {
                                         <tr><td colSpan="4" className="text-center py-20 text-slate-400 font-bold">No users found matching your search.</td></tr>
                                     ) : (
                                         filteredUsers.map(user => (
-                                            <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <tr 
+                                                key={user.id} 
+                                                className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                                                onClick={() => fetchUserDetail(user.id)}
+                                            >
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400 border border-slate-200 uppercase overflow-hidden">
@@ -179,6 +206,139 @@ const AdminUserManagement = () => {
             </div>
             <Footer />
             <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ message: '', type: '' })} />
+
+            {/* User Detail Modal */}
+            {isModalOpen && selectedUserDetail && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+                        {/* Modal Header */}
+                        <div className="relative h-32 bg-indigo-600">
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                className="absolute right-6 top-6 w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-md"
+                            >
+                                <FaTimes />
+                            </button>
+                            <div className="absolute -bottom-12 left-10">
+                                <div className="w-28 h-28 bg-white p-2 rounded-3xl shadow-xl">
+                                    <div className="w-full h-full bg-slate-100 rounded-2xl flex items-center justify-center font-black text-3xl text-slate-400 border border-slate-100 uppercase overflow-hidden">
+                                        {selectedUserDetail.profile_image_url || selectedUserDetail.store_logo_url ? (
+                                            <img
+                                                src={selectedUserDetail.profile_image_url || selectedUserDetail.store_logo_url}
+                                                alt={selectedUserDetail.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            selectedUserDetail.name.charAt(0)
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="pt-16 pb-10 px-10 space-y-8">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h2 className="text-3xl font-black text-slate-900">{selectedUserDetail.name}</h2>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        {getRoleBadge(selectedUserDetail.role)}
+                                        {selectedUserDetail.is_verified && (
+                                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-black uppercase">Verified</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Joined On</div>
+                                    <div className="flex items-center gap-2 text-slate-600 font-bold justify-end">
+                                        <FaCalendarAlt className="text-indigo-500" />
+                                        {new Date(selectedUserDetail.date_joined).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Left Column: Contact & Location */}
+                                <div className="space-y-6">
+                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
+                                        Contact Details
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-4 group">
+                                            <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                                                <FaEnvelope />
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</div>
+                                                <div className="text-slate-700 font-bold">{selectedUserDetail.email}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4 group">
+                                            <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                                                <FaPhone />
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone Number</div>
+                                                <div className="text-slate-700 font-bold">{selectedUserDetail.phone || 'Not Provided'}</div>
+                                            </div>
+                                        </div>
+                                        {(selectedUserDetail.store_address || selectedUserDetail.city) && (
+                                            <div className="flex items-center gap-4 group">
+                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                                                    <FaMapMarkerAlt />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</div>
+                                                    <div className="text-slate-700 font-bold">
+                                                        {selectedUserDetail.store_address || selectedUserDetail.city}
+                                                        {selectedUserDetail.city && selectedUserDetail.store_address ? `, ${selectedUserDetail.city}` : ''}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right Column: Stats & Meta */}
+                                <div className="space-y-6">
+                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
+                                        Platform Activity
+                                    </h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100 hover:border-indigo-200 transition-colors">
+                                            <div className="text-2xl font-black text-slate-900">{selectedUserDetail.total_rentals}</div>
+                                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Rentals</div>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100 hover:border-indigo-200 transition-colors">
+                                            <div className="text-2xl font-black text-slate-900">{selectedUserDetail.total_donations}</div>
+                                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Donations</div>
+                                        </div>
+                                        {selectedUserDetail.role === 'Store' && (
+                                            <div className="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100 hover:border-indigo-200 transition-colors">
+                                                <div className="text-2xl font-black text-slate-900">{selectedUserDetail.total_listings}</div>
+                                                <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Listings</div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {selectedUserDetail.store_description && (
+                                        <div className="p-5 bg-indigo-50/50 rounded-3xl border border-indigo-100/50">
+                                            <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                <FaInfoCircle /> Store Description
+                                            </div>
+                                            <p className="text-slate-600 text-sm font-medium leading-relaxed italic">
+                                                "{selectedUserDetail.store_description}"
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
