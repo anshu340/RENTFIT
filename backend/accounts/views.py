@@ -869,7 +869,7 @@ class AddToBrowseView(APIView):
             images=donation.images,
             status=Clothing.ClothingApproval.PENDING,
             donation=donation,
-            rental_price=0.00,
+            rental_price=50.00,
             security_deposit=0.00
         )
 
