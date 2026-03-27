@@ -598,6 +598,17 @@ class StoreProfileView(APIView):
             "details": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
 
+class PublicStoreView(generics.RetrieveAPIView):
+    """
+    Get Public Store Profile
+    GET /api/accounts/stores/<int:pk>/
+    Auth: None
+    """
+    queryset = User.objects.filter(role='Store', is_active=True)
+    serializer_class = StoreReadSerializer
+    permission_classes = [AllowAny]
+
+
     def delete(self, request):
         """
         Soft delete store account (deactivate)
@@ -889,6 +900,7 @@ class AllClothingListView(generics.ListAPIView):
         min_price = self.request.query_params.get('min_price', None)
         max_price = self.request.query_params.get('max_price', None)
         city = self.request.query_params.get('city', None)
+        store_id = self.request.query_params.get('store_id', None)
         
         if category:
             queryset = queryset.filter(category=category)
@@ -900,6 +912,8 @@ class AllClothingListView(generics.ListAPIView):
             queryset = queryset.filter(rental_price__lte=max_price)
         if city:
             queryset = queryset.filter(store__city=city)
+        if store_id:
+            queryset = queryset.filter(store_id=store_id)
         
         return queryset
 
@@ -1092,9 +1106,59 @@ class WishlistClearView(APIView):
 
     def delete(self, request):
         """Clear all wishlist items"""
-        count = Wishlist.objects.filter(customer=request.user).count()
         Wishlist.objects.filter(customer=request.user).delete()
-        
         return Response({
-            "message": f"Wishlist cleared successfully. {count} items removed."
+            "message": "Wishlist cleared successfully"
         }, status=status.HTTP_200_OK)
+
+
+class UniversalSearchView(APIView):
+    """
+    Universal Search for Clothes and Stores
+    GET /api/accounts/search/?q={query}
+    Auth: None (Public)
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        print(f"DEBUG: Universal Search Query: {query}")
+        
+        if not query:
+            return Response({
+                "clothes": [],
+                "stores": []
+            }, status=status.HTTP_200_OK)
+
+        # Search Clothes (Approved ones)
+        # Search by item_name or category
+        clothes = Clothing.objects.filter(
+            status=Clothing.ClothingApproval.APPROVED,
+            item_name__icontains=query
+        ) | Clothing.objects.filter(
+            status=Clothing.ClothingApproval.APPROVED,
+            category__icontains=query
+        )
+        clothes = clothes.distinct().select_related('store')[:10]
+
+        # Search Stores
+        # Search by store_name or city
+        stores = User.objects.filter(
+            role='Store',
+            store_name__icontains=query,
+            is_active=True
+        ) | User.objects.filter(
+            role='Store',
+            city__icontains=query,
+            is_active=True
+        )
+        stores = stores.distinct()[:10]
+
+        response_data = {
+            "clothes": ClothingListSerializer(clothes, many=True, context={'request': request}).data,
+            "stores": StoreReadSerializer(stores, many=True, context={'request': request}).data
+        }
+        
+        print(f"DEBUG: Found {len(response_data['clothes'])} clothes and {len(response_data['stores'])} stores")
+        
+        return Response(response_data, status=status.HTTP_200_OK)

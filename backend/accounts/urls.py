@@ -32,6 +32,8 @@ from .views import (
     ForgotPasswordView,
     ResetPasswordView,
     AddToBrowseView,
+    UniversalSearchView,
+    PublicStoreView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from .admin_views import (
@@ -64,6 +66,9 @@ urlpatterns = [
     
     # Location Endpoints
     path("stores/nearby/", NearbyStoresView.as_view(), name="nearby-stores"),
+    
+    # Public Store Profile Endpoint
+    path("stores/<int:pk>/", PublicStoreView.as_view(), name="public-store-detail"),
     
     # Legacy Endpoints
     path("profile/", ProfileView.as_view(), name="profile"),
@@ -101,4 +106,7 @@ urlpatterns = [
     path("wishlist/remove-by-clothing/<int:clothing_id>/", WishlistRemoveByClothingView.as_view(), name="wishlist-remove-by-clothing"),
     path("wishlist/check/<int:clothing_id>/", WishlistCheckView.as_view(), name="wishlist-check"),
     path("wishlist/clear/", WishlistClearView.as_view(), name="wishlist-clear"),
+    
+    # Universal Search Endpoint
+    path("search/", UniversalSearchView.as_view(), name="search"),
 ]

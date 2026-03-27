@@ -86,6 +86,8 @@ class StoreReadSerializer(serializers.ModelSerializer):
     store_logo_url = serializers.SerializerMethodField()
     open_time = serializers.TimeField(required=False, allow_null=True)
     close_time = serializers.TimeField(required=False, allow_null=True)
+    rating = serializers.SerializerMethodField()
+    reviews_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -94,9 +96,9 @@ class StoreReadSerializer(serializers.ModelSerializer):
             'store_address', 'city', 'store_description', 'store_logo',
             'store_logo_url', 'latitude', 'longitude', 'open_time', 'close_time',
             'profile_visibility', 'location_sharing', 'recommendations_enabled',
-            'is_verified', 'date_joined', 'role'
+            'is_verified', 'date_joined', 'role', 'rating', 'reviews_count'
         ]
-        read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role']
+        read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role', 'rating', 'reviews_count']
 
     def get_store_logo_url(self, obj):
         if obj.store_logo:
@@ -105,6 +107,23 @@ class StoreReadSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.store_logo.url)
             return obj.store_logo.url
         return None
+
+    def get_rating(self, obj):
+        try:
+            from django.db.models import Avg
+            from reviews.models import Review
+            # Calculate average rating of all reviews for this store's clothing
+            avg = Review.objects.filter(clothing__store=obj).aggregate(Avg('rating'))['rating__avg']
+            return round(avg, 1) if avg else 0.0
+        except Exception:
+            return 0.0
+            
+    def get_reviews_count(self, obj):
+        try:
+            from reviews.models import Review
+            return Review.objects.filter(clothing__store=obj).count()
+        except Exception:
+            return 0
 
 
 # Store Update Serializer
