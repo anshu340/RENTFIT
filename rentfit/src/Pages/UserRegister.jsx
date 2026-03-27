@@ -255,18 +255,39 @@ const UserRegister = () => {
                       />
                     </div>
 
-                    <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Gender</label>
-                      <select
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleChange}
-                        className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-xs uppercase tracking-widest appearance-none cursor-pointer"
-                      >
-                        <option value="">SELECT</option>
-                        <option value="Male">MALE</option>
-                        <option value="Female">FEMALE</option>
-                      </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="group">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Gender</label>
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleChange}
+                          className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-xs uppercase tracking-widest appearance-none cursor-pointer"
+                        >
+                          <option value="">SELECT</option>
+                          <option value="Male">MALE</option>
+                          <option value="Female">FEMALE</option>
+                          <option value="Other">OTHER</option>
+                        </select>
+                      </div>
+
+                      <div className="group">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Clothing Size</label>
+                        <select
+                          name="preferred_clothing_size"
+                          value={formData.preferred_clothing_size}
+                          onChange={handleChange}
+                          className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-xs uppercase tracking-widest appearance-none cursor-pointer"
+                        >
+                          <option value="">SELECT SIZE</option>
+                          <option value="XS">XS</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="XXL">XXL</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 

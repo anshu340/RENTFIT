@@ -16,11 +16,12 @@ axiosInstance.interceptors.request.use(
       'accounts/register/',
       'accounts/verify-otp/',
       'accounts/clothing/all/',
-      'accounts/token/refresh/'
+      'accounts/token/refresh/',
+      'accounts/search/'
     ];
     const isPublic = publicEndpoints.some(endpoint =>
       config.url === endpoint || config.url?.endsWith('/' + endpoint)
-    ) || (config.url?.match(/accounts\/clothing\/\d+\/?$/));
+    ) || (config.url?.match(/accounts\/clothing\/\d+\/?$/)) || (config.url?.match(/accounts\/stores\/\d+\/?$/));
 
     // For all other requests, attempt to add the token
     if (!isPublic) {

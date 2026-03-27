@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import Alert from "../Components/Alert";
 import RentalModal from "../Components/RentalModal";
-import { FaHeart, FaRegHeart, FaTh, FaList, FaStar, FaFilter, FaSearch, FaChevronDown, FaChevronRight } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaTh, FaList, FaStar, FaFilter, FaSearch, FaChevronDown, FaChevronRight, FaStore } from "react-icons/fa";
 
 const BrowseClothes = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [clothes, setClothes] = useState([]);
   const [filteredClothes, setFilteredClothes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,9 +47,17 @@ const BrowseClothes = () => {
   ];
 
   useEffect(() => {
+    // Check for search query in URL
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get('search');
+    
+    if (searchParam) {
+      setFilters(prev => ({ ...prev, searchQuery: searchParam }));
+    }
+
     fetchClothes();
     fetchWishlist();
-  }, []);
+  }, [location.search]);
 
   const fetchWishlist = async () => {
     try {

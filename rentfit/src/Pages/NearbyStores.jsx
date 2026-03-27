@@ -5,7 +5,7 @@ import Footer from "../Components/Footer";
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import MapView from "../Components/MapView";
 import { FaStore, FaMapMarkerAlt, FaStar, FaSearch, FaFilter, FaDirections, FaClock } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const isStoreOpen = (opening, closing, now = new Date()) => {
     if (!opening || !closing) return true; // Default to open if no hours set
@@ -36,6 +36,7 @@ const formatTime12h = (timeStr) => {
 
 const NearbyStores = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [stores, setStores] = useState([]);
     const [selectedStore, setSelectedStore] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -49,6 +50,14 @@ const NearbyStores = () => {
     };
 
     useEffect(() => {
+        // Check for search query in URL
+        const params = new URLSearchParams(location.search);
+        const searchParam = params.get('search');
+        
+        if (searchParam) {
+            setSearchQuery(searchParam);
+        }
+
         fetchNearbyStores();
 
         // Auto-refresh status every minute
@@ -57,7 +66,7 @@ const NearbyStores = () => {
         }, 60000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [location.search]);
 
     const fetchNearbyStores = async () => {
         try {

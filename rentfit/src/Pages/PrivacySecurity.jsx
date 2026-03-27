@@ -3,11 +3,13 @@ import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
+import StoreSidebar from '../Components/StoreSidebar';
 import { FaLock, FaUserShield, FaMapMarkerAlt, FaBell, FaSignOutAlt, FaTrashAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const PrivacySecurity = () => {
     const navigate = useNavigate();
+    const role = localStorage.getItem("role");
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [alert, setAlert] = useState({ message: "", type: "" });
@@ -34,7 +36,7 @@ const PrivacySecurity = () => {
     const fetchSettings = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.get("user/profile/");
+            const response = await axiosInstance.get("accounts/profile/");
             const data = response.data?.data || response.data;
             setPrivacySettings({
                 profile_visibility: data.profile_visibility ?? true,
@@ -57,7 +59,7 @@ const PrivacySecurity = () => {
 
         setIsSaving(true);
         try {
-            await axiosInstance.post("user/change-password/", passwordData);
+            await axiosInstance.post("accounts/user/change-password/", passwordData);
             setAlert({ message: "Password updated successfully!", type: "success" });
             setPasswordData({ old_password: "", new_password: "", confirm_password: "" });
         } catch (error) {
@@ -73,7 +75,7 @@ const PrivacySecurity = () => {
         setPrivacySettings(updatedSettings);
 
         try {
-            await axiosInstance.put("user/privacy/", updatedSettings);
+            await axiosInstance.put("accounts/user/privacy/", updatedSettings);
             // Subtle feedback could be added here
         } catch (error) {
             console.error("Error updating privacy:", error);
@@ -85,7 +87,7 @@ const PrivacySecurity = () => {
 
     const handleDeleteAccount = async () => {
         try {
-            await axiosInstance.delete("user/delete-account/");
+            await axiosInstance.delete("accounts/user/delete-account/");
             localStorage.clear();
             navigate("/login");
         } catch (error) {
@@ -104,7 +106,7 @@ const PrivacySecurity = () => {
         <div className="min-h-screen bg-gray-50">
             <Navbar />
             <div className="flex">
-                <DashboardSidebar />
+                {role === "Store" ? <StoreSidebar /> : <DashboardSidebar />}
                 <main className="flex-1 p-4 md:p-8">
                     <div className="max-w-4xl mx-auto">
                         <header className="mb-8">

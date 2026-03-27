@@ -4,6 +4,7 @@ import logo from "../assets/Rentfit Logo.png";
 import { IoMdNotifications } from "react-icons/io";
 import axiosInstance from "../services/axiosInstance";
 import NotificationDropdown from "./NotificationDropdown.jsx";
+import SearchBar from "./SearchBar.jsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -70,9 +71,14 @@ const Navbar = () => {
             />
             <span className="text-2xl font-bold text-gray-900">Rentfit</span>
           </Link>
+          
+          {/* SEARCH BAR - Center */}
+          <div className="flex-1 max-w-2xl px-6 hidden md:block">
+            <SearchBar />
+          </div>
 
           {/* NAV LINKS */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8">
             {(!isLoggedIn || userRole === 'Customer') && (
               <Link
                 to="/browseClothes"

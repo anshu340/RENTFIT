@@ -13,7 +13,8 @@ import {
     FaCog,
     FaStore,
     FaComments,
-    FaExclamationTriangle
+    FaExclamationTriangle,
+    FaShieldAlt
 } from 'react-icons/fa';
 
 const StoreSidebar = () => {
@@ -34,6 +35,7 @@ const StoreSidebar = () => {
         { name: 'Damage Reports', icon: FaExclamationTriangle, path: '/damaged-items' },
         { name: 'Shop Locations', icon: FaMapMarkerAlt, path: '/storeLocation' },
         { name: 'Reports', icon: FaFileAlt, path: '/reports' },
+        { name: 'Privacy & Security', icon: FaShieldAlt, path: '/privacy-security' },
     ];
 
     useEffect(() => {

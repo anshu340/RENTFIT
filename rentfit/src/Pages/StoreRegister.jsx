@@ -17,7 +17,6 @@ const StoreRegister = () => {
     city: "",
     store_description: "",
     store_logo: null,
-    business_registration_number: "",
     password: "",
     confirmPassword: "",
   });
@@ -319,6 +318,17 @@ const StoreRegister = () => {
                       onChange={handleChange}
                       className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
                     ></textarea>
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Store Logo (Optional)</label>
+                    <input
+                      type="file"
+                      name="store_logo"
+                      accept="image/*"
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border-2 border-slate-50 p-2 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-[11px] uppercase tracking-wider file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer"
+                    />
                   </div>
 
                   <div className="pt-6 border-t border-slate-100">
