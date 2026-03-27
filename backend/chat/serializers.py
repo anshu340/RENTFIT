@@ -17,6 +17,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     store_name = serializers.CharField(source='store.store_name', read_only=True)
     store_image = serializers.ImageField(source='store.store_logo', read_only=True)
+    last_message = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
@@ -26,7 +27,8 @@ class ConversationSerializer(serializers.ModelSerializer):
             'store_name',
             'customer_image',
             'store_image',
-            'created_at'
+            'created_at',
+            'last_message'
         ]
 
     def get_last_message(self, obj):
