@@ -161,22 +161,8 @@ const DonateClothing = () => {
       {isLoggedIn ? (
         <div className="flex flex-1 min-h-screen">
           <DashboardSidebar />
-          <main className="flex-1 p-6 md:p-8 space-y-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center">
-                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
-                  Give Your Clothes a <span className="text-purple-600">New Life</span>
-                </h1>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Join RentFit's sustainable fashion movement. Donate your gently used clothes
-                  and help us reduce textile waste while supporting others.
-                </p>
-              </div>
-
-              {/* Donation Steps Component - Always Visible */}
-              <DonationSteps />
-
-              <div className="max-w-3xl mx-auto w-full">
+          <main className="flex-1 p-6 md:p-8 space-y-8 flex items-center justify-center">
+            <div className="max-w-3xl mx-auto w-full">
                 {/* Conditional Rendering: Form or CTA */}
                 {isAuthenticated && userRole === "Customer" ? (
                   <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
@@ -449,7 +435,6 @@ const DonateClothing = () => {
                   </div>
                 )}
               </div>
-            </div>
           </main>
         </div>
       ) : (
