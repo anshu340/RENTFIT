@@ -8,7 +8,9 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db.models import Sum
 from django.apps import apps
 
-from .models import User, Clothing, Wishlist
+from django.utils import timezone
+from datetime import timedelta
+from .models import User, Clothing, Wishlist, OTP
 from donations.models import Donation
 from .serializers import (
     CustomerRegisterSerializer, 
@@ -50,7 +52,14 @@ class ForgotPasswordView(APIView):
             # Return success even if not found to prevent email enumeration
             return Response({"message": "If the email is registered, an OTP will be sent."}, status=status.HTTP_200_OK)
             
-        create_and_send_otp(email)
+        # Optional: Check for 30-second cooldown
+        last_otp = OTP.objects.filter(email=email).order_by('-created_at').first()
+        if last_otp and timezone.now() < last_otp.created_at + timedelta(seconds=30):
+            return Response({"error": "Please wait 30 seconds before requesting a new OTP."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            
+        success = create_and_send_otp(email)
+        if not success:
+            return Response({"error": "Failed to send OTP. Please try again."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({"message": "If the email is registered, an OTP will be sent."}, status=status.HTTP_200_OK)
 
 
@@ -142,6 +151,24 @@ class VerifyOTPView(APIView):
         otp = request.data.get("otp")
         success, message = verify_otp(email, otp)
         return Response({"message": message}, status=200 if success else 400)
+
+class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Check for 30-second cooldown
+        last_otp = OTP.objects.filter(email=email).order_by('-created_at').first()
+        if last_otp and timezone.now() < last_otp.created_at + timedelta(seconds=30):
+            return Response({"error": "Please wait 30 seconds before requesting a new OTP."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            
+        success = create_and_send_otp(email)
+        if not success:
+            return Response({"error": "Failed to resend OTP."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"message": "A new OTP has been sent to your email."}, status=status.HTTP_200_OK)
 
 
 # LOGIN JWT GENERATED 

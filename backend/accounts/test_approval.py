@@ -54,19 +54,19 @@ class ClothingApprovalTest(TestCase):
         url = reverse('clothing-create')
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['status'], 'pending') # Should still be pending
+        self.assertEqual(response.data['status'], Clothing.ClothingApproval.PENDING) # Should still be pending
         
         clothing = Clothing.objects.get(id=response.data['id'])
-        self.assertEqual(clothing.status, 'pending')
+        self.assertEqual(clothing.status, Clothing.ClothingApproval.PENDING)
 
     def test_public_list_only_shows_approved_items(self):
         # Create one approved and one pending item
         Clothing.objects.create(
-            store=self.store, item_name='Approved Item', status='approved',
+            store=self.store, item_name='Approved Item', status=Clothing.ClothingApproval.APPROVED,
             category='Casual', gender='Male', size='L', rental_price=10.0
         )
         Clothing.objects.create(
-            store=self.store, item_name='Pending Item', status='pending',
+            store=self.store, item_name='Pending Item', status=Clothing.ClothingApproval.PENDING,
             category='Casual', gender='Male', size='L', rental_price=10.0
         )
         
@@ -80,28 +80,28 @@ class ClothingApprovalTest(TestCase):
 
     def test_admin_can_approve_item(self):
         clothing = Clothing.objects.create(
-            store=self.store, item_name='To Approve', status='pending',
+            store=self.store, item_name='To Approve', status=Clothing.ClothingApproval.PENDING,
             category='Casual', gender='Male', size='L', rental_price=10.0
         )
         
         self.client.force_authenticate(user=self.admin)
-        url = reverse('admin-clothing-approve', kwargs={'pk': clothing.id})
-        response = self.client.patch(url, {'status': 'approved'})
+        url = reverse('admin-clothing-approval', kwargs={'pk': clothing.id, 'action': 'approve'})
+        response = self.client.post(url, {'status': Clothing.ClothingApproval.APPROVED})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         clothing.refresh_from_db()
-        self.assertEqual(clothing.status, 'approved')
+        self.assertEqual(clothing.status, Clothing.ClothingApproval.APPROVED)
 
     def test_store_cannot_approve_own_item(self):
         clothing = Clothing.objects.create(
-            store=self.store, item_name='Wait For Admin', status='pending',
+            store=self.store, item_name='Wait For Admin', status=Clothing.ClothingApproval.PENDING,
             category='Casual', gender='Male', size='L', rental_price=10.0
         )
         
         self.client.force_authenticate(user=self.store)
-        url = reverse('admin-clothing-approve', kwargs={'pk': clothing.id})
-        response = self.client.patch(url, {'status': 'approved'})
+        url = reverse('admin-clothing-approval', kwargs={'pk': clothing.id, 'action': 'approve'})
+        response = self.client.post(url, {'status': Clothing.ClothingApproval.APPROVED})
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         clothing.refresh_from_db()
-        self.assertEqual(clothing.status, 'pending')
+        self.assertEqual(clothing.status, Clothing.ClothingApproval.PENDING)

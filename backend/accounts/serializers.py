@@ -42,15 +42,18 @@ class StoreRegisterSerializer(serializers.ModelSerializer):
             'store_name', 'owner_name', 'email', 'password', 'phone_number',
             'store_address', 'city', 'store_description', 'store_logo'
         ]
-
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        user = User.objects.filter(email=value).first()
+        if user and user.is_verified:
             raise serializers.ValidationError("Email already exists")
         return value
 
     def validate_phone_number(self, value):
-        if value and User.objects.filter(phone=value).exists():
-            raise serializers.ValidationError("Phone number already exists")
+        if value:
+            # Allow unverified users to re-register with the same phone number
+            user = User.objects.filter(phone=value).first()
+            if user and user.is_verified:
+                raise serializers.ValidationError("Phone number already exists")
         return value
 
     def create(self, validated_data):
@@ -58,20 +61,39 @@ class StoreRegisterSerializer(serializers.ModelSerializer):
         name = validated_data.pop('name')
         phone = validated_data.pop('phone', None)
         password = validated_data.pop('password')
+        email = validated_data.pop('email')
         
-        user = User.objects.create_user(
-            email=validated_data.pop('email'),
-            password=password,
-            name=name,
-            phone=phone,
-            store_name=validated_data.get('store_name'),
-            store_address=validated_data.get('store_address'),
-            city=validated_data.get('city'),
-            store_description=validated_data.get('store_description'),
-            store_logo=validated_data.get('store_logo'),
-            is_store=True
-        )
-        create_and_send_otp(user.email)
+        user = User.objects.filter(email=email).first()
+        
+        if user:
+            # Update existing unverified user details if they try to register again
+            user.set_password(password)
+            user.name = name
+            user.phone = phone
+            user.store_name = validated_data.get('store_name')
+            user.store_address = validated_data.get('store_address')
+            user.city = validated_data.get('city')
+            user.store_description = validated_data.get('store_description')
+            user.store_logo = validated_data.get('store_logo')
+            user.save()
+        else:
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                name=name,
+                phone=phone,
+                store_name=validated_data.get('store_name'),
+                store_address=validated_data.get('store_address'),
+                city=validated_data.get('city'),
+                store_description=validated_data.get('store_description'),
+                store_logo=validated_data.get('store_logo'),
+                is_store=True
+            )
+        
+        success = create_and_send_otp(user.email)
+        if not success:
+            raise serializers.ValidationError("Failed to send OTP. Please check your email credentials in .env.")
+            
         return user
 
 
@@ -192,15 +214,18 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
             'full_name', 'email', 'password', 'phone_number',
             'address', 'city', 'gender', 'preferred_clothing_size', 'profile_image'
         ]
-
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        user = User.objects.filter(email=value).first()
+        if user and user.is_verified:
             raise serializers.ValidationError("Email already exists")
         return value
 
     def validate_phone_number(self, value):
-        if value and User.objects.filter(phone=value).exists():
-            raise serializers.ValidationError("Phone number already exists")
+        if value:
+            # Allow unverified users to re-register with the same phone number
+            user = User.objects.filter(phone=value).first()
+            if user and user.is_verified:
+                raise serializers.ValidationError("Phone number already exists")
         return value
 
     def create(self, validated_data):
@@ -208,20 +233,39 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
         name = validated_data.pop('name')
         phone = validated_data.pop('phone', None)
         password = validated_data.pop('password')
+        email = validated_data.pop('email')
         
-        user = User.objects.create_user(
-            email=validated_data.pop('email'),
-            password=password,
-            name=name,
-            phone=phone,
-            address=validated_data.get('address'),
-            city=validated_data.get('city'),
-            gender=validated_data.get('gender'),
-            preferred_clothing_size=validated_data.get('preferred_clothing_size'),
-            profile_image=validated_data.get('profile_image'),
-            is_store=False
-        )
-        create_and_send_otp(user.email)
+        user = User.objects.filter(email=email).first()
+        
+        if user:
+            # Update existing unverified user details if they try to register again
+            user.set_password(password)
+            user.name = name
+            user.phone = phone
+            user.address = validated_data.get('address')
+            user.city = validated_data.get('city')
+            user.gender = validated_data.get('gender')
+            user.preferred_clothing_size = validated_data.get('preferred_clothing_size')
+            user.profile_image = validated_data.get('profile_image')
+            user.save()
+        else:
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                name=name,
+                phone=phone,
+                address=validated_data.get('address'),
+                city=validated_data.get('city'),
+                gender=validated_data.get('gender'),
+                preferred_clothing_size=validated_data.get('preferred_clothing_size'),
+                profile_image=validated_data.get('profile_image'),
+                is_store=False
+            )
+        
+        success = create_and_send_otp(user.email)
+        if not success:
+            raise serializers.ValidationError("Failed to send OTP. Please check your email credentials in .env.")
+            
         return user
 
 

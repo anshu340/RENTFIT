@@ -31,6 +31,7 @@ from .views import (
     DeleteAccountView,
     ForgotPasswordView,
     ResetPasswordView,
+    ResendOTPView,
     AddToBrowseView,
     UniversalSearchView,
     PublicStoreView,
@@ -63,6 +64,7 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("password/forgot/", ForgotPasswordView.as_view(), name="forgot-password"),
     path("password/reset/", ResetPasswordView.as_view(), name="reset-password"),
+    path("resend-otp/", ResendOTPView.as_view(), name="resend-otp"),
     
     # Location Endpoints
     path("stores/nearby/", NearbyStoresView.as_view(), name="nearby-stores"),
