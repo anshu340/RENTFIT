@@ -56,6 +56,7 @@ const StoreSidebar = () => {
 
     const handleLogout = () => {
         localStorage.clear();
+        sessionStorage.clear();
         navigate('/login');
     };
 

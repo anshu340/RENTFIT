@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
+import { formatPrice } from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import StoreSidebar from "../Components/StoreSidebar";
@@ -119,7 +120,7 @@ const StoreReports = () => {
                             <StatCard
                                 icon={FaDollarSign}
                                 label="Total Revenue"
-                                value={`Rs. ${stats.totalEarnings}`}
+                                value={formatPrice(stats.totalEarnings)}
                                 color="green"
                                 description="Verified eSewa earnings"
                             />
@@ -161,7 +162,7 @@ const StoreReports = () => {
                                     <p className="text-sm text-gray-500">Revenue history for the last 30 days</p>
                                 </div>
                                 <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100">
-                                    <span className="text-green-700 font-black text-lg">Rs. {stats.totalEarnings}</span>
+                                    <span className="text-green-700 font-black text-lg">{formatPrice(stats.totalEarnings)}</span>
                                 </div>
                             </div>
                             <div className="h-[400px] w-full">
@@ -189,7 +190,7 @@ const StoreReports = () => {
                                             axisLine={false}
                                             tickLine={false}
                                             tick={{ fontSize: 12, fill: '#9ca3af', fontWeight: 600 }}
-                                            tickFormatter={(val) => `Rs.${val}`}
+                                            tickFormatter={(val) => `Rs. ${val}`}
                                         />
                                         <Tooltip
                                             contentStyle={{
@@ -262,7 +263,7 @@ const StoreReports = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    <span className="font-black text-green-600">Rs. {tx.amount}</span>
+                                                    <span className="font-black text-green-600">{formatPrice(tx.amount)}</span>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex items-center justify-center gap-2 text-xs text-gray-500 font-medium">

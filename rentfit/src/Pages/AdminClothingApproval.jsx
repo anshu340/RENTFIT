@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
 import axiosInstance from '../services/axiosInstance';
 import AdminSidebar from '../Components/AdminSidebar';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import { formatPrice } from '../services/axiosInstance';
 import { FaTshirt, FaCheck, FaTimes, FaEye, FaStore, FaClock } from 'react-icons/fa';
 
 const AdminClothingApproval = () => {
@@ -114,7 +114,7 @@ const AdminClothingApproval = () => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{item.category}</span>
                                                     <span className="text-slate-200">|</span>
-                                                    <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">₹{item.rental_price}/Day</span>
+                                                    <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">{formatPrice(item.rental_price)}/Day</span>
                                                 </div>
                                             </div>
 
@@ -203,11 +203,11 @@ const AdminClothingApproval = () => {
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Rental Price</p>
-                                    <p className="font-bold text-indigo-600">₹{selectedItem.rental_price}/Day</p>
+                                    <p className="font-bold text-indigo-600">{formatPrice(selectedItem.rental_price)}/Day</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Security Deposit</p>
-                                    <p className="font-bold text-slate-900">₹{selectedItem.security_deposit}</p>
+                                    <p className="font-bold text-slate-900">{formatPrice(selectedItem.security_deposit)}</p>
                                 </div>
                             </div>
 

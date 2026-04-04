@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
+import { formatPrice } from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import StoreSidebar from "../Components/StoreSidebar";
@@ -299,7 +300,7 @@ const StoreDashboard = () => {
                     <FaDollarSign className="text-green-500 text-lg" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-gray-800 mb-1">Rs. {stats.totalEarnings}</div>
+                <div className="text-3xl font-bold text-gray-800 mb-1">{formatPrice(stats.totalEarnings)}</div>
                 <div className="text-xs text-gray-500">Verified revenue</div>
               </div>
             </div>
@@ -428,7 +429,7 @@ const StoreDashboard = () => {
                         key={index}
                         icon={FaDollarSign}
                         color="bg-green-100 text-green-600"
-                        title={`Received Rs. ${tx.amount}`}
+                        title={`Received ${formatPrice(tx.amount)}`}
                         desc={`${tx.item_name} - ${tx.customer_name}`}
                         time={formatTime(tx.date)}
                       />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance from '../services/axiosInstance';
 import EsewaPayment from './EsewaPayment';
+import { formatPrice } from '../services/axiosInstance';
 
 const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStartDate, prefilledSize }) => {
     const [startDate, setStartDate] = useState(prefilledStartDate || '');
@@ -123,11 +124,10 @@ const RentalModal = ({ isOpen, onClose, clothing, onRentalCreated, prefilledStar
                         </div>
 
                         <div className="p-4 bg-gray-50 rounded-xl flex justify-between items-center">
-                            <div className="flex flex-col">
-                                <span className="text-gray-600 font-medium">Price per day:</span>
-                                <span className="text-xs text-gray-400">Secure payment via eSewa</span>
+                            <div className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-1">Price / Day</span>
+                                <span className="text-xl font-black text-gray-900">{formatPrice(clothing.rental_price)}</span>
                             </div>
-                            <span className="text-xl font-bold text-purple-600">₹{clothing.rental_price}</span>
                         </div>
 
                         <div className="flex gap-3 pt-4">

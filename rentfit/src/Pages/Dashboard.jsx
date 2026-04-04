@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance, { formatPrice } from '../services/axiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
@@ -304,7 +304,7 @@ const Dashboard = () => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Total Spent</p>
-                    <p className="text-3xl font-bold text-gray-800">${dashboardData.totalSpent}</p>
+                    <p className="text-3xl font-bold text-gray-800">{formatPrice(dashboardData.totalSpent)}</p>
                   </div>
                   <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <FaDollarSign className="text-green-600 text-lg" />
@@ -425,7 +425,7 @@ const Dashboard = () => {
                           </h3>
                           <p className="text-xs text-gray-500 mb-2">{item.category}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-black text-gray-900">${item.rental_price}</span>
+                            <span className="text-sm font-black text-gray-900">{formatPrice(item.rental_price)}</span>
                             <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded uppercase">New</span>
                           </div>
                         </div>

@@ -12,6 +12,11 @@ const Navbar = () => {
   const [userRole, setUserRole] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    profileImage: "",
+    role: "",
+  });
 
   const checkAuth = React.useCallback(() => {
     const token = localStorage.getItem("access_token") || localStorage.getItem("authToken");
@@ -45,7 +50,46 @@ const Navbar = () => {
       }
     };
 
+    const fetchUserProfile = async () => {
+      try {
+        const role = localStorage.getItem("role") || localStorage.getItem("userType");
+        let endpoint = "accounts/customers/profile/";
+        if (role === 'Store' || role === 'store') endpoint = "accounts/stores/profile/";
+        else if (role === 'Admin' || role === 'admin') endpoint = "accounts/admin/profile/";
+
+        const response = await axiosInstance.get(endpoint);
+        const profileData = response.data?.data || response.data;
+
+        if (profileData) {
+          const name = profileData.full_name || profileData.owner_name || profileData.name || "User";
+          const profileImage = profileData.profile_image_url || profileData.profile_image || profileData.store_logo_url || profileData.store_logo || "";
+
+          setUserInfo({
+            name,
+            profileImage,
+            role: role || profileData.role || "Customer"
+          });
+
+          // Also update local storage so it stays somewhat fresh
+          const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          localStorage.setItem('user', JSON.stringify({ ...savedUser, name, profile_image: profileImage }));
+        }
+      } catch (error) {
+        console.error("Error fetching user profile for navbar:", error);
+        // Fallback to local storage
+        try {
+          const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          setUserInfo({
+            name: savedUser.name || savedUser.full_name || savedUser.owner_name || "User",
+            profileImage: savedUser.profile_image_url || savedUser.profile_image || savedUser.store_logo_url || savedUser.store_logo || "",
+            role: localStorage.getItem('role') || "Customer"
+          });
+        } catch (e) { }
+      }
+    };
+
     fetchUnreadCount();
+    fetchUserProfile();
     const interval = setInterval(fetchUnreadCount, 15000); // Poll every 15s
 
     return () => clearInterval(interval);
@@ -71,7 +115,7 @@ const Navbar = () => {
             />
             <span className="text-2xl font-bold text-gray-900">Rentfit</span>
           </Link>
-          
+
           {/* SEARCH BAR - Center */}
           <div className="flex-1 max-w-2xl px-6 hidden md:block">
             <SearchBar />
@@ -206,12 +250,23 @@ const Navbar = () => {
             </button>
 
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
-              >
-                Log out
-              </button>
+              <div className="flex items-center space-x-4">
+                <Link to={userRole === 'Store' ? "/storeDashboard" : userRole === 'Admin' ? "/adminDashboard" : "/dashboard"} className="flex items-center gap-2 group cursor-pointer">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-gray-300">
+                    {userInfo.profileImage ? (
+                      <img src={userInfo.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs font-bold uppercase">
+                        {(userInfo.name && userInfo.name !== "User") ? userInfo.name.charAt(0) : (userRole ? userRole.charAt(0) : 'U')}
+                      </div>
+                    )}
+                  </div>
+                  <div className="hidden sm:block flex-col items-start leading-tight">
+                    <p className="text-sm font-semibold text-gray-800">{userInfo.name || "User"}</p>
+                    <p className="text-[10px] text-gray-500 font-medium">{userRole || "User"}</p>
+                  </div>
+                </Link>
+              </div>
             ) : (
               <>
                 <Link

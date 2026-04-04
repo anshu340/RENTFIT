@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../services/axiosInstance';
+import { formatPrice } from '../services/axiosInstance';
 import AdminSidebar from '../Components/AdminSidebar';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
     }, []);
 
     const statCards = [
-        { title: 'Total Revenue', value: `$${stats.total_revenue.toLocaleString()}`, icon: FaMoneyBillWave, color: 'bg-emerald-500', trend: '+12.5%' },
+        { title: 'Total Revenue', value: formatPrice(stats.total_revenue), icon: FaMoneyBillWave, color: 'bg-emerald-500', trend: '+12.5%' },
         { title: 'Total Users', value: stats.total_users, icon: FaUsers, color: 'bg-indigo-500', trend: '+8.2%' },
         { title: 'Registered Stores', value: stats.total_stores, icon: FaStore, color: 'bg-amber-500', trend: '+4.1%' },
         { title: 'Donations Processed', value: stats.total_donations, icon: FaHandHoldingHeart, color: 'bg-rose-500', trend: '+15.3%' },
@@ -63,7 +64,7 @@ const AdminDashboard = () => {
             return (
                 <div className="bg-white p-4 shadow-xl rounded-2xl border border-slate-100">
                     <p className="text-xs font-black text-slate-400 uppercase mb-1">{label}</p>
-                    <p className="text-lg font-black text-indigo-600">${payload[0].value.toLocaleString()}</p>
+                    <p className="text-lg font-black text-indigo-600">{formatPrice(payload[0].value)}</p>
                 </div>
             );
         }
@@ -147,7 +148,7 @@ const AdminDashboard = () => {
                                                         axisLine={false}
                                                         tickLine={false}
                                                         tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-                                                        tickFormatter={(val) => `$${val}`}
+                                                        tickFormatter={(val) => `Rs. ${val}`}
                                                     />
                                                     <Tooltip content={<CustomTooltip />} />
                                                     <Area

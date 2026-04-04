@@ -93,3 +93,9 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
+// ✅ Add this utility function
+export const formatPrice = (amount) => {
+  if (!amount) return "Rs. 0";
+  return `Rs. ${Number(amount).toLocaleString()}`;
+};

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
+import { formatPrice } from '../services/axiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import ReviewSection from '../Components/ReviewSection';
@@ -202,16 +203,16 @@ const ClothingDetail = () => {
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <div className="bg-purple-50 rounded-2xl p-6 border border-purple-100 shadow-sm transition-all hover:shadow-md">
                                     <span className="text-xs text-purple-600 font-black uppercase tracking-widest block mb-1">Rental Price</span>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black text-purple-700">₹{clothing.rental_price}</span>
-                                        <span className="text-purple-600 font-bold text-xs">/day</span>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl font-black text-gray-900 leading-none">{formatPrice(clothing.rental_price)}</span>
+                                        <span className="text-gray-400 font-bold uppercase tracking-widest text-xs">/ Day</span>
                                     </div>
                                 </div>
                                 <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100 shadow-sm transition-all hover:shadow-md">
                                     <span className="text-xs text-blue-600 font-black uppercase tracking-widest block mb-1">Security Deposit</span>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black text-blue-700">₹{clothing.security_deposit}</span>
-                                        <span className="text-blue-600 font-bold text-xs">ref.</span>
+                                    <div className="flex items-baseline gap-2 mt-1">
+                                        <span className="text-2xl font-black text-gray-900 leading-none">{formatPrice(clothing.security_deposit)}</span>
+                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase rounded-md border border-blue-100">Refundable</span>
                                     </div>
                                 </div>
                             </div>

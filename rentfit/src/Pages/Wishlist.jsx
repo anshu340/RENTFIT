@@ -10,6 +10,7 @@ import Footer from "../Components/Footer";
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import { BsGrid3X3Gap, BsList } from 'react-icons/bs';
 import axiosInstance from "../services/axiosInstance";
+import { formatPrice } from "../services/axiosInstance";
 
 const Wishlist = () => {
   const [currentPage, setCurrentPage] = useState('wishlist');
@@ -174,11 +175,11 @@ const Wishlist = () => {
           ))}
           <span className="text-xs text-gray-600 ml-1">(New)</span>
         </div>
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl font-bold text-purple-600">{formatPrice(item.rental_price)}</span>
+          <span className="text-gray-400 text-xs font-bold uppercase tracking-widest">/ Day</span>
+        </div>
         <div className="flex items-center justify-between mt-auto">
-          <div>
-            <span className="text-2xl font-bold text-purple-600">${item.rental_price}</span>
-            <span className="text-sm text-gray-500">/day</span>
-          </div>
           <button
             onClick={() => createRental(item.id)}
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

@@ -12,6 +12,8 @@ const ResetPassword = () => {
   const [errors, setErrors] = useState({});
   const [serverMessage, setServerMessage] = useState({ text: "", type: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [canResend, setCanResend] = useState(true);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +25,51 @@ const ResetPassword = () => {
       navigate("/forgot-password");
     }
   }, [email, navigate]);
+
+  useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  const handleResendOTP = async () => {
+    if (!canResend) return;
+
+    setIsLoading(true);
+    setServerMessage({ text: "", type: "" });
+
+    try {
+      const response = await axiosInstance.post("accounts/resend-otp/", {
+        email,
+      });
+
+      setServerMessage({ text: response.data.message || "OTP resent successfully.", type: "success" });
+      setCanResend(false);
+      setResendTimer(30);
+    } catch (error) {
+      console.error("Resend OTP Error:", error);
+      const errorData = error.response?.data;
+      const message =
+        errorData?.error ||
+        "Failed to resend OTP. Please try again.";
+
+      setServerMessage({ text: message, type: "error" });
+
+      // If backend says wait, start timer anyway
+      if (error.response?.status === 429) {
+        setCanResend(false);
+        setResendTimer(30);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +97,7 @@ const ResetPassword = () => {
       });
 
       setServerMessage({ text: response.data.message || "Password reset successfully.", type: "success" });
-      
+
       // Navigate to Login page after a short delay
       setTimeout(() => {
         navigate("/login", { state: { message: "Password updated successfully. Please login." } });
@@ -81,7 +128,7 @@ const ResetPassword = () => {
         <div className="absolute -bottom-10 left-40 w-80 h-80 bg-amber-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
 
         <div className="relative w-full max-w-5xl flex flex-col md:flex-row bg-white/40 backdrop-blur-xl rounded-[3rem] border border-white/60 shadow-xl overflow-hidden animate-fade-in">
-          
+
           {/* Left Side: Aesthetic Branding */}
           <div className="md:w-5/12 hidden md:flex flex-col justify-center p-12 bg-gradient-to-br from-[#e0eafc] via-[#cfdef3] to-[#e0eafc] text-slate-800 relative">
             <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay grayscale"></div>
@@ -108,11 +155,19 @@ const ResetPassword = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                
+
                 {/* OTP Field */}
                 <div className="group">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">6-Digit Code</label>
+                    <button
+                      type="button"
+                      onClick={handleResendOTP}
+                      disabled={!canResend || isLoading}
+                      className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-600 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend code?"}
+                    </button>
                   </div>
                   <div className="relative">
                     <FaKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-400 transition-colors" />
@@ -124,7 +179,7 @@ const ResetPassword = () => {
                       value={otp}
                       onChange={(e) => {
                         setOtp(e.target.value.replace(/\D/g, ''));
-                        setErrors({...errors, otp: ""});
+                        setErrors({ ...errors, otp: "" });
                         setServerMessage({ text: "", type: "" });
                       }}
                     />
@@ -144,7 +199,7 @@ const ResetPassword = () => {
                       value={newPassword}
                       onChange={(e) => {
                         setNewPassword(e.target.value);
-                        setErrors({...errors, newPassword: ""});
+                        setErrors({ ...errors, newPassword: "" });
                       }}
                     />
                   </div>
@@ -163,7 +218,7 @@ const ResetPassword = () => {
                       value={confirmPassword}
                       onChange={(e) => {
                         setConfirmPassword(e.target.value);
-                        setErrors({...errors, confirmPassword: ""});
+                        setErrors({ ...errors, confirmPassword: "" });
                       }}
                     />
                   </div>

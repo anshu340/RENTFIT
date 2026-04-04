@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../services/axiosInstance';
+import { formatPrice } from '../services/axiosInstance';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Alert from '../Components/Alert';
@@ -304,8 +305,8 @@ const MyRentals = () => {
                         </div>
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Spent</p>
-                                <p className="text-2xl font-bold text-gray-900 mt-1">${totalSpent.toFixed(2)}</p>
+                                <p className="text-gray-600 text-sm font-medium">Total Spent</p>
+                                <p className="text-2xl font-bold text-gray-900 mt-1">{formatPrice(totalSpent)}</p>
                             </div>
                             <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
                                 <FaMoneyBillWave />
@@ -405,7 +406,8 @@ const MyRentals = () => {
                                                         )}
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-xl font-black text-gray-900">${rental.total_price}</div>
+                                                        <div className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Paid</div>
+                                                        <div className="text-xl font-black text-gray-900">{formatPrice(rental.total_price)}</div>
                                                         <div className="text-xs font-bold text-gray-400 mt-1">{getRentalDuration(rental.rent_start_date, rental.rent_end_date)}</div>
                                                     </div>
                                                 </div>

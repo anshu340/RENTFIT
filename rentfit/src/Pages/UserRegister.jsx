@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
@@ -25,6 +25,9 @@ const UserRegister = () => {
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [resendTimer, setResendTimer] = useState(0);
+  const [canResend, setCanResend] = useState(true);
+
   const handleChange = (e) => {
     if (e.target.name === "profile_image") {
       setFormData({ ...formData, profile_image: e.target.files[0] });
@@ -32,6 +35,18 @@ const UserRegister = () => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
     }
   };
+
+  useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,24 +151,46 @@ const UserRegister = () => {
   };
 
   const handleResendOtp = async () => {
-    // Note: Resend OTP endpoint may need to be implemented in backend
-    setServerError("Please use the OTP sent to your email. If you didn't receive it, try registering again.");
-    setOtp("");
+    if (!canResend) return;
+
+    setIsLoading(true);
+    setServerError("");
+
+    try {
+      const response = await axiosInstance.post("accounts/resend-otp/", {
+        email: formData.email,
+      });
+
+      setServerError("");
+      setCanResend(false);
+      setResendTimer(30);
+    } catch (error) {
+      console.error("Resend OTP Error:", error);
+      const message = error.response?.data?.error || "Failed to resend OTP. Please try again.";
+      setServerError(message);
+
+      if (error.response?.status === 429) {
+        setCanResend(false);
+        setResendTimer(30);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-2 relative bg-[#fdfcfb] overflow-hidden">
-        
+
         {/* Left Section: Aesthetic Branding */}
         <div className="hidden lg:flex flex-col justify-center px-16 xl:px-24 bg-white/30 backdrop-blur-md text-slate-800 relative h-full border-r border-slate-100">
-           {/* Aesthetic Blobs */}
+          {/* Aesthetic Blobs */}
           <div className="absolute top-0 -left-10 w-96 h-96 bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
           <div className="absolute top-1/2 -right-10 w-96 h-96 bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-          
+
           <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
-          
+
           <div className="relative z-10">
             <span className="inline-block px-3 py-1 bg-white/80 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-slate-100 text-slate-400">Step {step} of 2</span>
             <h1 className="text-5xl font-black mb-8 leading-tight tracking-tight text-slate-900 italic">
@@ -164,18 +201,18 @@ const UserRegister = () => {
                 ? "Join our curated collective where fashion meets sustainability in every thread."
                 : "A secure verification step to ensure your style journey remains personal and protected."}
             </p>
-            
+
             <div className="space-y-6">
-               {[
-                 { title: "Personalized Feed", color: "rose-400" },
-                 { title: "Secure Rentals", color: "teal-400" },
-                 { title: "Impact Tracking", color: "amber-400" }
-               ].map((item, i) => (
-                 <div key={i} className="flex items-center gap-4">
-                    <div className={`w-2 h-2 rounded-full bg-${item.color}`}></div>
-                    <h3 className="font-black text-[11px] uppercase tracking-widest text-slate-400">{item.title}</h3>
-                 </div>
-               ))}
+              {[
+                { title: "Personalized Feed", color: "rose-400" },
+                { title: "Secure Rentals", color: "teal-400" },
+                { title: "Impact Tracking", color: "amber-400" }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className={`w-2 h-2 rounded-full bg-${item.color}`}></div>
+                  <h3 className="font-black text-[11px] uppercase tracking-widest text-slate-400">{item.title}</h3>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -349,7 +386,7 @@ const UserRegister = () => {
                       <span className="relative z-10">{isLoading ? "Processing..." : "Continue"}</span>
                       <div className="absolute inset-0 bg-gradient-to-r from-rose-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </button>
-                    
+
                     <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
                       Already registered?{" "}
                       <button
@@ -366,7 +403,7 @@ const UserRegister = () => {
             ) : (
               <div className="text-center max-w-sm mx-auto">
                 <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-10 border border-teal-100">
-                   <FaEnvelope className="text-teal-400 text-2xl" />
+                  <FaEnvelope className="text-teal-400 text-2xl" />
                 </div>
                 <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter italic">Confirm Identity</h2>
                 <p className="text-slate-500 font-medium mb-12 leading-relaxed text-sm">
@@ -374,7 +411,7 @@ const UserRegister = () => {
                 </p>
 
                 {serverError && (
-                   <div className="text-rose-400 text-[10px] font-black uppercase tracking-widest mb-8 animate-shake">
+                  <div className="text-rose-400 text-[10px] font-black uppercase tracking-widest mb-8 animate-shake">
                     {serverError}
                   </div>
                 )}
@@ -406,13 +443,13 @@ const UserRegister = () => {
                     Code not received?{" "}
                     <button
                       onClick={handleResendOtp}
-                      disabled={isLoading}
-                      className="text-slate-900 hover:text-rose-400 transition-colors"
+                      disabled={isLoading || !canResend}
+                      className={`text-slate-900 hover:text-rose-400 transition-colors ${!canResend ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      Resend Now
+                      {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend Now"}
                     </button>
                   </p>
-                  
+
                   <button
                     onClick={() => setStep(1)}
                     className="text-slate-300 text-[9px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 hover:text-slate-600 transition-colors"

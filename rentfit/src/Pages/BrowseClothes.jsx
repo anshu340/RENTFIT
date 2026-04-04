@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
+import { formatPrice } from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
@@ -40,17 +41,17 @@ const BrowseClothes = () => {
   const categories = ['Formal Wear', 'Casual', 'Party Wear', 'Traditional', 'Sports Wear'];
   // const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const priceRanges = [
-    { label: 'Under $20', value: '0-20' },
-    { label: '$20 - $50', value: '20-50' },
-    { label: '$50 - $100', value: '50-100' },
-    { label: 'Over $100', value: '100-1000' }
+    { id: 1, label: "Rs. 0 - Rs. 20", min: 0, max: 20 },
+    { id: 2, label: "Rs. 20 - Rs. 50", min: 20, max: 50 },
+    { id: 3, label: "Rs. 50 - Rs. 100", min: 50, max: 100 },
+    { id: 4, label: "Rs. 100+", min: 100, max: 100000 },
   ];
 
   useEffect(() => {
     // Check for search query in URL
     const params = new URLSearchParams(location.search);
     const searchParam = params.get('search');
-    
+
     if (searchParam) {
       setFilters(prev => ({ ...prev, searchQuery: searchParam }));
     }
@@ -142,11 +143,13 @@ const BrowseClothes = () => {
 
     // Price Range
     if (filters.priceRange) {
-      const [min, max] = filters.priceRange.split('-').map(Number);
-      result = result.filter(item => {
-        const price = parseFloat(item.rental_price);
-        return price >= min && price <= max;
-      });
+      const selectedRange = priceRanges.find(r => r.label === filters.priceRange);
+      if (selectedRange) {
+        result = result.filter(item => {
+          const price = parseFloat(item.rental_price);
+          return price >= selectedRange.min && price <= selectedRange.max;
+        });
+      }
     }
 
     // Event Type (loose match as requested)
@@ -264,23 +267,6 @@ const BrowseClothes = () => {
     }
   };
 
-//   const handleRentNow = (item) => {
-//     const token = localStorage.getItem("access_token");
-//     if (!token) {
-//       navigate("/login", { state: { message: "Please login to continue renting" } });
-//       return;
-//     }
-// 
-//     // If not a customer, you might want to redirect or show alert
-//     const userRole = localStorage.getItem('role');
-//     if (userRole !== 'Customer') {
-//       showAlert('Only customers can rent items.', 'error');
-//       return;
-//     }
-//     setSelectedClothing(item);
-//     setIsRentalModalOpen(true);
-//   };
-
   const showAlert = (message, type) => {
     setAlert({ message, type });
   };
@@ -393,15 +379,15 @@ const BrowseClothes = () => {
                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Price Range</label>
                         <div className="space-y-2">
                           {priceRanges.map(range => (
-                            <label key={range.value} className="flex items-center gap-2 cursor-pointer group">
+                            <label key={range.id} className="flex items-center gap-2 cursor-pointer group">
                               <input
                                 type="radio"
                                 name="priceRange"
-                                checked={filters.priceRange === range.value}
-                                onChange={() => handleFilterChange('priceRange', range.value)}
+                                checked={filters.priceRange === range.label}
+                                onChange={() => handleFilterChange('priceRange', range.label)}
                                 className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500 cursor-pointer"
                               />
-                              <span className={`text-sm transition-colors ${filters.priceRange === range.value ? 'text-purple-600 font-bold' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                              <span className={`text-sm transition-colors ${filters.priceRange === range.label ? 'text-purple-600 font-bold' : 'text-gray-600 group-hover:text-gray-900'}`}>
                                 {range.label}
                               </span>
                             </label>
@@ -548,9 +534,9 @@ const BrowseClothes = () => {
                                     )}
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-2xl font-black text-gray-900 leading-none">${item.rental_price}</p>
-                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">per day</p>
+                                <div className="flex items-baseline gap-1">
+                                  <span className="text-2xl font-bold text-gray-900">{formatPrice(item.rental_price)}</span>
+                                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">/ Day</span>
                                 </div>
                               </div>
                               <p className="text-sm font-medium text-gray-500 mb-4 bg-gray-50 inline-block px-3 py-1 rounded-lg">

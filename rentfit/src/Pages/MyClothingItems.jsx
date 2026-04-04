@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import StoreSidebar from "../Components/StoreSidebar";
 import { FaTshirt, FaTrash, FaEdit, FaEye, FaCheckCircle, FaTimesCircle, FaClock, FaDollarSign, FaBox } from "react-icons/fa";
+import { formatPrice } from "../services/axiosInstance";
 
 const MyClothingItems = () => {
   const navigate = useNavigate();
@@ -219,9 +218,9 @@ const MyClothingItems = () => {
 
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="font-semibold text-purple-600">₹{item.rental_price}/day</span>
+                          <span className="font-semibold text-purple-600">{formatPrice(item.rental_price)} /day</span>
                           <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                          <span className="text-blue-600 font-bold">₹{item.security_deposit} ref.</span>
+                          <span className="text-blue-600 font-bold">{formatPrice(item.security_deposit)} ref.</span>
                         </div>
                         <div className="text-sm text-gray-600">
                           <span className="font-medium">Category:</span> {item.category} | {item.event_type}
@@ -322,10 +321,10 @@ const MyClothingItems = () => {
                     {getStatusBadge(selectedItem.availability)}
                     {getApprovalBadge(selectedItem.status)}
                     <span className="text-lg font-bold text-purple-600">
-                      ₹{selectedItem.rental_price}/day
+                      {formatPrice(selectedItem.rental_price)} /day
                     </span>
                     <span className="text-lg font-bold text-blue-600">
-                      ₹{selectedItem.security_deposit} Ref.
+                      {formatPrice(selectedItem.security_deposit)} Ref.
                     </span>
                   </div>
                 </div>

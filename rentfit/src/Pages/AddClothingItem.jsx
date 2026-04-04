@@ -466,9 +466,9 @@ const AddClothingItem = () => {
 
                     {/* Rental Price */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Rental Price (per day) *</label>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Rental Price (RS) *</label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">RS</span>
                         <input
                           type="number"
                           name="rental_price"
@@ -484,9 +484,9 @@ const AddClothingItem = () => {
 
                     {/* Security Deposit */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Security Deposit *</label>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Security Deposit (RS) *</label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">RS</span>
                         <input
                           type="number"
                           name="security_deposit"
