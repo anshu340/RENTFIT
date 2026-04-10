@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance'; // Still need for user profile?
-import { chatService } from '../services/chatAxiosInstance.js';
+import { chatService } from '../services/chataxiosInstance.js';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
@@ -86,6 +86,9 @@ const ChatPage = () => {
             setMessages(res.data || res);
         } catch (error) {
             console.error("Error sending message", error);
+            if (error.response) {
+                console.error("Backend error details:", error.response.data);
+            }
         }
     };
 
