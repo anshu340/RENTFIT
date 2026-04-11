@@ -50,6 +50,20 @@ class User(AbstractUser):
     store_logo = models.ImageField(upload_to='store_logos/', blank=True, null=True)
     profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     
+    # Store KYC Verification
+    citizenship_image = models.ImageField(upload_to='kyc/citizenship/', blank=True, null=True)
+    business_card_image = models.ImageField(upload_to='kyc/business_card/', blank=True, null=True)
+    verification_status = models.CharField(
+        max_length=10,
+        choices=[
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('rejected', 'Rejected')
+        ],
+        default='pending'
+    )
+
+    
     # Location fields
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)

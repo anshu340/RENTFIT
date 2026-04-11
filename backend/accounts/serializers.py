@@ -29,35 +29,35 @@ class PrivacySettingsSerializer(serializers.ModelSerializer):
 class StoreRegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for Store registration
-    Fields: store_name, owner_name, email, password, phone_number, store_address, city, store_description
     """
     password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
     owner_name = serializers.CharField(source='name', max_length=255)
-    phone_number = serializers.CharField(source='phone', max_length=20, required=False, allow_blank=True)
     store_logo = serializers.ImageField(required=False, allow_null=True)
+    phone_number = serializers.CharField(source='phone', max_length=20, required=False, allow_blank=True)
+    store_description = serializers.CharField(required=False, allow_blank=True)
+    citizenship_image = serializers.ImageField(required=True)
+    business_card_image = serializers.ImageField(required=True)
 
     class Meta:
         model = User
         fields = [
             'store_name', 'owner_name', 'email', 'password', 'phone_number',
-            'store_address', 'city', 'store_description', 'store_logo'
+            'store_address', 'city', 'store_description', 'store_logo',
+            'citizenship_image', 'business_card_image'
         ]
+        
+    def validate(self, data):
+        if not data.get('citizenship_image') or not data.get('business_card_image'):
+            raise serializers.ValidationError({"error": "Both documents (Citizenship and Business Card) are required."})
+        return data
+
     def validate_email(self, value):
         user = User.objects.filter(email=value).first()
         if user and user.is_verified:
             raise serializers.ValidationError("Email already exists")
         return value
 
-    def validate_phone_number(self, value):
-        if value:
-            # Allow unverified users to re-register with the same phone number
-            user = User.objects.filter(phone=value).first()
-            if user and user.is_verified:
-                raise serializers.ValidationError("Phone number already exists")
-        return value
-
     def create(self, validated_data):
-        # Extract nested data (source='name' maps owner_name to 'name' in validated_data)
         name = validated_data.pop('name')
         phone = validated_data.pop('phone', None)
         password = validated_data.pop('password')
@@ -66,7 +66,6 @@ class StoreRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.filter(email=email).first()
         
         if user:
-            # Update existing unverified user details if they try to register again
             user.set_password(password)
             user.name = name
             user.phone = phone
@@ -75,6 +74,9 @@ class StoreRegisterSerializer(serializers.ModelSerializer):
             user.city = validated_data.get('city')
             user.store_description = validated_data.get('store_description')
             user.store_logo = validated_data.get('store_logo')
+            user.citizenship_image = validated_data.get('citizenship_image')
+            user.business_card_image = validated_data.get('business_card_image')
+            user.verification_status = 'pending'
             user.save()
         else:
             user = User.objects.create_user(
@@ -87,6 +89,9 @@ class StoreRegisterSerializer(serializers.ModelSerializer):
                 city=validated_data.get('city'),
                 store_description=validated_data.get('store_description'),
                 store_logo=validated_data.get('store_logo'),
+                citizenship_image=validated_data.get('citizenship_image'),
+                business_card_image=validated_data.get('business_card_image'),
+                verification_status='pending',
                 is_store=True
             )
         
@@ -118,9 +123,9 @@ class StoreReadSerializer(serializers.ModelSerializer):
             'store_address', 'city', 'store_description', 'store_logo',
             'store_logo_url', 'latitude', 'longitude', 'open_time', 'close_time',
             'profile_visibility', 'location_sharing', 'recommendations_enabled',
-            'is_verified', 'date_joined', 'role', 'rating', 'reviews_count'
+            'is_verified', 'verification_status', 'date_joined', 'role', 'rating', 'reviews_count'
         ]
-        read_only_fields = ['id', 'email', 'is_verified', 'date_joined', 'role', 'rating', 'reviews_count']
+        read_only_fields = ['id', 'email', 'is_verified', 'verification_status', 'date_joined', 'role', 'rating', 'reviews_count']
 
     def get_store_logo_url(self, obj):
         if obj.store_logo:
@@ -367,8 +372,24 @@ class UserSerializer(serializers.ModelSerializer):
             'open_time', 'close_time',
             'profile_visibility', 'location_sharing', 'recommendations_enabled',
             'profile_image', 'profile_image_url',
+            'citizenship_image', 'business_card_image', 'verification_status',
             'is_verified', 'date_joined'
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        if instance.citizenship_image:
+            representation['citizenship_image_url'] = request.build_absolute_uri(instance.citizenship_image.url) if request else instance.citizenship_image.url
+        else:
+            representation['citizenship_image_url'] = None
+            
+        if instance.business_card_image:
+            representation['business_card_image_url'] = request.build_absolute_uri(instance.business_card_image.url) if request else instance.business_card_image.url
+        else:
+            representation['business_card_image_url'] = None
+            
+        return representation
 
     def get_profile_image_url(self, obj):
         if obj.profile_image:
@@ -423,6 +444,45 @@ class AdminUserDetailSerializer(UserSerializer):
         if obj.role == 'Store':
             return obj.clothing_items.count()
         return 0
+
+
+class AdminUserCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for admin to create new users (Customers or Stores)
+    """
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = [
+            'email', 'password', 'name', 'phone', 'role',
+            'is_verified', 'is_active', 'store_name', 'store_address', 'city'
+        ]
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        role = validated_data.get('role', 'Customer')
+        is_store = (role == 'Store')
+        
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=password,
+            name=validated_data.get('name', ''),
+            phone=validated_data.get('phone', ''),
+            role=role,
+            is_store=is_store,
+            **{k: v for k, v in validated_data.items() if k not in ['email', 'password', 'role']}
+        )
+        return user
+
+
+class AdminProfileUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for admin profile updates.
+    """
+    class Meta:
+        model = User
+        fields = ['name', 'phone', 'profile_image']
 
 # CLOTHING SERIALIZERS
 

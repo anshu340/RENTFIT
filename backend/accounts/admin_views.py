@@ -4,7 +4,14 @@ from rest_framework.views import APIView
 from django.db.models import Sum, Count
 from django.apps import apps
 from .models import User
-from .serializers import UserSerializer, StoreReadSerializer, CustomerReadSerializer, AdminUserDetailSerializer
+from .serializers import (
+    UserSerializer, 
+    StoreReadSerializer, 
+    CustomerReadSerializer, 
+    AdminUserDetailSerializer,
+    AdminUserCreateSerializer,
+    AdminProfileUpdateSerializer
+)
 from .permissions import IsAdmin
 
 class AdminStatsView(APIView):
@@ -85,24 +92,30 @@ class AdminStatsView(APIView):
             "total_revenue": float(total_revenue),
             "total_donations": total_donations,
             "collected_donations": collected_donations,
+            "pending_listings": apps.get_model('accounts', 'Clothing').objects.filter(status='PENDING_APPROVAL').count(),
+            "pending_donations": Donation.objects.filter(donation_status='Pending').count(),
             "revenue_history": revenue_history,
             "user_distribution": user_distribution
         }, status=status.HTTP_200_OK)
 
-class AdminUserListView(generics.ListAPIView):
+class AdminUserListView(generics.ListCreateAPIView):
     """
-    GET /api/accounts/admin/users/
-    Lists all users for admin management.
+    GET /api/accounts/admin/users/ - List users.
+    POST /api/accounts/admin/users/ - Create a new user (Admin-only).
     """
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
-    serializer_class = UserSerializer
     queryset = User.objects.all().order_by('-date_joined')
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AdminUserCreateSerializer
+        return UserSerializer
 
-class AdminUserDetailView(generics.RetrieveAPIView):
+
+class AdminUserDetailView(generics.RetrieveDestroyAPIView):
     """
-    GET /api/accounts/admin/users/<id>/
-    Retrieves detailed information for a specific user, including activity stats.
+    GET /api/accounts/admin/users/<id>/ - Retrieve user detail.
+    DELETE /api/accounts/admin/users/<id>/ - Hard delete user (Admin-only).
     """
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
     serializer_class = AdminUserDetailSerializer
@@ -154,3 +167,64 @@ class AdminGlobalActivityView(APIView):
             "recent_rentals": RentalSerializer(recent_rentals, many=True, context={'request': request}).data,
             "recent_donations": DonationListSerializer(recent_donations, many=True, context={'request': request}).data
         }, status=status.HTTP_200_OK)
+
+class AdminProfileView(APIView):
+    """
+    GET /api/accounts/admin/profile/
+    PATCH /api/accounts/admin/profile/
+    Returns or updates the profile information for the logged-in admin.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        serializer = AdminProfileUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            # Return updated info using read serializer
+            read_serializer = UserSerializer(request.user, context={'request': request})
+            return Response({
+                "message": "Admin profile updated successfully",
+                "data": read_serializer.data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PendingStoresView(generics.ListAPIView):
+    """
+    GET /api/accounts/admin/stores/pending/
+    Lists all stores that are awaiting KYC verification.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(role='Store', verification_status='pending').order_by('-date_joined')
+
+class ApproveStoreView(generics.UpdateAPIView):
+    """
+    PATCH /api/accounts/admin/stores/<id>/verify/
+    Approves or rejects a store's KYC verification.
+    """
+    queryset = User.objects.filter(role='Store')
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        status_val = request.data.get("status")
+
+        if status_val in ["approved", "rejected"]:
+            user.verification_status = status_val
+            user.save()
+            return Response({"message": f"Store {status_val} successfully."}, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)

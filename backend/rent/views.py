@@ -21,7 +21,8 @@ class RentalCreateView(generics.CreateAPIView):
         Notification.objects.create(
             user=rental.store,
             message=f"{self.request.user.email} requested to rent {rental.clothing.item_name}.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=self.request.build_absolute_uri(rental.clothing.images.url) if rental.clothing.images else None
         )
 
 class CustomerRentalListView(generics.ListAPIView):
@@ -73,7 +74,8 @@ class RentalApproveView(generics.UpdateAPIView):
             Notification.objects.create(
                 user=rental.customer,
                 message=f"Your rental request for {clothing.item_name} has been approved by {request.user.store_name}.",
-                notification_type='rental'
+                notification_type='rental',
+                image_url=request.build_absolute_uri(clothing.images.url) if clothing.images else None
             )
             return Response({"message": "Rental approved and stock updated."}, status=status.HTTP_200_OK)
         else:
@@ -98,7 +100,8 @@ class RentalRejectView(generics.UpdateAPIView):
         Notification.objects.create(
             user=rental.customer,
             message=f"Your rental request for {rental.clothing.item_name} has been rejected by {request.user.store_name}.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=request.build_absolute_uri(rental.clothing.images.url) if rental.clothing.images else None
         )
         return Response({"message": "Rental rejected."}, status=status.HTTP_200_OK)
 
@@ -126,7 +129,8 @@ class RentalMarkReturnedView(generics.UpdateAPIView):
         Notification.objects.create(
             user=rental.store,
             message=f"Customer {request.user.email} has marked {rental.clothing.item_name} as returned. Please confirm.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=request.build_absolute_uri(rental.clothing.images.url) if rental.clothing.images else None
         )
         return Response({"message": "Item marked as returned. Waiting for store confirmation."}, status=status.HTTP_200_OK)
 
@@ -154,7 +158,8 @@ class RentalConfirmReturnView(generics.UpdateAPIView):
         Notification.objects.create(
             user=rental.customer,
             message=f"Store {request.user.store_name} has confirmed the return of {rental.clothing.item_name}.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=request.build_absolute_uri(clothing.images.url) if clothing.images else None
         )
         
         return Response({"message": "Return confirmed and stock updated."}, status=status.HTTP_200_OK)
@@ -177,7 +182,8 @@ class DamageReportSubmitView(generics.CreateAPIView):
         Notification.objects.create(
             user=rental.store,
             message=f"New damage report submitted for {rental.clothing.item_name} by {self.request.user.email}.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=self.request.build_absolute_uri(rental.clothing.images.url) if rental.clothing.images else None
         )
 
 class DamageReportStoreView(generics.ListAPIView):
@@ -224,7 +230,8 @@ class DamageReportActionView(generics.UpdateAPIView):
         Notification.objects.create(
             user=report.user,
             message=f"Your damage report for {report.clothing.item_name} has been {report.status}.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=request.build_absolute_uri(report.clothing.images.url) if report.clothing.images else None
         )
         
         return Response(DamageReportSerializer(report).data, status=status.HTTP_200_OK)

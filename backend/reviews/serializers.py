@@ -8,10 +8,11 @@ class ReviewListSerializer(serializers.ModelSerializer):
     dress_name = serializers.CharField(source='clothing.item_name', read_only=True)
     store_name = serializers.CharField(source='clothing.store.store_name', read_only=True)
     dress_image = serializers.SerializerMethodField()
+    user_profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
-        fields = ['id', 'user_name', 'user_email', 'dress_name', 'store_name', 'dress_image', 'rating', 'comment', 'created_at']
+        fields = ['id', 'user_name', 'user_email', 'user_profile_image', 'dress_name', 'store_name', 'dress_image', 'rating', 'comment', 'created_at']
 
     def get_dress_image(self, obj):
         if obj.clothing.images:
@@ -19,6 +20,14 @@ class ReviewListSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.clothing.images.url)
             return obj.clothing.images.url
+        return None
+
+    def get_user_profile_image(self, obj):
+        if obj.user.profile_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.user.profile_image.url)
+            return obj.user.profile_image.url
         return None
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
@@ -38,7 +47,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         if rental.customer != user:
             raise serializers.ValidationError("You can only review your own rentals.")
 
-        if rental.status != Rental.Status.RETURNED_CONFIRMED:
+        if rental.status not in [Rental.Status.RETURNED_CONFIRMED, Rental.Status.RETURNED_PENDING]:
             raise serializers.ValidationError("You can only review completed rentals.")
 
         if hasattr(rental, 'review'):

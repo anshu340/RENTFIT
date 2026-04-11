@@ -36,7 +36,8 @@ class DonationCreateView(generics.CreateAPIView):
         Notification.objects.create(
             user=donation.store,
             message=f"New donation pledge from {self.request.user.email}: {donation.item_name}.",
-            notification_type='donation'
+            notification_type='donation',
+            image_url=self.request.build_absolute_uri(donation.images.url) if donation.images else None
         )
 
 
@@ -201,7 +202,8 @@ class DonationStatusUpdateView(generics.UpdateAPIView):
         Notification.objects.create(
             user=instance.customer,
             message=f"The status of your donation {instance.item_name} has been updated to {instance.donation_status}.",
-            notification_type='donation'
+            notification_type='donation',
+            image_url=request.build_absolute_uri(instance.images.url) if instance.images else None
         )
 
         # Return updated donation details
@@ -262,7 +264,8 @@ class DonationCollectView(APIView):
         Notification.objects.create(
             user=donation.customer,
             message=f"Store {request.user.store_name} has marked your donation {donation.item_name} as collected. Thank you!",
-            notification_type='donation'
+            notification_type='donation',
+            image_url=request.build_absolute_uri(donation.images.url) if donation.images else None
         )
 
         serializer = DonationDetailSerializer(donation, context={'request': request})
@@ -297,3 +300,71 @@ class StoreListForDonationView(APIView):
         return Response({
             "stores": store_list
         }, status=status.HTTP_200_OK)
+
+
+# ADMIN DONATION VIEWS
+
+from accounts.permissions import IsAdmin
+
+class AdminDonationListView(generics.ListAPIView):
+    """
+    List all pending donations for admin moderation
+    GET /api/donations/admin/
+    Auth: Admin
+    """
+    permission_classes = [IsAuthenticated, IsAdmin]
+    serializer_class = DonationListSerializer
+
+    def get_queryset(self):
+        return Donation.objects.filter(donation_status=Donation.DonationStatus.PENDING).order_by('-created_at')
+
+class AdminDonationAcceptView(APIView):
+    """
+    Approve/Accept donation by Admin
+    PATCH /api/donations/admin/<id>/accept/
+    Auth: Admin
+    """
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def patch(self, request, pk):
+        donation = get_object_or_404(Donation, pk=pk)
+        donation.donation_status = Donation.DonationStatus.APPROVED
+        donation.save()
+        
+        Notification.objects.create(
+            user=donation.customer,
+            message=f"Admin has approved your donation pledge: {donation.item_name}.",
+            notification_type='donation',
+            image_url=request.build_absolute_uri(donation.images.url) if donation.images else None
+        )
+        
+        return Response({
+            "message": "Donation approved by admin",
+            "status": donation.donation_status,
+            "data": DonationDetailSerializer(donation, context={'request': request}).data
+        }, status=status.HTTP_200_OK)
+
+class AdminDonationRejectView(APIView):
+    """
+    Reject donation by Admin
+    PATCH /api/donations/admin/<id>/reject/
+    Auth: Admin
+    """
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def patch(self, request, pk):
+        donation = get_object_or_404(Donation, pk=pk)
+        donation.donation_status = Donation.DonationStatus.REJECTED
+        donation.save()
+
+        Notification.objects.create(
+            user=donation.customer,
+            message=f"Admin has rejected your donation pledge: {donation.item_name}.",
+            notification_type='donation',
+            image_url=request.build_absolute_uri(donation.images.url) if donation.images else None
+        )
+        
+        return Response({
+            "message": "Donation rejected by admin",
+            "status": donation.donation_status
+        }, status=status.HTTP_200_OK)

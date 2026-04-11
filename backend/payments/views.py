@@ -96,7 +96,8 @@ class EsewaVerifyView(APIView):
             Notification.objects.create(
                 user=rental.store,
                 message=f"Payment received for rental of '{rental.clothing.item_name}'.",
-                notification_type='rental'
+                notification_type='rental',
+                image_url=request.build_absolute_uri(rental.clothing.images.url) if rental.clothing.images else None
             )
             
             return redirect("http://localhost:5173/payment-success")

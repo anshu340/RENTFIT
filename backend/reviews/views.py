@@ -27,7 +27,8 @@ class ReviewCreateView(generics.CreateAPIView):
         Notification.objects.create(
             user=review.clothing.store,
             message=f"New review received for {review.clothing.item_name} from {review.user.email}: {review.rating} stars.",
-            notification_type='rental'
+            notification_type='rental',
+            image_url=self.request.build_absolute_uri(review.clothing.images.url) if review.clothing.images else None
         )
 
 class ClothingReviewListView(generics.ListAPIView):

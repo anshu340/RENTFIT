@@ -10,6 +10,9 @@ from .views import (
     DonationStatusUpdateView,
     DonationCollectView,
     StoreListForDonationView,
+    AdminDonationListView,
+    AdminDonationAcceptView,
+    AdminDonationRejectView
 )
 
 urlpatterns = [
@@ -26,4 +29,9 @@ urlpatterns = [
     path('store/<int:pk>/status/', DonationStatusUpdateView.as_view(), name='donation-status-update'),
     path('store/<int:pk>/collect/', DonationCollectView.as_view(), name='donation-collect'),
     path('store/<int:pk>/delete/', StoreDonationDeleteView.as_view(), name='store-donation-delete'),
+
+    # Admin endpoints
+    path('admin/', AdminDonationListView.as_view(), name='admin-donation-list'),
+    path('admin/<int:pk>/accept/', AdminDonationAcceptView.as_view(), name='admin-donation-accept'),
+    path('admin/<int:pk>/reject/', AdminDonationRejectView.as_view(), name='admin-donation-reject'),
 ]

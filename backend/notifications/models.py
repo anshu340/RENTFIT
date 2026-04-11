@@ -15,6 +15,7 @@ class Notification(models.Model):
     message = models.TextField()
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='system')
     is_read = models.BooleanField(default=False)
+    image_url = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

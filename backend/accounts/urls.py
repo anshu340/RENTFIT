@@ -35,6 +35,8 @@ from .views import (
     AddToBrowseView,
     UniversalSearchView,
     PublicStoreView,
+    AdminClothingApproveView,
+    AdminClothingRejectView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from .admin_views import (
@@ -43,6 +45,9 @@ from .admin_views import (
     AdminUserDetailView,
     AdminUserDeactivateView,
     AdminGlobalActivityView,
+    AdminProfileView,
+    PendingStoresView,
+    ApproveStoreView,
 )
 
 urlpatterns = [
@@ -55,7 +60,13 @@ urlpatterns = [
     path("admin/users/<int:pk>/deactivate/", AdminUserDeactivateView.as_view(), name="admin-user-deactivate"),
     path("admin/activity/", AdminGlobalActivityView.as_view(), name="admin-activity"),
     path("admin/clothing/pending/", AdminPendingClothingListView.as_view(), name="admin-clothing-pending"),
-    path("admin/clothing/<int:pk>/<str:action>/", AdminClothingApprovalView.as_view(), name="admin-clothing-approval"),
+    path("admin/profile/", AdminProfileView.as_view(), name="admin-profile"),
+    path("admin/clothing/<int:pk>/approve/", AdminClothingApproveView.as_view(), name="admin-clothing-approve"),
+    path("admin/clothing/<int:pk>/reject/", AdminClothingRejectView.as_view(), name="admin-clothing-reject"),
+    path("admin/stores/pending/", PendingStoresView.as_view(), name="admin-stores-pending"),
+    path("admin/stores/<int:pk>/verify/", ApproveStoreView.as_view(), name="admin-stores-verify"),
+
+
     # Authentication Endpoints
     path("register/customer/", CustomerRegisterView.as_view(), name="register-customer"),
     path("register/store/", StoreRegisterView.as_view(), name="register-store"),

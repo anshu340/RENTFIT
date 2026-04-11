@@ -826,36 +826,51 @@ class AdminPendingClothingListView(generics.ListAPIView):
         return Clothing.objects.filter(status=Clothing.ClothingApproval.PENDING).order_by('-created_at')
 
 
-class AdminClothingApprovalView(APIView):
+class AdminClothingApproveView(APIView):
     """
-    Approve or Reject clothing item
-    POST /api/accounts/admin/clothing/<int:pk>/<str:action>/
+    Approve clothing item
+    PATCH /api/accounts/admin/clothing/<int:pk>/approve/
     Auth: Admin
     """
     permission_classes = [IsAuthenticated, IsAdmin]
 
-    def post(self, request, pk, action):
+    def patch(self, request, pk):
         try:
             clothing = Clothing.objects.get(pk=pk)
+            clothing.status = Clothing.ClothingApproval.APPROVED
+            clothing.save()
+            return Response({
+                "message": f"Clothing item {clothing.item_name} approved successfully",
+                "status": clothing.status
+            }, status=status.HTTP_200_OK)
         except Clothing.DoesNotExist:
             return Response({"error": "Clothing item not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if action == "approve":
-            clothing.status = Clothing.ClothingApproval.APPROVED
-            message = f"Clothing item {clothing.item_name} approved successfully"
-        elif action == "reject":
-            clothing.status = Clothing.ClothingApproval.REJECTED
-            message = f"Clothing item {clothing.item_name} rejected"
-        else:
-            return Response({"error": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
+class AdminClothingRejectView(APIView):
+    """
+    Reject clothing item
+    PATCH /api/accounts/admin/clothing/<int:pk>/reject/
+    Auth: Admin
+    """
+    permission_classes = [IsAuthenticated, IsAdmin]
 
-        clothing.save()
-        
-        return Response({
-            "message": message,
-            "status": clothing.status,
-            "data": ClothingDetailSerializer(clothing, context={'request': request}).data
-        }, status=status.HTTP_200_OK)
+    def patch(self, request, pk):
+        try:
+            clothing = Clothing.objects.get(pk=pk)
+            clothing.status = Clothing.ClothingApproval.REJECTED
+            clothing.save()
+            return Response({
+                "message": f"Clothing item {clothing.item_name} rejected",
+                "status": clothing.status
+            }, status=status.HTTP_200_OK)
+        except Clothing.DoesNotExist:
+            return Response({"error": "Clothing item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AdminClothingApprovalView(APIView):
+    """
+    Legacy view: Approve or Reject clothing item via POST action string.
+    """
 
 
 class AddToBrowseView(APIView):

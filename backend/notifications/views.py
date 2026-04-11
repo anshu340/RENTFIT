@@ -35,3 +35,16 @@ class UnreadCountView(APIView):
     def get(self, request):
         count = Notification.objects.filter(user=request.user, is_read=False).count()
         return Response({"unread_count": count}, status=status.HTTP_200_OK)
+
+
+from accounts.permissions import IsAdmin
+
+class AdminNotificationListView(generics.ListAPIView):
+    """
+    List all system-wide notifications for admin monitoring
+    GET /api/notifications/admin/
+    Auth: Admin
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    serializer_class = NotificationSerializer
+    queryset = Notification.objects.all().order_by('-created_at')
