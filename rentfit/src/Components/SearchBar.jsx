@@ -80,7 +80,7 @@ const SearchBar = () => {
     };
 
     return (
-        <div className="relative w-full max-w-lg mx-4" ref={dropdownRef}>
+        <div className="relative w-full max-w-2xl mx-4" ref={dropdownRef}>
             {/* Search Input Box */}
             <div className={`flex items-center bg-gray-50 border-2 transition-all duration-300 rounded-2xl px-4 py-2 ${showDropdown ? 'border-purple-300 bg-white shadow-lg shadow-purple-50' : 'border-transparent hover:border-gray-200'}`}>
                 <FaSearch className={`text-lg transition-colors duration-300 ${query ? 'text-purple-500' : 'text-gray-400'}`} />

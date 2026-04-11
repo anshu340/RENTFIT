@@ -38,11 +38,24 @@ const AddClothingItem = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const [storeStatus, setStoreStatus] = useState(null);
+
   useEffect(() => {
+    fetchStoreProfile();
     if (isEditMode) {
       fetchClothingItem();
     }
   }, [editId]);
+
+  const fetchStoreProfile = async () => {
+    try {
+      const response = await axiosInstance.get('accounts/stores/profile/');
+      const profile = response.data?.data || response.data;
+      setStoreStatus(profile.verification_status);
+    } catch (err) {
+      console.error('Error fetching store profile:', err);
+    }
+  };
 
   const fetchClothingItem = async () => {
     try {
@@ -232,6 +245,15 @@ const AddClothingItem = () => {
           </div>
 
           <div className="space-y-6">
+            {storeStatus && storeStatus !== 'approved' ? (
+              <div className="p-8 bg-amber-50 border border-amber-200 rounded-3xl text-amber-800 text-center space-y-4">
+                <h3 className="text-xl font-bold uppercase tracking-widest text-amber-600">Verification Pending</h3>
+                <p className="font-medium max-w-lg mx-auto">
+                  Your store application is currently under review or has been rejected. You cannot add or edit clothing items until your store is fully verified and approved by the administration.
+                </p>
+              </div>
+            ) : (
+              <>
             {/* Success Message */}
             {success && (
               <div className="p-4 bg-green-50 border border-green-100 rounded-2xl text-green-700 font-medium animate-pulse">
@@ -577,6 +599,8 @@ const AddClothingItem = () => {
                 </div>
               </div>
             </div>
+            </>
+            )}
           </div>
         </div>
       </div>

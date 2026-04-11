@@ -28,7 +28,17 @@ const AdminUserManagement = () => {
     const [alert, setAlert] = useState({ message: '', type: '' });
     const [selectedUserDetail, setSelectedUserDetail] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [loadingAction, setLoadingAction] = useState(false);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [newUser, setNewUser] = useState({
+        email: '',
+        password: '',
+        name: '',
+        phone: '',
+        role: 'Customer',
+        is_verified: true
+    });
 
     const fetchUsers = async () => {
         try {
@@ -57,11 +67,25 @@ const AdminUserManagement = () => {
         }
     };
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        try {
+            setLoadingAction(true);
+            await axiosInstance.post('accounts/admin/users/', newUser);
+            setAlert({ message: "User created successfully!", type: "success" });
+            setIsAddModalOpen(false);
+            setNewUser({ email: '', password: '', name: '', phone: '', role: 'Customer', is_verified: true });
+            fetchUsers();
+        } catch (error) {
+            const errorMsg = error.response?.data?.email?.[0] || "Failed to create user.";
+            setAlert({ message: errorMsg, type: "error" });
+        } finally {
+            setLoadingAction(false);
+        }
+    };
 
-    const handleDeactivate = async (userId) => {
+    const handleDeactivate = async (e, userId) => {
+        e.stopPropagation(); // Prevent modal from opening
         try {
             const response = await axiosInstance.patch(`accounts/admin/users/${userId}/deactivate/`);
             setAlert({ message: response.data.message, type: "success" });
@@ -70,6 +94,26 @@ const AdminUserManagement = () => {
             setAlert({ message: "Failed to update user status.", type: "error" });
         }
     };
+
+    const handleDeleteUser = async (userId) => {
+        if (!window.confirm("ARE YOU SURE? This is a HARD DELETE and cannot be undone. All data related to this user will be lost.")) return;
+        
+        try {
+            setLoadingAction(true);
+            await axiosInstance.delete(`accounts/admin/users/${userId}/`);
+            setAlert({ message: "User permanently deleted.", type: "success" });
+            setIsModalOpen(false);
+            fetchUsers();
+        } catch (error) {
+            setAlert({ message: "Failed to delete user.", type: "error" });
+        } finally {
+            setLoadingAction(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
 
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,7 +143,15 @@ const AdminUserManagement = () => {
                                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
                                 <p className="text-slate-500 font-medium">Control platform access and review user accounts.</p>
                             </div>
-                            <div className="text-sm font-bold text-slate-400">Total Users: {users.length}</div>
+                            <div className="flex items-center gap-4">
+                                <div className="text-sm font-bold text-slate-400">Total Users: {users.length}</div>
+                                <button 
+                                    onClick={() => setIsAddModalOpen(true)}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-100 transition-all active:scale-95"
+                                >
+                                    + Add User
+                                </button>
+                            </div>
                         </div>
 
                         {/* Search & Filters */}
@@ -187,7 +239,7 @@ const AdminUserManagement = () => {
                                                 </td>
                                                 <td className="px-8 py-6 text-right">
                                                     <button
-                                                        onClick={() => handleDeactivate(user.id)}
+                                                        onClick={(e) => handleDeactivate(e, user.id)}
                                                         className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${user.is_active
                                                             ? 'bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white'
                                                             : 'bg-emerald-50 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}
@@ -209,8 +261,8 @@ const AdminUserManagement = () => {
 
             {/* User Detail Modal */}
             {isModalOpen && selectedUserDetail && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
                         {/* Modal Header */}
                         <div className="relative h-32 bg-indigo-600">
                             <button 
@@ -264,7 +316,7 @@ const AdminUserManagement = () => {
                                         <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
                                         Contact Details
                                     </h3>
-                                    <div className="space-y-4">
+                                    <div className="space-y-4 text-left">
                                         <div className="flex items-center gap-4 group">
                                             <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
                                                 <FaEnvelope />
@@ -298,6 +350,15 @@ const AdminUserManagement = () => {
                                             </div>
                                         )}
                                     </div>
+                                    <div className="pt-4 border-t border-slate-50">
+                                        <button 
+                                            onClick={() => handleDeleteUser(selectedUserDetail.id)}
+                                            disabled={loadingAction}
+                                            className="w-full bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-50"
+                                        >
+                                            {loadingAction ? 'Deleting...' : 'Permanently Delete User'}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Right Column: Stats & Meta */}
@@ -328,7 +389,7 @@ const AdminUserManagement = () => {
                                             <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                 <FaInfoCircle /> Store Description
                                             </div>
-                                            <p className="text-slate-600 text-sm font-medium leading-relaxed italic">
+                                            <p className="text-slate-600 text-sm font-medium leading-relaxed italic text-left">
                                                 "{selectedUserDetail.store_description}"
                                             </p>
                                         </div>
@@ -336,6 +397,93 @@ const AdminUserManagement = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Create User Modal */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
+                        <div className="px-10 pt-10 pb-4">
+                            <h2 className="text-2xl font-black text-slate-900 mb-2">Create New User</h2>
+                            <p className="text-slate-500 text-sm font-medium">Add a new customer or store account.</p>
+                        </div>
+                        <form onSubmit={handleCreateUser} className="p-10 pt-4 space-y-4">
+                            <div className="space-y-4 text-left">
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Full Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none font-bold transition-all"
+                                        value={newUser.name}
+                                        onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Email</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none font-bold transition-all"
+                                            value={newUser.email}
+                                            onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Password</label>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none font-bold transition-all"
+                                            value={newUser.password}
+                                            onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Role</label>
+                                        <select
+                                            className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none font-bold transition-all appearance-none cursor-pointer"
+                                            value={newUser.role}
+                                            onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                                        >
+                                            <option value="Customer">Customer</option>
+                                            <option value="Store">Store</option>
+                                            <option value="Admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Phone</label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none font-bold transition-all"
+                                            value={newUser.phone}
+                                            onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 pt-6">
+                                <button 
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    className="flex-1 px-6 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-100 transition-all font-bold"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    disabled={loadingAction}
+                                    className="flex-1 px-6 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50"
+                                >
+                                    {loadingAction ? 'Creating...' : 'Create'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

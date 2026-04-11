@@ -125,6 +125,7 @@ const StoreDashboard = () => {
           location,
           description,
           storeImage,
+          verification_status: profileData.verification_status || 'pending',
         });
       }
 
@@ -257,37 +258,39 @@ const StoreDashboard = () => {
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
+
           {/* Header */}
-          <div className="bg-white border-b border-gray-200">
-            <div className="px-8 py-5 flex items-center justify-between">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-800">{storeInfo.storeName || "Store Dashboard"}</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {storeInfo.description || "Monitor and manage rental operations"}
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer">
-                    {storeInfo.storeImage ? (
-                      <img src={storeInfo.storeImage} alt="Store Logo" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm font-bold">
-                        {storeInfo.ownerName?.charAt(0)?.toUpperCase() || 'S'}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{storeInfo.ownerName || "Store Owner"}</p>
-                    <p className="text-xs text-gray-500">Sub-Admin</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="px-8 pt-10 pb-2">
+            <h2 className="text-3xl font-bold text-gray-900">{storeInfo.storeName || "Store Dashboard"}</h2>
+            <p className="text-sm text-gray-500 mt-1 font-medium">
+              {storeInfo.description || "Monitor and manage rental operations"}
+            </p>
           </div>
 
+          {storeInfo.verification_status && storeInfo.verification_status !== 'approved' && (
+            <div className={`mx-8 mt-4 p-4 rounded-xl border flex items-start gap-4 shadow-sm ${
+              storeInfo.verification_status === 'rejected' 
+                ? 'bg-rose-50 border-rose-200 text-rose-800' 
+                : 'bg-amber-50 border-amber-200 text-amber-800'
+            }`}>
+              <div className="mt-1">
+                <FaExclamationTriangle className="text-xl" />
+              </div>
+              <div>
+                <h4 className="font-black text-sm uppercase tracking-widest mb-1">
+                  {storeInfo.verification_status === 'rejected' ? 'Verification Rejected' : 'Verification Pending'}
+                </h4>
+                <p className="text-sm font-medium">
+                  {storeInfo.verification_status === 'rejected' 
+                    ? 'Your store application was rejected by the administration. Please contact support.'
+                    : 'Your store is currently under review. Some features like adding clothing items will be restricted until approved.'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Dashboard Content */}
-          <div className="p-8">
+          <div className="p-8 pt-10">
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
               <InfoCard icon={FaTshirt} label="Total Listings" value={stats.totalClothes} color="purple" trend={`${stats.availableClothes} available`} />

@@ -20,10 +20,6 @@ import {
 const StoreSidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [storeInfo, setStoreInfo] = useState({
-        storeName: "",
-        storeImage: "",
-    });
 
     const menuItems = [
         { name: 'Dashboard', icon: FaHome, path: '/storeDashboard' },
@@ -38,21 +34,6 @@ const StoreSidebar = () => {
         { name: 'Privacy & Security', icon: FaShieldAlt, path: '/privacy-security' },
     ];
 
-    useEffect(() => {
-        const fetchStoreProfile = async () => {
-            try {
-                const response = await axiosInstance.get("accounts/stores/profile/");
-                const data = response.data?.data || response.data;
-                setStoreInfo({
-                    storeName: data.store_name || "My Store",
-                    storeImage: data.store_logo_url || data.store_logo || "",
-                });
-            } catch (error) {
-                console.error("Error fetching sidebar profile:", error);
-            }
-        };
-        fetchStoreProfile();
-    }, []);
 
     const handleLogout = () => {
         localStorage.clear();
@@ -67,20 +48,6 @@ const StoreSidebar = () => {
 
     return (
         <div className="w-60 bg-white border border-gray-100 rounded-3xl flex flex-col h-fit m-6 shadow-md">
-            <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {storeInfo.storeImage ? (
-                            <img src={storeInfo.storeImage} alt="Store Logo" className="w-full h-full object-cover" />
-                        ) : (
-                            <FaStore className="text-white text-xl" />
-                        )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-lg font-bold text-gray-800 truncate">{storeInfo.storeName}</h1>
-                    </div>
-                </div>
-            </div>
 
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                 {menuItems.map((item) => {

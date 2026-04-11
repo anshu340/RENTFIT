@@ -35,9 +35,12 @@ import AdminActivity from './Pages/AdminActivity.jsx';
 import StoreReports from './Pages/StoreReports.jsx';
 
 import AdminClothingApproval from './Pages/AdminClothingApproval.jsx';
+import AdminDonationManagement from './Pages/AdminDonationManagement.jsx';
+import AdminStoreApproval from './Pages/AdminStoreApproval.jsx';
 
 
 import PrivacySecurity from "./Pages/PrivacySecurity.jsx";
+import AdminSettings from './Pages/AdminSettings.jsx';
 
 function App() {
   return (
@@ -81,6 +84,9 @@ function App() {
       <Route path="/reports" element={<StoreReports />} />
 
       <Route path="/adminClothingApproval" element={<AdminClothingApproval />} />
+      <Route path="/adminDonations" element={<AdminDonationManagement />} />
+      <Route path="/adminStoreApproval" element={<AdminStoreApproval />} />
+      <Route path="/adminSettings" element={<AdminSettings />} />
     </Routes>
 
   );

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '../services/axiosInstance';
 import AdminSidebar from '../Components/AdminSidebar';
 import Navbar from '../Components/Navbar';
@@ -33,7 +34,7 @@ const AdminClothingApproval = () => {
         try {
             const apiStatus = statusAction === 'approved' ? 'APPROVED' : 'REJECTED';
             const endpoint = statusAction === 'approved' ? 'approve' : 'reject';
-            await axiosInstance.post(`accounts/admin/clothing/${id}/${endpoint}/`);
+            await axiosInstance.patch(`accounts/admin/clothing/${id}/${endpoint}/`);
             setMessage({
                 type: 'success',
                 text: `Item ${statusAction === 'approved' ? 'approved' : 'rejected'} successfully.`

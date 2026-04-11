@@ -53,10 +53,10 @@ const AdminDashboard = () => {
     }, []);
 
     const statCards = [
-        { title: 'Total Revenue', value: formatPrice(stats.total_revenue), icon: FaMoneyBillWave, color: 'bg-emerald-500', trend: '+12.5%' },
-        { title: 'Total Users', value: stats.total_users, icon: FaUsers, color: 'bg-indigo-500', trend: '+8.2%' },
-        { title: 'Registered Stores', value: stats.total_stores, icon: FaStore, color: 'bg-amber-500', trend: '+4.1%' },
-        { title: 'Donations Processed', value: stats.total_donations, icon: FaHandHoldingHeart, color: 'bg-rose-500', trend: '+15.3%' },
+        { title: 'Total Revenue', value: formatPrice(stats.total_revenue), icon: FaMoneyBillWave, color: 'bg-emerald-500', trend: 'Live' },
+        { title: 'Total Users', value: stats.total_users, icon: FaUsers, color: 'bg-indigo-500', trend: 'Global' },
+        { title: 'Pending Listings', value: stats.pending_listings, icon: FaStore, color: 'bg-amber-500', trend: 'Review' },
+        { title: 'Pending Donations', value: stats.pending_donations, icon: FaHandHoldingHeart, color: 'bg-rose-500', trend: 'Review' },
     ];
 
     const CustomTooltip = ({ active, payload, label }) => {

@@ -7,7 +7,8 @@ import {
     FaSignOutAlt,
     FaCog,
     FaUserShield,
-    FaTshirt
+    FaTshirt,
+    FaHandHoldingHeart
 } from 'react-icons/fa';
 
 const AdminSidebar = () => {
@@ -18,7 +19,9 @@ const AdminSidebar = () => {
         { name: 'Admin Dashboard', icon: FaHome, path: '/adminDashboard' },
         { name: 'User Management', icon: FaUsers, path: '/adminUsers' },
         { name: 'Global Activity', icon: FaHistory, path: '/adminActivity' },
+        { name: 'Store Verification', icon: FaTshirt, path: '/adminStoreApproval' },
         { name: 'Clothing Approval', icon: FaTshirt, path: '/adminClothingApproval' },
+        { name: 'Donation Moderation', icon: FaHandHoldingHeart, path: '/adminDonations' },
     ];
 
     const handleLogout = () => {
@@ -61,7 +64,7 @@ const AdminSidebar = () => {
 
             <div className="p-4 border-t border-gray-100 space-y-1.5">
                 <Link
-                    to="/adminDashboard"
+                    to="/adminSettings"
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm ${location.pathname === '/adminSettings'
                         ? 'bg-indigo-50 text-indigo-600 font-bold'
                         : 'text-gray-500 hover:bg-gray-50'

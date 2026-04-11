@@ -40,8 +40,12 @@ const ReviewSection = ({ reviews, averageRating, totalReviews }) => {
                         <div key={review.id} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm transition-hover hover:shadow-md">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
-                                        <FaUserCircle size={24} />
+                                    <div className="w-10 h-10 bg-purple-100 rounded-full overflow-hidden border border-purple-200 flex items-center justify-center text-purple-600">
+                                        {review.user_profile_image ? (
+                                            <img src={review.user_profile_image} alt={review.user_name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <FaUserCircle size={24} />
+                                        )}
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-gray-800">{review.user_name || review.user_email.split('@')[0]}</h4>

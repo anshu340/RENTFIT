@@ -17,6 +17,8 @@ const StoreRegister = () => {
     city: "",
     store_description: "",
     store_logo: null,
+    citizenship_image: null,
+    business_card_image: null,
     password: "",
     confirmPassword: "",
   });
@@ -52,12 +54,67 @@ const StoreRegister = () => {
 
   // Step 2: Submit registration and get OTP
   const handleRegister = async () => {
-    // ... same as before
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    
+    if (!formData.citizenship_image || !formData.business_card_image) {
+      setError("Citizenship Image and Business Card are required.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    setMessage("");
+
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key !== "confirmPassword" && formData[key] !== null) {
+        data.append(key, formData[key]);
+      }
+    });
+
+    try {
+      await axiosInstance.post("accounts/register/store/", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setStep(3);
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.email?.[0] ||
+        err.response?.data?.error ||
+        "Registration failed. Please check your details.";
+      setError(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Step 3: Verify OTP
   const handleVerifyOTP = async () => {
-    // ... same as before
+    if (!otp || otp.length !== 6) {
+      setError("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await axiosInstance.post("accounts/verify-otp/", {
+        email: formData.email,
+        otp: otp,
+      });
+
+      setMessage("Account registered successfully! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || "Invalid OTP. Please try again.";
+      setError(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResendOtp = async () => {
@@ -91,304 +148,302 @@ const StoreRegister = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-2 relative bg-[#fdfcfb] overflow-hidden">
+      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-[#fdfcfb] relative overflow-hidden px-4 py-12">
+        {/* Aesthetic Background Blobs - Soft Pastels */}
+        <div className="absolute top-0 -left-4 w-[30rem] h-[30rem] bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div className="absolute top-10 -right-4 w-[30rem] h-[30rem] bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-10 left-40 w-[30rem] h-[30rem] bg-amber-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
 
-        {/* Left Section: Aesthetic Branding & Progress */}
-        <div className="hidden lg:flex flex-col justify-center px-16 xl:px-24 bg-white/30 backdrop-blur-md text-slate-800 relative h-full border-r border-slate-100">
-          {/* Aesthetic Blobs */}
-          <div className="absolute top-0 -left-10 w-96 h-96 bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-          <div className="absolute bottom-0 -right-10 w-96 h-96 bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div className="relative w-full max-w-6xl flex flex-col lg:flex-row bg-white/60 backdrop-blur-xl rounded-[3rem] border border-white/60 shadow-xl overflow-hidden animate-fade-in">
 
-          <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
-
-          <div className="relative z-10">
-            <span className="inline-block px-3 py-1 bg-white/80 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-slate-100 text-slate-400">Merchant Portal</span>
-            <h1 className="text-5xl font-black mb-8 leading-tight tracking-tight text-slate-900 italic">
-              Empower your<br />Inventory.
-            </h1>
-            <p className="text-xl text-slate-500 mb-12 font-medium max-w-md leading-relaxed">
-              Join the future of circular fashion as a premium partner store.
-            </p>
-
-            {/* Progress Indicator */}
-            <div className="space-y-10">
-              {[
-                { s: 1, title: "Store Identity", desc: "Basic details & location" },
-                { s: 2, title: "Security", desc: "Access credentials" },
-                { s: 3, title: "Verification", desc: "OTP authentication" }
-              ].map((item) => (
-                <div key={item.s} className={`flex items-start gap-4 transition-all duration-500 ${step >= item.s ? 'opacity-100 translate-x-2' : 'opacity-30'}`}>
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm border-2 ${step >= item.s ? 'bg-slate-900 border-slate-900 text-white' : 'border-slate-200 text-slate-400'}`}>
-                    {step > item.s ? '✓' : `0${item.s}`}
-                  </div>
-                  <div>
-                    <h3 className="font-black text-[11px] uppercase tracking-widest text-slate-900">{item.title}</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
+          {/* Left Side: Aesthetic Branding */}
+          <div className="lg:w-5/12 hidden lg:flex flex-col justify-center p-12 lg:p-16 bg-gradient-to-br from-[#f8edeb] via-[#fae1dd] to-[#f8edeb] text-slate-800 relative">
+            <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
+            <div className="relative z-10">
+              <span className="inline-block px-4 py-1.5 bg-white/50 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-white/80">Step {step} of 3</span>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight tracking-tight text-slate-900">
+                {step === 1 && "Start your store journey."}
+                {step === 2 && "Secure your store."}
+                {step === 3 && "Verify your identity."}
+              </h2>
+              <p className="text-base lg:text-lg text-slate-600 mb-8 font-medium leading-relaxed">
+                Join the future of circular fashion. Monetize your wardrobe as a premium partner in our trusted network.
+              </p>
             </div>
           </div>
 
-          <div className="absolute bottom-12 left-16 xl:left-24 text-slate-300 text-[10px] font-black tracking-[0.3em] uppercase">
-            RentFit / Partner Network
-          </div>
-        </div>
-
-        {/* Right Section: Form */}
-        <div className="flex items-center justify-center bg-white/50 backdrop-blur-sm px-6 py-12 lg:py-20 overflow-y-auto">
-          <div className="w-full max-w-lg animate-fade-in">
-
-            {message && (
-              <div className="flex items-center gap-3 text-emerald-600 text-[11px] font-black uppercase tracking-widest mb-8 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                <p>{message}</p>
+          {/* Right Section: Form */}
+          <div className="lg:w-7/12 w-full px-6 py-12 sm:px-12 lg:px-16 flex flex-col justify-center bg-white/80">
+            <div className="max-w-xl w-full mx-auto">
+              
+              <div className="mb-8 text-center sm:text-left">
+                <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Partner Registration</h2>
+                <p className="text-slate-500 font-medium text-sm">
+                  {step === 1 && "Complete your store details to begin."}
+                  {step === 2 && "Setup your access credentials."}
+                  {step === 3 && "Final verification step."}
+                </p>
               </div>
-            )}
 
-            {error && (
-              <div className="flex items-center gap-3 text-rose-600 text-[11px] font-black uppercase tracking-widest mb-8 bg-rose-50 p-4 rounded-2xl border border-rose-100 animate-shake">
-                <p>{error}</p>
-              </div>
-            )}
-
-            {step === 1 && (
-              <div>
-                <div className="mb-10">
-                  <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter italic">Store Persona</h2>
-                  <p className="text-slate-500 font-medium uppercase text-[11px] tracking-widest">Partner Registration</p>
+              {message && (
+                <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl text-sm font-semibold flex items-center gap-3">
+                  {message}
                 </div>
+              )}
 
+              {error && (
+                <div className="flex items-center gap-3 text-rose-600 text-sm mb-6 bg-rose-50 p-4 rounded-xl border border-rose-100">
+                  <p className="font-semibold">{error}</p>
+                </div>
+              )}
+
+              {step === 1 && (
                 <form className="space-y-5">
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Founder Name</label>
-                    <input
-                      type="text"
-                      name="owner_name"
-                      placeholder="NAME"
-                      value={formData.owner_name}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Founder Name</label>
+                      <input
+                        type="text"
+                        name="owner_name"
+                        placeholder="Alex Doe"
+                        value={formData.owner_name}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Store Name</label>
+                      <input
+                        type="text"
+                        name="store_name"
+                        placeholder="Luxe Rentals"
+                        value={formData.store_name}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
+                      />
+                    </div>
                   </div>
 
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Store Name</label>
-                    <input
-                      type="text"
-                      name="store_name"
-                      placeholder="LUXE RENTALS"
-                      value={formData.store_name}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Official Email</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Official Email</label>
                       <input
                         type="email"
                         name="email"
-                        placeholder="STORE@EXAMPLE.COM"
+                        placeholder="store@example.com"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
                       />
                     </div>
-
-                    <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Business Line</label>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Business Phone</label>
                       <input
                         type="tel"
                         name="phone_number"
-                        placeholder="OFFICE"
+                        placeholder="000-000-0000"
                         value={formData.phone_number}
                         onChange={handleChange}
-                        className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">HQ Location / City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      placeholder="CITY"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">City</label>
+                      <input
+                        type="text"
+                        name="city"
+                        placeholder="City / Region"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Store Address Detail</label>
+                      <input
+                        type="text"
+                        name="store_address"
+                        placeholder="Street Address"
+                        value={formData.store_address}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
+                      />
+                    </div>
                   </div>
 
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Store Address Detail</label>
-                    <textarea
-                      name="store_address"
-                      placeholder="HQ STREET ADDRESS"
-                      rows="2"
-                      value={formData.store_address}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
-                    ></textarea>
-                  </div>
-
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Brand Narrative</label>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Store Description (Optional)</label>
                     <textarea
                       name="store_description"
-                      placeholder="A SHORT STORY OF YOUR COLLECTION..."
+                      placeholder="A short description of your store and what you sell..."
                       rows="2"
                       value={formData.store_description}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-3 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-xs uppercase tracking-wider"
+                      className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
                     ></textarea>
                   </div>
 
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Store Logo (Optional)</label>
-                    <input
-                      type="file"
-                      name="store_logo"
-                      accept="image/*"
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-2 rounded-xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-600 text-[11px] uppercase tracking-wider file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer"
-                    />
+                  <div className="space-y-4 pt-4 border-t border-slate-200">
+                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Verification Documents</h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Citizenship Copy *</label>
+                      <input
+                        type="file"
+                        name="citizenship_image"
+                        accept="image/*"
+                        required
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-slate-200 hover:file:bg-slate-300 cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Business Reg. Document *</label>
+                      <input
+                        type="file"
+                        name="business_card_image"
+                        accept="image/*"
+                        required
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-slate-200 hover:file:bg-slate-300 cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Store Logo (Optional)</label>
+                      <input
+                        type="file"
+                        name="store_logo"
+                        accept="image/*"
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-slate-200 hover:file:bg-slate-300 cursor-pointer"
+                      />
+                    </div>
                   </div>
 
-                  <div className="pt-6 border-t border-slate-100">
+                  <div className="pt-6 mt-6 border-t border-slate-200">
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-100 group relative overflow-hidden"
+                      className="w-full bg-slate-900 text-white font-semibold py-3.5 rounded-xl hover:bg-slate-800 transition-all font-medium disabled:opacity-70"
                     >
-                      <span className="relative z-10 flex items-center justify-center gap-2">Next Step <span className="text-lg">→</span></span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-rose-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      Continue to Security
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/login")}
-                      className="w-full mt-4 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-slate-600 transition-colors"
-                    >
-                      Cancel / Sign In
-                    </button>
+                    <div className="text-center mt-6">
+                      <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+                      >
+                        Cancel / Log In
+                      </button>
+                    </div>
                   </div>
                 </form>
-              </div>
-            )}
+              )}
 
-            {step === 2 && (
-              <div className="animate-fade-in">
-                <div className="mb-10">
-                  <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter italic">Vault Access</h2>
-                  <p className="text-slate-500 font-medium uppercase text-[11px] tracking-widest">Establish Security</p>
+              {step === 2 && (
+                <div className="animate-fade-in">
+                  <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+                      <input
+                        type="password"
+                        name="password"
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Confirm Password</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        placeholder="••••••••"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:outline-none focus:border-slate-900 focus:bg-white transition-all text-slate-900 text-sm"
+                      />
+                    </div>
+
+                    <div className="pt-6 mt-6 border-t border-slate-200 text-center">
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-slate-900 text-white font-semibold py-3.5 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70"
+                      >
+                        {isLoading ? "Registering..." : "Complete Registration"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStep(1)}
+                        className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors mt-6 block w-full"
+                      >
+                        ← Back to Details
+                      </button>
+                    </div>
+                  </form>
                 </div>
+              )}
 
-                <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }} className="space-y-8">
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Password</label>
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="••••••••"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-4 rounded-2xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-sm"
-                    />
+              {step === 3 && (
+                <div className="text-center max-w-sm mx-auto animate-fade-in">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-600">
+                    <FaEnvelope className="text-2xl" />
                   </div>
+                  <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+                    We've sent a 6-digit verification code to <br /><span className="font-semibold text-slate-900">{formData.email}</span>.
+                  </p>
 
-                  <div className="group">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Identity</label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="••••••••"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-4 rounded-2xl focus:outline-none focus:border-rose-100 focus:bg-white transition-all font-medium text-slate-900 text-sm"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-4 pt-8">
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 group relative overflow-hidden"
-                    >
-                      <span className="relative z-10">{isLoading ? "Deploying..." : "Finalize Infrastructure"}</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-teal-200 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mt-4 flex items-center justify-center gap-2 hover:text-slate-600 transition-colors"
-                    >
-                      <span>←</span> Return to Details
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="text-center max-w-sm mx-auto animate-fade-in">
-                <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-10 border border-teal-100">
-                  <FaEnvelope className="text-teal-400 text-2xl" />
-                </div>
-                <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter italic">Verify Partner</h2>
-                <p className="text-slate-500 font-medium mb-12 leading-relaxed text-sm">
-                  Identity link shared to <span className="text-slate-900 font-black">{formData.email}</span>.
-                </p>
-
-                {error && (
-                  <div className="text-rose-400 text-[10px] font-black uppercase tracking-widest mb-8 animate-shake">
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={(e) => { e.preventDefault(); handleVerifyOTP(); }} className="space-y-10">
-                  <div className="flex justify-center">
+                  <form onSubmit={(e) => { e.preventDefault(); handleVerifyOTP(); }} className="space-y-6">
                     <input
                       type="text"
                       name="otp"
-                      placeholder="0 0 0 0 0 0"
+                      placeholder="000000"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="w-full bg-slate-50 border-2 border-slate-50 p-6 rounded-3xl text-center text-4xl font-black tracking-[0.6em] focus:outline-none focus:border-teal-100 focus:bg-white transition-all shadow-inner text-slate-900 placeholder:text-slate-200"
+                      className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl text-center text-3xl font-bold tracking-[0.5em] focus:outline-none focus:border-slate-900 transition-all"
                       maxLength={6}
                     />
-                  </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
-                  >
-                    {isLoading ? "Validating..." : "Synchronize & Launch"}
-                  </button>
-                </form>
-
-                <div className="mt-12 flex flex-col gap-8">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                    Link expired?{" "}
                     <button
-                      onClick={handleResendOtp}
-                      disabled={isLoading || !canResend}
-                      className={`text-slate-900 hover:text-rose-400 transition-colors ${!canResend ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-slate-900 text-white font-semibold py-3.5 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70"
                     >
-                      {resendTimer > 0 ? `Refresh in ${resendTimer}s` : "Refresh Link"}
+                      {isLoading ? "Verifying..." : "Verify Identity"}
                     </button>
-                  </p>
+                  </form>
 
-                  <button
-                    onClick={() => setStep(2)}
-                    className="text-slate-300 text-[9px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 hover:text-slate-600 transition-colors"
-                  >
-                    <span>←</span> Edit Security Settings
-                  </button>
+                  <div className="mt-8 space-y-4">
+                    <p className="text-sm text-slate-500">
+                      Didn't receive code?{" "}
+                      <button
+                        onClick={handleResendOtp}
+                        disabled={isLoading || !canResend}
+                        className={`font-semibold text-slate-900 hover:text-slate-700 transition-colors ${!canResend ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend Now"}
+                      </button>
+                    </p>
+
+                    <button
+                      onClick={() => setStep(2)}
+                      className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors block w-full mt-2"
+                    >
+                      ← Back to Security
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

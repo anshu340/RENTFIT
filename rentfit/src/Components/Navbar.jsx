@@ -122,7 +122,7 @@ const Navbar = () => {
           </div>
 
           {/* NAV LINKS */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center gap-6">
             {(!isLoggedIn || userRole === 'Customer') && (
               <Link
                 to="/browseClothes"
@@ -210,7 +210,7 @@ const Navbar = () => {
           </div>
 
           {/* RIGHT ACTIONS */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-6">
             {/* NOTIFICATION BELL */}
             {isLoggedIn && (
               <div className="relative">
@@ -232,25 +232,27 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* HEART ICON */}
-            <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </button>
+            {/* HEART ICON - Only for Customers */}
+            {userRole === 'Customer' && (
+              <Link to="/wishlist" className="p-2 text-gray-600 hover:text-red-500 transition-colors">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </Link>
+            )}
 
             {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-6">
                 <Link to={userRole === 'Store' ? "/storeDashboard" : userRole === 'Admin' ? "/adminDashboard" : "/dashboard"} className="flex items-center gap-2 group cursor-pointer">
                   <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-gray-300">
                     {userInfo.profileImage ? (
@@ -266,6 +268,12 @@ const Navbar = () => {
                     <p className="text-[10px] text-gray-500 font-medium">{userRole || "User"}</p>
                   </div>
                 </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-1.5 text-xs font-black uppercase tracking-widest text-rose-500 border border-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-all active:scale-95"
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               <>

@@ -1,12 +1,16 @@
 import React from "react";
 import { FaUser, FaStore } from "react-icons/fa6";
 import { useNavigate, Link } from "react-router-dom";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 
 const CreateAccount = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fdfcfb] relative overflow-hidden px-4 py-20">
+    <>
+    <Navbar />
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-[#fdfcfb] relative overflow-hidden px-4 py-20">
       {/* Aesthetic Background Blobs - Soft Pastels */}
       <div className="absolute top-0 -left-10 w-[30rem] h-[30rem] bg-rose-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
       <div className="absolute top-0 -right-10 w-[30rem] h-[30rem] bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -102,6 +106,8 @@ const CreateAccount = () => {
 
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

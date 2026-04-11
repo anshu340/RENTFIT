@@ -7,7 +7,8 @@ import Alert from '../Components/Alert';
 import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import EsewaPayment from '../Components/EsewaPayment';
 import RentalModal from '../Components/RentalModal';
-import { FaClock, FaCheckCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt, FaMapMarkerAlt, FaPhoneAlt, FaCalendarAlt } from 'react-icons/fa';
+import { reviewService } from '../services/reviewAxiosInstance';
+import { FaClock, FaCheckCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt, FaMapMarkerAlt, FaPhoneAlt, FaCalendarAlt, FaStar } from 'react-icons/fa';
 
 const MyRentals = () => {
     const [rentals, setRentals] = useState([]);
@@ -31,6 +32,9 @@ const MyRentals = () => {
     const [prefilledStartDate, setPrefilledStartDate] = useState('');
     const [prefilledSize, setPrefilledSize] = useState('');
     const [extensionModal, setExtensionModal] = useState({ show: false, rental: null, newEndDate: '' });
+    
+    // Review State
+    const [reviewModal, setReviewModal] = useState({ show: false, rentalId: null, rating: 5, comment: '' });
 
     useEffect(() => {
         fetchRentals();
@@ -104,6 +108,26 @@ const MyRentals = () => {
         } catch (error) {
             console.error('Damage Submission Error:', error.response?.data);
             showAlert('Failed to submit damage report. Please try again.', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setIsSubmitting(true);
+            await reviewService.createReview({
+                rental: reviewModal.rentalId,
+                rating: reviewModal.rating,
+                comment: reviewModal.comment
+            });
+            showAlert('Review submitted successfully!', 'success');
+            setReviewModal({ show: false, rentalId: null, rating: 5, comment: '' });
+            fetchRentals();
+        } catch (error) {
+            console.error('Review Submit Error:', error);
+            showAlert(error.response?.data?.[0] || error.response?.data?.non_field_errors?.[0] || 'Failed to submit review.', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -363,8 +387,9 @@ const MyRentals = () => {
                                 <p className="text-gray-500 mt-1">Try adjusting your filters.</p>
                             </div>
                         ) : (
-                            filteredRentals.map((rental) => {
-                                const statusBadge = getReturnStatusBadge(rental.rent_end_date, rental.status);
+                            <div className="max-h-[800px] overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-gray-200">
+                                {filteredRentals.map((rental) => {
+                                    const statusBadge = getReturnStatusBadge(rental.rent_end_date, rental.status);
                                 return (
                                     <div key={rental.id} className="relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-6 hover:shadow-md transition-all duration-300">
                                         {/* Urgency Badge in Top Right */}
@@ -505,6 +530,15 @@ const MyRentals = () => {
                                                             {['returned_pending', 'returned_confirmed'].includes(rental.status) ? 'Rent Again' : 'Extend'}
                                                         </button>
                                                     )}
+                                                    {['returned_pending', 'returned_confirmed'].includes(rental.status) && !rental.has_review && (
+                                                        <button
+                                                            onClick={() => setReviewModal({ show: true, rentalId: rental.id, rating: 5, comment: '' })}
+                                                            className="px-6 py-2 border-2 border-pink-100 text-pink-600 rounded-xl font-bold text-xs hover:bg-pink-50 hover:border-pink-200 transition-all uppercase tracking-wider flex items-center gap-2"
+                                                        >
+                                                            <FaStar />
+                                                            Write Review
+                                                        </button>
+                                                    )}
                                                     {rental.status === 'returned_pending' && (
                                                         <div className="flex items-center gap-2 text-purple-600 bg-purple-50 px-4 py-2 rounded-xl border border-purple-100">
                                                             <FaClock className="animate-pulse" />
@@ -516,7 +550,8 @@ const MyRentals = () => {
                                         </div>
                                     </div>
                                 );
-                            })
+                            })}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -626,6 +661,68 @@ const MyRentals = () => {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Review Modal */}
+            {reviewModal.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+                    <div className="bg-white rounded-[2rem] p-10 max-w-xl w-full shadow-2xl animate-in fade-in slide-in-from-bottom-5 duration-500">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center text-pink-500">
+                                <FaStar size={24} />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-gray-900">Write a Review</h2>
+                                <p className="text-gray-500 font-medium">Share your experience with this item.</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleReviewSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-black text-gray-700 mb-2 uppercase tracking-wide">Rating</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setReviewModal({ ...reviewModal, rating: star })}
+                                            className={`text-3xl transition-colors ${star <= reviewModal.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                        >
+                                            <FaStar />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-black text-gray-700 mb-2 uppercase tracking-wide">Comment</label>
+                                <textarea
+                                    required
+                                    className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-pink-500 focus:outline-none font-medium h-32 transition-colors"
+                                    placeholder="How did you like the outfit?"
+                                    value={reviewModal.comment}
+                                    onChange={(e) => setReviewModal({ ...reviewModal, comment: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="flex-1 py-4 bg-pink-500 text-white rounded-2xl font-black text-lg hover:bg-pink-600 transition shadow-xl shadow-pink-200 disabled:opacity-50"
+                                >
+                                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setReviewModal({ show: false, rentalId: null, rating: 5, comment: '' })}
+                                    className="px-8 py-4 bg-gray-100 text-gray-600 rounded-2xl font-black text-lg hover:bg-gray-200 transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

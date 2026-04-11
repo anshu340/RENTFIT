@@ -102,12 +102,12 @@ const MyReviews = () => {
                                 </a>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {reviews.map((review) => (
-                                    <div key={review.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
-                                        <div className="flex flex-col md:flex-row">
+                                    <div key={review.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
+                                        <div className="flex flex-col sm:flex-row h-full">
                                             {/* Top/Left: Item Info */}
-                                            <div className="w-full md:w-64 h-48 md:h-auto relative bg-gray-100">
+                                            <div className="w-full sm:w-40 h-48 sm:h-auto flex-shrink-0 relative bg-gray-100">
                                                 {review.dress_image ? (
                                                     <img
                                                         src={review.dress_image}

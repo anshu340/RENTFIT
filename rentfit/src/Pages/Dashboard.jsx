@@ -240,39 +240,7 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-h-screen">
-          {/* Header */}
-          <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-            <div className="px-8 py-5 flex items-center justify-between">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-800">User Dashboard</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Welcome back, {userInfo.fullName || 'User'}. Manage your rentals and explore new outfits.
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 group cursor-pointer border border-gray-100 shadow-sm">
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-lg font-bold z-0">
-                      {(userInfo.fullName || 'User').charAt(0).toUpperCase()}
-                    </div>
-                    {userInfo.profileImage && (
-                      <img
-                        src={userInfo.profileImage}
-                        alt="Profile"
-                        className="absolute inset-0 w-full h-full object-cover z-10"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                    )}
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <p className="text-sm font-medium text-gray-800">{userInfo.fullName || 'User'}</p>
-                    <p className="text-xs text-gray-500">{userInfo.role || 'Customer'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <main className="flex-1 p-8 pt-0 overflow-y-auto">
+          <main className="flex-1 p-8 pt-10 overflow-y-auto">
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
