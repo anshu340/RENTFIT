@@ -248,7 +248,7 @@ const RentManagement = () => {
                                                                     <FaTimes />
                                                                 </button>
                                                             </div>
-                                                        ) : rental.status === 'returned_pending' ? (
+                                                        ) : (rental.status === 'returned_pending' || rental.status === 'rented') ? (
                                                             <button
                                                                 onClick={() => handleAction(rental.id, 'confirm-return')}
                                                                 className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-bold text-[10px] uppercase tracking-wider shadow-sm"

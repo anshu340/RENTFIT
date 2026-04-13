@@ -110,8 +110,14 @@ const DonateClothing = () => {
     setIsLoading(true);
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("store_id", formData.store_id);
+        // Generic name validation warning
+        const genericNames = ["shirt", "pants", "dress", "jacket"];
+        if (genericNames.includes(formData.item_name.toLowerCase())) {
+          alert("Please enter a more specific item name (e.g., 'Blue Denim Jacket')");
+        }
+
+        const formDataToSend = new FormData();
+        formDataToSend.append("store_id", formData.store_id);
       formDataToSend.append("item_name", formData.item_name);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("gender", formData.gender);
@@ -253,14 +259,12 @@ const DonateClothing = () => {
                                 }`}
                             >
                               <option value="">-- Select category --</option>
-                              <option value="Shirt">Shirt</option>
-                              <option value="Pants">Pants</option>
-                              <option value="Dress">Dress</option>
-                              <option value="Jacket">Jacket</option>
-                              <option value="Skirt">Skirt</option>
-                              <option value="Shoes">Shoes</option>
-                              <option value="Accessories">Accessories</option>
-                              <option value="Other">Other</option>
+                              <option value="shirt">Shirt</option>
+                              <option value="pants">Pants</option>
+                              <option value="dress">Dress</option>
+                              <option value="jacket">Jacket</option>
+                              <option value="traditional">Traditional Wear</option>
+                              <option value="other">Other</option>
                             </select>
                             {errors.category && (
                               <p className="text-red-500 text-xs mt-1 font-medium">{errors.category}</p>

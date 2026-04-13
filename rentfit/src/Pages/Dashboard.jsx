@@ -145,10 +145,6 @@ const Dashboard = () => {
 
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
-      if (error.response?.status === 401) {
-        localStorage.clear();
-        navigate('/login');
-      }
     } finally {
       setIsLoading(false);
     }

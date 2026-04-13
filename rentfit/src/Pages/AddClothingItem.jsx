@@ -12,7 +12,14 @@ const AddClothingItem = () => {
   const editId = searchParams.get('edit');
   const isEditMode = !!editId;
 
-  const categories = ['Formal Wear', 'Casual', 'Party Wear', 'Traditional', 'Sports Wear'];
+  const categories = [
+    { id: 'shirt', label: 'Shirt' },
+    { id: 'pants', label: 'Pants' },
+    { id: 'dress', label: 'Dress' },
+    { id: 'jacket', label: 'Jacket' },
+    { id: 'traditional', label: 'Traditional Wear' },
+    { id: 'other', label: 'Other' }
+  ];
   const eventTypes = ['Wedding', 'Party', 'Formal', 'Casual'];
   const conditions = ['New', 'Like New', 'Good', 'Used'];
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free', 'Custom'];
@@ -312,7 +319,7 @@ const AddClothingItem = () => {
                         >
                           <option value="">Select Category</option>
                           {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat.id} value={cat.id}>{cat.label}</option>
                           ))}
                         </select>
                         <FaArrowLeft className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-90 text-gray-400 pointer-events-none" size={12} />

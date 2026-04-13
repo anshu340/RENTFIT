@@ -132,10 +132,10 @@ const UserRegister = () => {
         otp: otp,
       });
 
-      // Add authentication for navbar
+      // Add authentication for navbar (if token returned)
       if (response.data.access_token) {
-        localStorage.setItem("authToken", response.data.access_token);
-        localStorage.setItem("userType", "user");
+        localStorage.setItem("access_token", response.data.access_token);
+        localStorage.setItem("role", "Customer"); // Register is always customer
         window.dispatchEvent(new Event('authChange'));
       }
 

@@ -38,7 +38,14 @@ const BrowseClothes = () => {
     searchQuery: ''
   });
 
-  const categories = ['Formal Wear', 'Casual', 'Party Wear', 'Traditional', 'Sports Wear'];
+  const categories = [
+    { id: 'shirt', label: 'Shirt' },
+    { id: 'pants', label: 'Pants' },
+    { id: 'dress', label: 'Dress' },
+    { id: 'jacket', label: 'Jacket' },
+    { id: 'traditional', label: 'Traditional Wear' },
+    { id: 'other', label: 'Other' }
+  ];
   // const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const priceRanges = [
     { id: 1, label: "Rs. 0 - Rs. 20", min: 0, max: 20 },
@@ -342,14 +349,14 @@ const BrowseClothes = () => {
                         <div className="grid grid-cols-1 gap-2">
                           {categories.map(cat => (
                             <button
-                              key={cat}
-                              onClick={() => handleFilterChange('category', cat)}
-                              className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filters.category === cat
+                              key={cat.id}
+                              onClick={() => handleFilterChange('category', cat.id)}
+                              className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filters.category === cat.id
                                 ? 'bg-purple-600 text-white shadow-lg shadow-purple-100'
                                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                 }`}
                             >
-                              {cat}
+                              {cat.label}
                             </button>
                           ))}
                         </div>
@@ -520,7 +527,7 @@ const BrowseClothes = () => {
                                     onClick={() => navigate(`/clothing/${item.id}`)}
                                     title={item.item_name}
                                   >
-                                    {item.item_name}
+                                      {item.item_name || item.category}
                                   </h3>
                                   <div className="mt-1 space-y-1">
                                     <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1">
