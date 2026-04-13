@@ -13,14 +13,12 @@ class Donation(models.Model):
         COLLECTED = "Collected", "Collected"
 
     class Category(models.TextChoices):
-        SHIRT = "Shirt", "Shirt"
-        PANTS = "Pants", "Pants"
-        DRESS = "Dress", "Dress"
-        JACKET = "Jacket", "Jacket"
-        SKIRT = "Skirt", "Skirt"
-        SHOES = "Shoes", "Shoes"
-        ACCESSORIES = "Accessories", "Accessories"
-        OTHER = "Other", "Other"
+        SHIRT = "shirt", "Shirt"
+        PANTS = "pants", "Pants"
+        DRESS = "dress", "Dress"
+        JACKET = "jacket", "Jacket"
+        TRADITIONAL = "traditional", "Traditional Wear"
+        OTHER = "other", "Other"
 
     class Condition(models.TextChoices):
         NEW = "New", "New"

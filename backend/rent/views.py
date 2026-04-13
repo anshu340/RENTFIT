@@ -147,7 +147,7 @@ class RentalConfirmReturnView(generics.UpdateAPIView):
         if request.user.role != 'Store':
             return Response({"error": "Only stores can confirm returns."}, status=status.HTTP_403_FORBIDDEN)
         
-        rental = get_object_or_404(Rental, pk=pk, store=request.user, status='returned_pending')
+        rental = get_object_or_404(Rental, pk=pk, store=request.user, status__in=['returned_pending', 'rented'])
         rental.status = 'returned_confirmed'
         rental.save()
         

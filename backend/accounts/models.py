@@ -113,11 +113,12 @@ class Clothing(models.Model):
     """
     
     class Category(models.TextChoices):
-        FORMAL_WEAR = "Formal Wear", "Formal Wear"
-        CASUAL = "Casual", "Casual"
-        PARTY_WEAR = "Party Wear", "Party Wear"
-        TRADITIONAL = "Traditional", "Traditional"
-        SPORTS_WEAR = "Sports Wear", "Sports Wear"
+        SHIRT = "shirt", "Shirt"
+        PANTS = "pants", "Pants"
+        DRESS = "dress", "Dress"
+        JACKET = "jacket", "Jacket"
+        TRADITIONAL = "traditional", "Traditional Wear"
+        OTHER = "other", "Other"
 
     class EventType(models.TextChoices):
         WEDDING = "Wedding", "Wedding"

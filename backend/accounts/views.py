@@ -899,10 +899,19 @@ class AddToBrowseView(APIView):
         if Clothing.objects.filter(donation=donation).exists():
             return Response({"error": "This donation has already been added to browse"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Determine item name logic
+        generic_names = ['shirt', 'pants', 'dress', 'jacket']
+        original_name = donation.item_name or donation.category
+        
+        if original_name.lower() in generic_names:
+            final_item_name = f"{donation.category.capitalize()} Item"
+        else:
+            final_item_name = original_name
+
         # Create Clothing item
         clothing = Clothing.objects.create(
             store=request.user,
-            item_name=donation.item_name,
+            item_name=final_item_name,
             category=donation.category,
             gender=donation.gender,
             size=donation.size,
