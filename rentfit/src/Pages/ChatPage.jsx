@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../services/axiosInstance'; // Still need for user profile?
+import axiosInstance from '../services/axiosInstance'; 
 import { chatService } from '../services/chataxiosInstance.js';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
