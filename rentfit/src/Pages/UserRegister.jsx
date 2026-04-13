@@ -132,10 +132,10 @@ const UserRegister = () => {
         otp: otp,
       });
 
-      // Add authentication for navbar (if token returned)
+      // Add authentication for navbar
       if (response.data.access_token) {
-        localStorage.setItem("access_token", response.data.access_token);
-        localStorage.setItem("role", "Customer"); // Register is always customer
+        localStorage.setItem("authToken", response.data.access_token);
+        localStorage.setItem("userType", "user");
         window.dispatchEvent(new Event('authChange'));
       }
 
@@ -208,7 +208,7 @@ const UserRegister = () => {
           {/* Right Side: Form */}
           <div className="lg:w-7/12 w-full px-6 py-12 sm:px-12 lg:px-16 flex flex-col justify-center bg-white/80">
             <div className="max-w-xl w-full mx-auto">
-              
+
               <div className="mb-8 text-center sm:text-left">
                 <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Customer Registration</h2>
                 <p className="text-slate-500 font-medium text-sm">

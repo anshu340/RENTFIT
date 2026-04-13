@@ -54,6 +54,10 @@ const Login = () => {
         localStorage.setItem("role", response.data.user?.role || "");
         localStorage.setItem("isLoggedIn", "true");
 
+        // Add these lines for navbar authentication
+        localStorage.setItem("authToken", response.data.access_token);
+        localStorage.setItem("userType", response.data.user?.role === "Store" ? "store" : "user");
+
         // Dispatch event to update navbar immediately
         window.dispatchEvent(new Event('authChange'));
       }

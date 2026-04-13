@@ -19,8 +19,8 @@ const Navbar = () => {
   });
 
   const checkAuth = React.useCallback(() => {
-    const token = localStorage.getItem("access_token");
-    const role = localStorage.getItem("role");
+    const token = localStorage.getItem("access_token") || localStorage.getItem("authToken");
+    const role = localStorage.getItem("role") || localStorage.getItem("userType");
     setIsLoggedIn(!!token);
     // Normalize role names
     if (role === 'Store' || role === 'store') setUserRole('Store');
