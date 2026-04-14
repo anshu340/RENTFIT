@@ -51,8 +51,6 @@ from .admin_views import (
 )
 
 urlpatterns = [
-    # ... (other paths)
-    
     # Admin Endpoints
     path("admin/stats/", AdminStatsView.as_view(), name="admin-stats"),
     path("admin/users/", AdminUserListView.as_view(), name="admin-users"),
@@ -65,7 +63,6 @@ urlpatterns = [
     path("admin/clothing/<int:pk>/reject/", AdminClothingRejectView.as_view(), name="admin-clothing-reject"),
     path("admin/stores/pending/", PendingStoresView.as_view(), name="admin-stores-pending"),
     path("admin/stores/<int:pk>/verify/", ApproveStoreView.as_view(), name="admin-stores-verify"),
-
 
     # Authentication Endpoints
     path("register/customer/", CustomerRegisterView.as_view(), name="register-customer"),
