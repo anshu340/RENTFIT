@@ -23,8 +23,6 @@ def create_and_send_otp(email):
     print(f"\n[VERIFICATION CODE] The OTP for {email} is: {otp_code}\n")
 
     try:
-        # We use a try-except but we don't return False anymore
-        # because Render blocks SMTP ports on the Free Tier.
         send_mail(
             subject="RentFit - Your Verification Code",
             message=f"Your OTP is {otp_code}. It will expire in 5 minutes.\nDo not share this code with anyone.",
@@ -32,13 +30,14 @@ def create_and_send_otp(email):
             recipient_list=[email],
             fail_silently=False,
         )
-        logger.info(f"OTP sent successfully via email to {email}")
+        logger.info(f"OTP sent successfully via SendGrid to {email}")
+        return True
     except Exception as e:
-        logger.warning(f"SMTP Blocked or Failed for {email}: {str(e)}")
-        logger.warning(f"FALLBACK: Please check the Render Logs for the code: {otp_code}")
-    
-    # We always return True now so the registration/login flow is NOT blocked
-    return True
+        logger.error(f"SendGrid Email Failed for {email}: {str(e)}")
+        # We still return True for now to avoid blocking the user if their SendGrid account 
+        # is still in "pending" status (common for new accounts).
+        # Once verified, you can change this to 'return False' for strict security.
+        return True
 
 def verify_otp(email, otp_input):
     otp = OTP.objects.filter(email=email, is_used=False).order_by('-created_at').first()
