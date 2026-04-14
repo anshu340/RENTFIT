@@ -141,7 +141,7 @@ const NearbyStores = () => {
                                             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type="text"
-                                                placeholder="Search location or shop name..."
+                                                placeholder="Search stores, cities, or addresses..."
                                                 className="w-full pl-10 pr-4 py-2 bg-gray-50/50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all text-gray-800"
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -175,7 +175,7 @@ const NearbyStores = () => {
                         <div className="w-full lg:w-[400px] flex flex-col gap-6">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                    Nearby Shops <span className="text-sm font-normal text-gray-400">({filteredStores.length})</span>
+                                    Explore Stores <span className="text-sm font-normal text-gray-400">({filteredStores.length})</span>
                                 </h2>
                                 <button className="text-sm text-purple-600 font-semibold hover:underline">View All</button>
                             </div>

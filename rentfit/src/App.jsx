@@ -37,6 +37,7 @@ import StoreReports from './Pages/StoreReports.jsx';
 import AdminClothingApproval from './Pages/AdminClothingApproval.jsx';
 import AdminDonationManagement from './Pages/AdminDonationManagement.jsx';
 import AdminStoreApproval from './Pages/AdminStoreApproval.jsx';
+import Shops from './Pages/Shops.jsx';
 
 
 import PrivacySecurity from "./Pages/PrivacySecurity.jsx";
@@ -73,6 +74,7 @@ function App() {
       <Route path="/storeProfile" element={<StoreProfile />} />
       <Route path="/storeLocation" element={<StoreProfile />} />
       <Route path="/nearbyStores" element={<NearbyStores />} />
+      <Route path="/shops" element={<Shops />} />
       <Route path="/privacy-security" element={<PrivacySecurity />} />
       <Route path="/myreviews" element={<MyReviews />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />

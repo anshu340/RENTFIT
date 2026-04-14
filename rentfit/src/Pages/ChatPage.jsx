@@ -25,8 +25,6 @@ const ChatPage = () => {
         const fetchInitialData = async () => {
             try {
                 // Get current user role/id from token or profile endpoint if needed
-                // For now assuming we can identify sender from response using local logic or just relying on "sender" field in message
-                // Better: fetch profile to know who "I" am
                 const profileRes = await axiosInstance.get('accounts/profile/'); // Adjust endpoint if needed
                 setCurrentUser(profileRes.data);
 

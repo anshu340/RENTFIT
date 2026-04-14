@@ -76,6 +76,12 @@ export default function PublicStoreProfile() {
                             )}
                         </div>
                         <div className="flex-1">
+                            <button 
+                                onClick={() => navigate('/nearbyStores')}
+                                className="flex items-center gap-2 text-xs font-bold text-purple-600 mb-4 hover:text-purple-700 transition-colors uppercase tracking-widest"
+                            >
+                                ← Back to Explore
+                            </button>
                             <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{store.store_name}</h1>
                             {store.owner_name && <p className="text-sm font-bold text-purple-600 mb-4 uppercase tracking-wider">Owner: {store.owner_name}</p>}
                             <p className="text-gray-600 mb-6 max-w-2xl leading-relaxed">{store.store_description || "Welcome to our rental store! Browse our collection of modern clothing below."}</p>

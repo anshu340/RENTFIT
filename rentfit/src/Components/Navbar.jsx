@@ -135,10 +135,10 @@ const Navbar = () => {
             {/* Logged Out Links - Locations & About */}
             {(!isLoggedIn || userRole === 'Customer') && (
               <Link
-                to="/nearbyStores"
+                to="/shops"
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
               >
-                Nearby Stores
+                Shops
               </Link>
             )}
             {!isLoggedIn && (

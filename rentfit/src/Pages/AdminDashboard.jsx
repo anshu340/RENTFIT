@@ -5,24 +5,10 @@ import AdminSidebar from '../Components/AdminSidebar';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import {
-    FaUsers,
-    FaMoneyBillWave,
-    FaHandHoldingHeart,
-    FaChartLine,
-    FaStore
+    FaUsers, FaMoneyBillWave, FaHandHoldingHeart, FaChartLine, FaStore
 } from 'react-icons/fa';
 import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell,
-    Legend
+    AreaChart,Area,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,PieChart,Pie, Cell,Legend
 } from 'recharts';
 
 const AdminDashboard = () => {
