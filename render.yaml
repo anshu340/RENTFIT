@@ -26,16 +26,3 @@ services:
         value: "*"
       - key: SECRET_KEY
         generateValue: true
-
-  # Frontend Static Site
-  - type: static
-    name: rentfit-frontend
-    runtime: node
-    region: singapore
-    plan: free
-    buildCommand: "npm install && npm run build"
-    publishPath: dist
-    rootDir: rentfit
-    envVars:
-      - key: VITE_API_BASE_URL
-        value: https://rentfit-backend.onrender.com
