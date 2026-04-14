@@ -116,9 +116,6 @@ class SendMessageView(APIView):
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(conversation=conversation, sender=request.user)
-            # Re-serialize to get absolute URLs if needed, though usually not for just creating.
-            # But let's be consistent.
-            # response_serializer = MessageSerializer(serializer.instance, context={'request': request})
             
             # Create Notification
             if request.user == conversation.customer:

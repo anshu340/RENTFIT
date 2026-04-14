@@ -199,7 +199,6 @@ class LoginView(APIView):
             "refresh_token": str(refresh)
         })
 
-
 # PROFILE JWT REQUIRED
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
