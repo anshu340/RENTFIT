@@ -651,14 +651,14 @@ const BrowseClothes = () => {
                     <div className="grid grid-cols-1 gap-2">
                       {categories.map(cat => (
                         <button
-                          key={cat}
-                          onClick={() => handleFilterChange('category', cat)}
-                          className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filters.category === cat
+                          key={cat.id}
+                          onClick={() => handleFilterChange('category', cat.id)}
+                          className={`text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filters.category === cat.id
                             ? 'bg-purple-600 text-white shadow-lg shadow-purple-100'
                             : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
-                          {cat}
+                          {cat.label}
                         </button>
                       ))}
                     </div>
