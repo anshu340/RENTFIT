@@ -186,8 +186,12 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Email Configuration (SendGrid Web API)
 # This bypasses Render's SMTP block on the Free Tier
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '').strip()
+if not SENDGRID_API_KEY:
+    # Fallback to EMAIL_HOST_PASSWORD if the specific key is missing
+    SENDGRID_API_KEY = os.getenv('EMAIL_HOST_PASSWORD', '').strip()
+
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 DEFAULT_FROM_EMAIL = os.getenv('SENDGRID_FROM_EMAIL', 'RentFit <noreply@rentfit.com>')
 
 # Keep SMTP settings as fallback for local development if needed
