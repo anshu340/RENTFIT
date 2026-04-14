@@ -192,7 +192,8 @@ if not SENDGRID_API_KEY:
     SENDGRID_API_KEY = os.getenv('EMAIL_HOST_PASSWORD', '').strip()
 
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-DEFAULT_FROM_EMAIL = os.getenv('SENDGRID_FROM_EMAIL', 'RentFit <noreply@rentfit.com>')
+# Check both possible environment names
+DEFAULT_FROM_EMAIL = os.getenv('SENDGRID_FROM_EMAIL') or os.getenv('DEFAULT_FROM_EMAIL') or 'RentFit <noreply@rentfit.com>'
 
 # Keep SMTP settings as fallback for local development if needed
 EMAIL_HOST = 'smtp.sendgrid.net'
