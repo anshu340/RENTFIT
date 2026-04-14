@@ -18,7 +18,13 @@ def create_and_send_otp(email):
     otp_code = generate_otp()
     OTP.objects.create(email=email, otp=otp_code)
 
+    # CRITICAL: Always log the OTP to the console/Render logs in production
+    # This ensures the user can still find their code if SMTP is blocked.
+    print(f"\n[VERIFICATION CODE] The OTP for {email} is: {otp_code}\n")
+
     try:
+        # We use a try-except but we don't return False anymore
+        # because Render blocks SMTP ports on the Free Tier.
         send_mail(
             subject="RentFit - Your Verification Code",
             message=f"Your OTP is {otp_code}. It will expire in 5 minutes.\nDo not share this code with anyone.",
@@ -26,28 +32,13 @@ def create_and_send_otp(email):
             recipient_list=[email],
             fail_silently=False,
         )
-        logger.info(f"OTP sent successfully to {email}")
-        return True
+        logger.info(f"OTP sent successfully via email to {email}")
     except Exception as e:
-        logger.error(f"Failed to send OTP email to {email}: {str(e)}")
-        # FALLBACK: Use console backend if SMTP fails in DEBUG mode to avoid 400 errors during local testing
-        if settings.DEBUG:
-            try:
-                from django.core.mail.backends.console import EmailBackend as ConsoleBackend
-                connection = ConsoleBackend()
-                send_mail(
-                    subject="RentFit - Your Verification Code (STAGING/TESTING)",
-                    message=f"Your OTP is {otp_code}. (Note: This is a fallback because SMTP failed: {str(e)})",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[email],
-                    connection=connection,
-                    fail_silently=False,
-                )
-                logger.warning(f"OTP sent to CONSOLE because SMTP failed for {email}. Please check your server terminal for the code.")
-                return True
-            except Exception as fallback_err:
-                logger.error(f"Email fallback failed: {str(fallback_err)}")
-        return False
+        logger.warning(f"SMTP Blocked or Failed for {email}: {str(e)}")
+        logger.warning(f"FALLBACK: Please check the Render Logs for the code: {otp_code}")
+    
+    # We always return True now so the registration/login flow is NOT blocked
+    return True
 
 def verify_otp(email, otp_input):
     otp = OTP.objects.filter(email=email, is_used=False).order_by('-created_at').first()
