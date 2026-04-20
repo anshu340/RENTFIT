@@ -21,6 +21,26 @@ const StoreSidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Store profile state to manage restricted features across the sidebar
+    const [storeInfo, setStoreInfo] = useState({ verification_status: 'approved' });
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await axiosInstance.get("accounts/stores/profile/");
+                const data = response.data?.data || response.data;
+                if (data) {
+                    setStoreInfo(data);
+                }
+            } catch (error) {
+                console.error("Error fetching store profile in sidebar:", error);
+            }
+        };
+        
+        const token = localStorage.getItem("access_token");
+        if (token) fetchProfile();
+    }, []);
+
     const menuItems = [
         { name: 'Dashboard', icon: FaHome, path: '/storeDashboard' },
         { name: 'Verify Listings', icon: FaCheckCircle, path: '/myClothingItems' },
@@ -53,18 +73,24 @@ const StoreSidebar = () => {
                 {menuItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
+                    
+                    // Filter restricted features if store is not approved
+                    const isRestricted = item.name === 'List Clothes' && storeInfo.verification_status !== 'approved';
+
                     return (
                         <button
                             key={item.name}
                             onClick={() => {
+                                if (isRestricted) return; // Prevent navigation if restricted
                                 if (item.path) {
                                     navigate(item.path);
                                 }
                             }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${active
-                                ? 'bg-purple-50 text-purple-600 font-bold shadow-sm'
-                                : 'text-gray-600 hover:bg-gray-50'
-                                }`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+                                active
+                                    ? 'bg-purple-50 text-purple-600 font-bold shadow-sm'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                            } ${isRestricted ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <Icon className={`text-base ${active ? 'text-purple-600' : 'text-gray-400'}`} />
                             <span>{item.name}</span>

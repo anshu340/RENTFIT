@@ -8,6 +8,7 @@ import DashboardSidebar from '../Components/DashboardSidebar.jsx';
 import EsewaPayment from '../Components/EsewaPayment';
 import RentalModal from '../Components/RentalModal';
 import { reviewService } from '../services/reviewAxiosInstance';
+import { submitDamageReport } from '../services/rentalAxiosInstance';
 import { FaClock, FaCheckCircle, FaUndo, FaCreditCard, FaSearch, FaFilter, FaMoneyBillWave, FaExclamationTriangle, FaCloudUploadAlt, FaMapMarkerAlt, FaPhoneAlt, FaCalendarAlt, FaStar } from 'react-icons/fa';
 
 const MyRentals = () => {

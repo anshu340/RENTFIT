@@ -9,7 +9,6 @@ const DamageReports = () => {
     const [reports, setReports] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [alert, setAlert] = useState({ message: '', type: '' });
-    const [actionModal, setActionModal] = useState({ show: false, reportId: null, status: '', extraCharge: '0' });
 
     useEffect(() => {
         fetchReports();
@@ -28,14 +27,13 @@ const DamageReports = () => {
         }
     };
 
-    const handleAction = async () => {
+    const handleAction = async (reportId, status) => {
         try {
-            await axiosInstance.post(`rentals/damage-report/${actionModal.reportId}/action/`, {
-                status: actionModal.status,
-                extra_charge: actionModal.extraCharge
+            await axiosInstance.patch(`rentals/damage-report/${reportId}/action/`, {
+                status: status,
+                extra_charge: 0
             });
-            showAlert(`Report ${actionModal.status} successfully.`, 'success');
-            setActionModal({ show: false, reportId: null, status: '', extraCharge: '0' });
+            showAlert(`Report ${status} successfully.`, 'success');
             fetchReports();
         } catch (error) {
             showAlert('Failed to update report.', 'error');
@@ -105,24 +103,17 @@ const DamageReports = () => {
                                     {report.status === 'pending' && (
                                         <div className="grid grid-cols-2 gap-3 mt-auto">
                                             <button
-                                                onClick={() => setActionModal({ show: true, reportId: report.id, status: 'accepted', extraCharge: '0' })}
+                                                onClick={() => handleAction(report.id, 'accepted')}
                                                 className="px-4 py-3 bg-purple-600 text-white rounded-2xl font-bold text-sm hover:bg-purple-700 transition shadow-lg shadow-purple-200 flex items-center justify-center gap-2"
                                             >
                                                 <FaCheck /> Accept
                                             </button>
                                             <button
-                                                onClick={() => setActionModal({ show: true, reportId: report.id, status: 'rejected', extraCharge: '0' })}
+                                                onClick={() => handleAction(report.id, 'rejected')}
                                                 className="px-4 py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2"
                                             >
                                                 <FaTimes /> Reject
                                             </button>
-                                        </div>
-                                    )}
-
-                                    {report.status !== 'pending' && (
-                                        <div className="mt-auto py-3 px-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200 flex items-center justify-between">
-                                            <span className="text-sm font-bold text-gray-500">Extra Charge:</span>
-                                            <span className="text-lg font-black text-purple-600">${report.extra_charge}</span>
                                         </div>
                                     )}
                                 </div>
@@ -131,51 +122,6 @@ const DamageReports = () => {
                     </div>
                 )}
             </div>
-
-            {/* Action Modal */}
-            {actionModal.show && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-300">
-                        <h2 className="text-2xl font-black text-gray-900 mb-2 capitalize">
-                            {actionModal.status} Report
-                        </h2>
-                        <p className="text-gray-500 mb-6">You are marking this damage report as <span className="font-bold text-purple-600">{actionModal.status}</span>.</p>
-
-                        {actionModal.status === 'accepted' && (
-                            <div className="mb-6">
-                                <label className="block text-sm font-black text-gray-700 mb-2">Extra Charge ($)</label>
-                                <div className="relative">
-                                    <FaDollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="number"
-                                        className="w-full pl-10 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-purple-500 focus:outline-none font-bold text-lg"
-                                        value={actionModal.extraCharge}
-                                        onChange={(e) => setActionModal({ ...actionModal, extraCharge: e.target.value })}
-                                        min="0"
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-400 mt-2">Enter the amount the customer needs to pay for the damage.</p>
-                            </div>
-                        )}
-
-                        <div className="flex gap-4">
-                            <button
-                                onClick={handleAction}
-                                className="flex-1 py-4 bg-purple-600 text-white rounded-2xl font-black text-lg hover:bg-purple-700 transition shadow-xl shadow-purple-200"
-                            >
-                                Confirm
-                            </button>
-                            <button
-                                onClick={() => setActionModal({ show: false, reportId: null, status: '', extraCharge: '0' })}
-                                className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-black text-lg hover:bg-gray-200 transition"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <Footer />
             <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ message: '', type: '' })} />
         </div>
